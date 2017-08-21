@@ -58,12 +58,12 @@ BOOL LoadData()
     gul_type_code_len = LoadCode(gp_type_code_filename, &gp_type_code);
     if (gul_type_code_len < 4)
     {
-        printf("学生类别代码表加载失败!\n");
+        printf("景区类别代码表加载失败!\n");
         gc_sys_state &= ~2;
     }
     else
     {
-        printf("学生类别代码表加载成功!\n");
+        printf("景区类别代码表加载成功!\n");
         gc_sys_state |= 2;
     }
 
@@ -173,122 +173,122 @@ int LoadCode(char *FileName, char **pBuffer)
  * 输出参数: phead 主链头指针的地址, 用来返回所创建的十字链.
  * 返 回 值: int型数值, 表示链表创建的情况.
  *           0  空链, 无数据
- *           4  已加载宿舍楼信息数据，无学生基本信息和缴费信息数据
- *           12 已加载宿舍楼信息和学生基本信息数据，无缴费信息数据
+ *           4  已加载宿舍楼信息数据，无景区基本信息和缴费信息数据
+ *           12 已加载宿舍楼信息和景区基本信息数据，无缴费信息数据
  *           28 三类基础数据都已加载
  *
  * 调用说明:
  */
-int CreatList(DORM_NODE **phead)
+int CreatList(CITY_NODE **phead)
 {
-    DORM_NODE *hd = NULL, *pDormNode, tmp1;
-    STU_NODE *pStuNode, tmp2;
-    CHARGE_NODE *pChargeNode, tmp3;
+    CITY_NODE *hd = NULL, *pCityNode, tmp1;
+    REGION_NODE *pRegionNode, tmp2;
+    SPOT_NODE *pSpotNode, tmp3;
     FILE *pFile;
     int find;
     int re = 0;
 
-    if ((pFile = fopen(gp_dorm_info_filename, "rb")) == NULL)
+    if ((pFile = fopen(gp_city_info_filename, "rb")) == NULL)
     {
-        printf("宿舍楼信息数据文件打开失败!\n");
+        printf("城市信息数据文件打开失败!\n");
         return re;
     }
-    printf("宿舍楼信息数据文件打开成功!\n");
+    printf("城市信息数据文件打开成功!\n");
 
-    /*从数据文件中读宿舍楼信息数据，存入以后进先出方式建立的主链中*/
-    while (fread(&tmp1, sizeof(DORM_NODE), 1, pFile) == 1)
+    /*从数据文件中读城市信息数据，存入以后进先出方式建立的主链中*/
+    while (fread(&tmp1, sizeof(CITY_NODE), 1, pFile) == 1)
     {
-        pDormNode = (DORM_NODE *)malloc(sizeof(DORM_NODE));
-        *pDormNode = tmp1;
-        pDormNode->snext = NULL;
-        pDormNode->next = hd;
-        hd = pDormNode;
+        pCityNode = (CITY_NODE *)malloc(sizeof(CITY_NODE));
+        *pCityNode = tmp1;
+        pCityNode->rnext = NULL;
+        pCityNode->next = hd;
+        hd = pCityNode;
     }
     fclose(pFile);
     if (hd == NULL)
     {
-        printf("宿舍楼信息数据文件加载失败!\n");
+        printf("城市信息数据文件加载失败!\n");
         return re;
     }
-    printf("宿舍楼信息数据文件加载成功!\n");
+    printf("城市信息数据文件加载成功!\n");
     *phead = hd;
     re += 4;
 
-    if ((pFile = fopen(gp_stu_info_filename, "rb")) == NULL)
+    if ((pFile = fopen(gp_region_info_filename, "rb")) == NULL)
     {
-        printf("学生基本信息数据文件打开失败!\n");
+        printf("景区基本信息数据文件打开失败!\n");
         return re;
     }
-    printf("学生基本信息数据文件打开成功!\n");
+    printf("景区基本信息数据文件打开成功!\n");
     re += 8;
 
-    /*从数据文件中读取学生基本信息数据，存入主链对应结点的学生基本信息支链中*/
-    while (fread(&tmp2, sizeof(STU_NODE), 1, pFile) == 1)
+    /*从数据文件中读取景区基本信息数据，存入主链对应结点的景区基本信息支链中*/
+    while (fread(&tmp2, sizeof(REGION_NODE), 1, pFile) == 1)
     {
-        /*创建结点，存放从数据文件中读出的学生基本信息*/
-        pStuNode = (STU_NODE *)malloc(sizeof(STU_NODE));
-        *pStuNode = tmp2;
-        pStuNode->cnext = NULL;
+        /*创建结点，存放从数据文件中读出的景区基本信息*/
+        pRegionNode = (REGION_NODE *)malloc(sizeof(REGION_NODE));
+        *pRegionNode = tmp2;
+        pRegionNode->snext = NULL;
 
-        /*在主链上查找该学生所住宿舍楼对应的主链结点*/
-        pDormNode = hd;
-        while (pDormNode != NULL
-               && strcmp(pDormNode->dorm_id, pStuNode->dorm_id) != 0)
+        /*在主链上查找该景区所属城市对应的主链结点*/
+        pCityNode = hd;
+        while (pCityNode != NULL
+               && strcmp(pCityNode->city_id, pRegionNode->city_id) != 0)
         {
-            pDormNode = pDormNode->next;
+            pCityNode = pCityNode->next;
         }
-        if (pDormNode != NULL) /*如果找到，则将结点以后进先出方式插入学生信息支链*/
+        if (pCityNode != NULL) /*如果找到，则将结点以后进先出方式插入景区信息支链*/
         {
-            pStuNode->next = pDormNode->snext;
-            pDormNode->snext = pStuNode;
+            pRegionNode->next = pCityNode->rnext;
+            pCityNode->rnext = pRegionNode;
         }
         else  /*如果未找到，则释放所创建结点的内存空间*/
         {
-            free(pStuNode);
+            free(pRegionNode);
         }
     }
     fclose(pFile);
 
-    if ((pFile = fopen(gp_charge_info_filename, "rb")) == NULL)
+    if ((pFile = fopen(gp_spot_info_filename, "rb")) == NULL)
     {
-        printf("住宿缴费信息数据文件打开失败!\n");
+        printf("景点信息数据文件打开失败!\n");
         return re;
     }
-    printf("住宿缴费信息数据文件打开成功!\n");
+    printf("景点信息数据文件打开成功!\n");
     re += 16;
 
-    /*从数据文件中读取学生缴费信息数据，存入学生基本信息支链对应结点的缴费支链中*/
-    while (fread(&tmp3, sizeof(CHARGE_NODE), 1, pFile) == 1)
+    /*从数据文件中读取景点信息数据，存入景区基本信息支链对应结点的景点支链中*/
+    while (fread(&tmp3, sizeof(SPOT_NODE), 1, pFile) == 1)
     {
-        /*创建结点，存放从数据文件中读出的学生缴费信息*/
-        pChargeNode = (CHARGE_NODE *)malloc(sizeof(CHARGE_NODE));
-        *pChargeNode = tmp3;
+        /*创建结点，存放从数据文件中读出的景区缴费信息*/
+        pSpotNode = (SPOT_NODE *)malloc(sizeof(SPOT_NODE));
+        *pSpotNode = tmp3;
 
-        /*查找学生信息支链上对应学生信息结点*/
-        pDormNode = hd;
+        /*查找景区信息支链上对应景区信息结点*/
+        pCityNode = hd;
         find = 0;
-        while (pDormNode != NULL && find == 0)
+        while (pCityNode != NULL && find == 0)
         {
-            pStuNode = pDormNode->snext;
-            while (pStuNode != NULL && find == 0)
+            pRegionNode = pCityNode->rnext;
+            while (pRegionNode != NULL && find == 0)
             {
-                if (strcmp(pStuNode->stu_id, pChargeNode->stu_id) == 0)
+                if (strcmp(pRegionNode->region_id, pSpotNode->region_id) == 0)
                 {
                     find = 1;
                     break;
                 }
-                pStuNode = pStuNode->next;
+                pRegionNode = pRegionNode->next;
             }
-            pDormNode = pDormNode->next;
+            pCityNode = pCityNode->next;
         }
-        if (find)  /*如果找到，则将结点以后进先出方式插入学生缴费信息支链中*/
+        if (find)  /*如果找到，则将结点以后进先出方式插入景区缴费信息支链中*/
         {
-            pChargeNode->next = pStuNode->cnext;
-            pStuNode->cnext = pChargeNode;
+            pSpotNode->next = pRegionNode->snext;
+            pRegionNode->snext = pSpotNode;
         }
         else /*如果未找到，则释放所创建结点的内存空间*/
         {
-            free(pChargeNode);
+            free(pSpotNode);
         }
     }
     fclose(pFile);
@@ -561,36 +561,36 @@ void TagMainMenu(int num)
  *
  * 调用说明:
  */
-void CloseSys(DORM_NODE *hd)
+void CloseSys(CITY_NODE *hd)
 {
-    DORM_NODE *pDormNode1 = hd, *pDormNode2;
-    STU_NODE *pStuNode1, *pStuNode2;
-    CHARGE_NODE *pChargeNode1, *pChargeNode2;
+    CITY_NODE *pCityNode1 = hd, *pCityNode2;
+    REGION_NODE *pRegionNode1, *pRegionNode2;
+    SPOT_NODE *pSpotNode1, *pSpotNode2;
 
-    while (pDormNode1 != NULL) /*释放十字交叉链表的动态存储区*/
+    while (pCityNode1 != NULL) /*释放十字交叉链表的动态存储区*/
     {
-        pDormNode2 = pDormNode1->next;
-        pStuNode1 = pDormNode1->snext;
-        while (pStuNode1 != NULL) /*释放学生基本信息支链的动态存储区*/
+        pCityNode2 = pCityNode1->next;
+        pRegionNode1 = pCityNode1->rnext;
+        while (pRegionNode1 != NULL) /*释放景区基本信息支链的动态存储区*/
         {
-            pStuNode2 = pStuNode1->next;
-            pChargeNode1 = pStuNode1->cnext;
-            while (pChargeNode1 != NULL) /*释放缴费信息支链的动态存储区*/
+            pRegionNode2 = pRegionNode1->next;
+            pSpotNode1 = pRegionNode1->snext;
+            while (pSpotNode1 != NULL) /*释放缴费信息支链的动态存储区*/
             {
-                pChargeNode2 = pChargeNode1->next;
-                free(pChargeNode1);
-                pChargeNode1 = pChargeNode2;
+                pSpotNode2 = pSpotNode1->next;
+                free(pSpotNode1);
+                pSpotNode1 = pSpotNode2;
             }
-            free(pStuNode1);
-            pStuNode1 = pStuNode2;
+            free(pRegionNode1);
+            pRegionNode1 = pRegionNode2;
         }
-        free(pDormNode1);  /*释放主链结点的动态存储区*/
-        pDormNode1 = pDormNode2;
+        free(pCityNode1);  /*释放主链结点的动态存储区*/
+        pCityNode1 = pCityNode2;
     }
 
     ClearScreen();        /*清屏*/
 
-    /*释放存放菜单条、状态条、性别代码和学生类别代码等信息动态存储区*/
+    /*释放存放菜单条、状态条、性别代码和景区类别代码等信息动态存储区*/
     free(gp_buff_menubar_info);
     free(gp_buff_stateBar_info);
     free(gp_sex_code);
@@ -615,7 +615,7 @@ void CloseSys(DORM_NODE *hd)
  *
  * 调用说明:
  */
-void RunSys(DORM_NODE **phead)
+void RunSys(CITY_NODE **phead)
 {
     INPUT_RECORD inRec;
     DWORD res;
@@ -1542,7 +1542,7 @@ BOOL MaintainTypeCode(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
-                           "子菜单项：学生类别代码",
+                           "子菜单项：景区类别代码",
                            "确认"
     };
 
@@ -1568,7 +1568,7 @@ BOOL MaintainStuInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
-                           "子菜单项：学生基本信息",
+                           "子菜单项：景区基本信息",
                            "确认"
     };
 
@@ -1581,7 +1581,7 @@ BOOL MaintainChargeInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
-                           "子菜单项：住宿缴费信息",
+                           "子菜单项：景点信息",
                            "确认"
     };
 
@@ -1607,7 +1607,7 @@ BOOL QueryTypeCode(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
-                           "子菜单项：学生类别代码",
+                           "子菜单项：景区类别代码",
                            "确认"
     };
 
@@ -1633,7 +1633,7 @@ BOOL QueryStuInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
-                           "子菜单项：学生基本信息",
+                           "子菜单项：景区基本信息",
                            "确认"
     };
 
@@ -1646,7 +1646,7 @@ BOOL QueryChargeInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
-                           "子菜单项：住宿缴费信息",
+                           "子菜单项：景点信息",
                            "确认"
     };
 
@@ -1672,7 +1672,7 @@ BOOL StatStuType(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据统计",
-                           "子菜单项：在住学生分类",
+                           "子菜单项：在住景区分类",
                            "确认"
     };
 
@@ -1737,13 +1737,13 @@ BOOL AboutDorm(void)
  * 函数名称: InsertChargeNode
  * 函数功能: 在十字链表中插入一个缴费信息结点.
  * 输入参数: hd 主链头指针
- *           pcharge_node 指向所要插入结点的指针
+ *           pSPOT_NODE 指向所要插入结点的指针
  * 输出参数: 无
  * 返 回 值: BOOL类型, TRUE表示插入成功, FALSE表示插入失败
  *
  * 调用说明:
  */
-BOOL InsertChargeNode(DORM_NODE *hd, CHARGE_NODE *pcharge_node)
+BOOL InsertChargeNode(CITY_NODE *hd, SPOT_NODE *pSPOT_NODE)
 {
 
     return TRUE;
@@ -1753,14 +1753,14 @@ BOOL InsertChargeNode(DORM_NODE *hd, CHARGE_NODE *pcharge_node)
  * 函数名称: DelChargeNode
  * 函数功能: 从十字链表中删除指定的缴费信息结点.
  * 输入参数: hd 主链头指针
- *           stu_id 缴费学生学号
+ *           region_id 缴费景区学号
  *           date 缴费日期
  * 输出参数: 无
  * 返 回 值: BOOL类型, TRUE表示删除成功, FALSE表示删除失败
  *
  * 调用说明: 根据学号和缴费日期可以确定唯一的缴费信息
  */
-BOOL DelChargeNode(DORM_NODE *hd, char *stu_id, char *date)
+BOOL DelChargeNode(CITY_NODE *hd, char *region_id, char *date)
 {
 
     return TRUE;
@@ -1770,15 +1770,15 @@ BOOL DelChargeNode(DORM_NODE *hd, char *stu_id, char *date)
  * 函数名称: ModifChargeNode
  * 函数功能: 对指定的缴费信息结点内容进行修改.
  * 输入参数: hd 主链头指针
- *           stu_id 缴费学生学号
+ *           region_id 缴费景区学号
  *           date 缴费日期
- *           pcharge_node 指向存放修改内容结点的指针
+ *           pSPOT_NODE 指向存放修改内容结点的指针
  * 输出参数: 无
  * 返 回 值: BOOL类型, TRUE表示修改成功, FALSE表示修改失败
  *
  * 调用说明:
  */
-BOOL ModifChargeNode(DORM_NODE *hd, char *stu_id, char *date, CHARGE_NODE *pcharge_node)
+BOOL ModifChargeNode(CITY_NODE *hd, char *region_id, char *date, SPOT_NODE *pSPOT_NODE)
 {
 
     return FALSE;
@@ -1786,15 +1786,15 @@ BOOL ModifChargeNode(DORM_NODE *hd, char *stu_id, char *date, CHARGE_NODE *pchar
 
 /**
  * 函数名称: SeekStuNode
- * 函数功能: 按学号查找学生基本信息结点.
+ * 函数功能: 按学号查找景区基本信息结点.
  * 输入参数: hd 主链头指针
- *           stu_id 学生学号
+ *           region_id 景区学号
  * 输出参数: 无
  * 返 回 值: 查中时返回结点的地址, 否则返回NULL
  *
  * 调用说明:
  */
-STU_NODE *SeekStuNode(DORM_NODE *hd, char *stu_id)
+REGION_NODE *SeekStuNode(CITY_NODE *hd, char *region_id)
 {
 
     return NULL;
@@ -1804,14 +1804,14 @@ STU_NODE *SeekStuNode(DORM_NODE *hd, char *stu_id)
  * 函数名称: SeekChargeNode
  * 函数功能: 按学号和缴费日期查找缴费信息结点.
  * 输入参数: hd 主链头指针
- *           stu_id 学生学号
+ *           region_id 景区学号
  *           date 缴费日期
  * 输出参数: 无
  * 返 回 值: 查中时返回结点的地址, 否则返回NULL
  *
  * 调用说明:
  */
-CHARGE_NODE *SeekChargeNode(DORM_NODE *hd, char *stu_id, char *date)
+SPOT_NODE *SeekChargeNode(CITY_NODE *hd, char *region_id, char *date)
 {
 
     return NULL;
@@ -1819,7 +1819,7 @@ CHARGE_NODE *SeekChargeNode(DORM_NODE *hd, char *stu_id, char *date)
 
 /**
  * 函数名称: SeekStuNodeM
- * 函数功能: 按多种条件组合查询满足条件的所有学生信息结点.
+ * 函数功能: 按多种条件组合查询满足条件的所有景区信息结点.
  * 输入参数: hd 主链头指针
  *           cond_num 组合条件的个数
  *           ... 表示查询条件的字符串
@@ -1828,7 +1828,7 @@ CHARGE_NODE *SeekChargeNode(DORM_NODE *hd, char *stu_id, char *date)
  *
  * 调用说明:
  */
-STU_NODE *SeekStuNodeM (DORM_NODE *hd, int cond_num, ...)
+REGION_NODE *SeekStuNodeM (CITY_NODE *hd, int cond_num, ...)
 {
 
     return NULL;
@@ -1836,15 +1836,15 @@ STU_NODE *SeekStuNodeM (DORM_NODE *hd, int cond_num, ...)
 
 /**
  * 函数名称: JudgeStuNodeItem
- * 函数功能: 判断学生信息结点是否满足给定条件.
- * 输入参数: pstu_node 学生信息结点指针
+ * 函数功能: 判断景区信息结点是否满足给定条件.
+ * 输入参数: pREGION_NODE 景区信息结点指针
  *           pcondition 用来表示条件的字符串
  * 输出参数: 无
  * 返 回 值: 满足条件时, 返回TRUE; 否则返回FALSE
  *
  * 调用说明:
  */
-BOOL JudgeStuNodeItem(STU_NODE *pstu_node, char *pcondition)
+BOOL JudgeStuNodeItem(REGION_NODE *pREGION_NODE, char *pcondition)
 {
 
     return TRUE;
@@ -1891,7 +1891,7 @@ BOOL MatchChar(char char_item, char *pcond)
  *
  * 调用说明:
  */
-UNCHARGE_NODE *StatUnchargeInfo(DORM_NODE *hd)
+UNCHARGE_NODE *StatUnchargeInfo(CITY_NODE *hd)
 {
 
     return NULL;
@@ -1921,7 +1921,7 @@ void SortUnchargeInfo(UNCHARGE_NODE *uncharge_hd)
  *
  * 调用说明:
  */
-BOOL SaveSysData(DORM_NODE *hd)
+BOOL SaveSysData(CITY_NODE *hd)
 {
 
     return TRUE;
@@ -1937,7 +1937,7 @@ BOOL SaveSysData(DORM_NODE *hd)
  *
  * 调用说明:
  */
-BOOL BackupSysData(DORM_NODE *hd, char *filename)
+BOOL BackupSysData(CITY_NODE *hd, char *filename)
 {
 
     return TRUE;
@@ -1953,7 +1953,7 @@ BOOL BackupSysData(DORM_NODE *hd, char *filename)
  *
  * 调用说明:
  */
-BOOL RestoreSysData(DORM_NODE **phead, char *filename)
+BOOL RestoreSysData(CITY_NODE **phead, char *filename)
 {
 
     return TRUE;
