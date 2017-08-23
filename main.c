@@ -891,7 +891,79 @@ void PopPrompt(int num)
 {
 
 }
+int PopChoiceMenu(char *plabel_name[], int choice_num) {
+    LABEL_BUNDLE labels;
+    HOT_AREA areas;
+    SMALL_RECT rcPop;
+    COORD pos;
+    WORD att;
+    int iHot = 1, n = choice_num;
+    int i, maxlen, str_len;
 
+    for (i=0,maxlen=0; i<n; i++)
+    {
+        str_len = strlen(plabel_name[i]);
+        if (maxlen < str_len)
+        {
+            maxlen = str_len;
+        }
+    }
+
+    /**************将弹出窗口居中*********************/
+    pos.X = maxlen + 6;
+    pos.Y = n + 5;
+    rcPop.Left = (SCR_COL - pos.X) / 2;
+    rcPop.Right = rcPop.Left + pos.X - 1;
+    rcPop.Top = (SCR_ROW - pos.Y) / 2;
+    rcPop.Bottom = rcPop.Top + pos.Y - 1;
+
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    labels.num = n;
+    labels.ppLabel = plabel_name;
+    COORD aLoc[n];
+
+
+    /******设置标签束的输出位置*****/
+    for (i=0; i<n; i++)
+    {
+        aLoc[i].X = rcPop.Left + 3;
+        aLoc[i].Y = rcPop.Top + 2 + i;
+
+    }
+    str_len = strlen(plabel_name[n-1]);
+    aLoc[n-1].X = rcPop.Left + 3 + (maxlen-str_len)/2;
+    aLoc[n-1].Y = aLoc[n-1].Y + 2;
+
+    labels.pLoc = aLoc;
+
+    areas.num = n;
+    SMALL_RECT aArea[n];
+    char aSort[n];
+    char aTag[n];
+    for (i=0; i<n; i++)
+    {
+        aArea[i].Left = aLoc[i].X;
+        aArea[i].Top = aLoc[i].Y ;
+        aArea[i].Right = aLoc[i].X + strlen(plabel_name[i]) - 1;
+        aArea[i].Bottom = aLoc[i].Y;
+        aSort[i] = 0;
+        aTag[i] = i + 1;
+    }
+
+    areas.pArea = aArea;
+    areas.pSort = aSort;
+    areas.pTag = aTag;
+    PopUp(&rcPop, att, &labels, &areas);
+    DrawBox(&rcPop);
+    pos.X = rcPop.Left + 1;
+    pos.Y = rcPop.Top + 2 + n;
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    if (DealInput(&areas, &iHot, NULL) != 13)
+    {
+        return -1;
+    }
+    return iHot;
+}
 /**
  * 函数名称: PopMenu
  * 函数功能: 弹出指定主菜单项对应的子菜单.
@@ -1398,25 +1470,18 @@ BOOL ExeFunction(int m, int s)
     pFunction[1] = BackupData;
     pFunction[2] = RestoreData;
     pFunction[3] = ExitSys;
-    pFunction[4] = MaintainSexCode;
-    pFunction[5] = MaintainTypeCode;
-    pFunction[6] = NULL;
-    pFunction[7] = MaintainDormInfo;
-    pFunction[8] = MaintainStuInfo;
-    pFunction[9] = MaintainChargeInfo;
-    pFunction[10] = QuerySexCode;
-    pFunction[11] = QueryTypeCode;
-    pFunction[12] = NULL;
-    pFunction[13] = QueryDormInfo;
-    pFunction[14] = QueryStuInfo;
-    pFunction[15] = QueryChargeInfo;
-    pFunction[16] = StatUsedRate;
-    pFunction[17] = StatStuType;
-    pFunction[18] = StatCharge;
-    pFunction[19] = StatUncharge;
-    pFunction[20] = HelpTopic;
-    pFunction[21] = NULL;
-    pFunction[22] = AboutDorm;
+
+    pFunction[4] = MaintainCityInfo;
+    pFunction[5] = MaintainScenicAreaInfo;
+    pFunction[6] = MaintainAttractionInfo;
+    pFunction[7] = NULL;
+    pFunction[8] = NULL;
+    pFunction[9] = NULL;
+    pFunction[10] = NULL;
+    pFunction[11] = NULL;
+    pFunction[12] = HelpTopic;
+    pFunction[13] = NULL;
+    pFunction[14] = AboutDorm;
 
     for (i=1,loc=0; i<m; i++)  /*根据主菜单号和子菜单号计算对应下标*/
     {
@@ -1524,7 +1589,43 @@ BOOL ExitSys(void)
 
     return bRet;
 }
+BOOL MaintainCityInfo(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"录入城市信息",
+                           "修改城市信息",
+                           "删除城市信息",
+                           "取消"
+    };
 
+    int iHot = PopChoiceMenu(plabel_name, 4);
+
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot==0){
+            PopOff();
+        }
+        else if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL MaintainScenicAreaInfo(void) {
+
+}
+
+BOOL MaintainAttractionInfo(void) {
+
+}
 BOOL MaintainSexCode(void)
 {
     BOOL bRet = TRUE;
