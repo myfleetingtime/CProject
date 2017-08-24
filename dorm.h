@@ -14,8 +14,8 @@
 #ifndef TYPE_H_INCLUDED
 #define TYPE_H_INCLUDED
 
-#define SCR_ROW 25             /*屏幕行数*/
-#define SCR_COL 80             /*屏幕列数*/
+#define SCR_ROW 40             /*屏幕行数*/
+#define SCR_COL 100             /*屏幕列数*/
 
 /**
  *缴费信息链结点结构
@@ -169,31 +169,23 @@ char *ga_sub_menu[] = {"[S] 数据保存",          /*系统子菜单名*/
                        "[R] 数据恢复",
                        "[X] 退出    Alt+X",
         //
-                       "[S] 性别代码",
-                       "[T] 学生类别代码",
-                       "",           /*空串用来在弹出菜单中分隔子菜单项，下同*/
-                       "[D] 宿舍楼信息",
-                       "[P] 学生基本信息",
-                       "[C] 住宿缴费信息",
+                       "[S] 城市信息",
+                       "[T] 景区信息",
+                       "[D] 景点信息",
         //
-                       "[S] 性别代码",
-                       "[T] 学生类别代码",
-                       "",
-                       "[D] 宿舍楼信息",
-                       "[P] 学生基本信息",
-                       "[C] 住宿缴费信息",
+                       "[S] 城市信息",
+                       "[T] 景区信息",
+                       "[D] 景点信息",
         //
-                       "[I] 宿舍楼入住率",
-                       "[T] 在住学生分类",
-                       "[C] 住宿费缴纳情况",
-                       "[U] 住宿费欠缴情况",
+                       "[I] 随便看看",
+                       "[T] 城市景区统计",
         //
                        "[T] 帮助主题",
                        "",
                        "[A] 关于..."
 };
 
-int ga_sub_menu_count[] = {4, 6, 6, 4, 3};  /*各主菜单项下子菜单的个数*/
+int ga_sub_menu_count[] = {4, 3, 3, 2, 3};  /*各主菜单项下子菜单的个数*/
 int gi_sel_menu = 1;                        /*被选中的主菜单项号,初始为1*/
 int gi_sel_sub_menu = 0;                    /*被选中的子菜单项号,初始为0,表示未选中*/
 
@@ -226,6 +218,7 @@ void ShowState(void);                           /*显示状态栏*/
 void TagMainMenu(int num);                      /*标记被选中的主菜单项*/
 void TagSubMenu(int num);                       /*标记被选中的子菜单项*/
 int DealConInput(HOT_AREA *phot_area, int *pihot_num);  /*控制台输入处理*/
+int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition);
 void SetHotPoint(HOT_AREA *phot_area, int hot_num);     /*设置热区*/
 void RunSys(DORM_NODE **pphd);                  /*系统功能模块的选择和运行*/
 BOOL ExeFunction(int main_menu_num, int sub_menu_num);  /*功能模块的调用*/
@@ -239,6 +232,17 @@ BOOL RestoreData(void);        /*恢复数据*/
 BOOL ExitSys(void);            /*退出系统*/
 BOOL HelpTopic(void);          /*帮助主体*/
 BOOL AboutDorm(void);          /*关于系统*/
+
+BOOL MaintainCityInfo(void);           /*维护城市信息*/
+BOOL MaintainScenicAreaInfo(void);    /*维护景区基本信息*/
+BOOL MaintainAttractionInfo(void);   /*维护景点基本信息*/
+
+BOOL QueryCityInfo(void);           /*查询城市信息*/
+BOOL QueryScenicAreaInfo(void);    /*查询景区基本信息*/
+BOOL QueryAttractionInfo(void);   /*查询景点基本信息*/
+
+BOOL RandomView(void);    /*查询景区基本信息*/
+BOOL StatusCityInfo(void);   /*查询景点基本信息*/
 
 BOOL MaintainSexCode(void);    /*维护性别代码*/
 BOOL MaintainTypeCode(void);   /*维护学生类别代码*/

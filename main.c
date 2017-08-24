@@ -892,6 +892,172 @@ void PopPrompt(int num)
 
 }
 
+int PopInputMenu(char *plabel_name[], int label_num, char *ppcondition[], int hot_area_num) {
+    LABEL_BUNDLE labels;
+    HOT_AREA areas;
+    SMALL_RECT rcPop;
+    COORD pos;
+    WORD att;
+    int iHot = 1, n = label_num;
+    int i, maxlen, str_len;
+    for (i=0,maxlen=0; i<n; i++)
+    {
+        str_len = strlen(plabel_name[i]);
+        if (maxlen < str_len)
+        {
+            maxlen = str_len;
+        }
+    }
+
+    /**************将弹出窗口居中*********************/
+    pos.X = maxlen + 6;
+    pos.Y = n;
+    rcPop.Left = (SCR_COL - pos.X) / 2;
+    rcPop.Right = rcPop.Left + 27+6;
+    rcPop.Top = (SCR_ROW - pos.Y) / 2-10;
+    rcPop.Bottom = rcPop.Top + pos.Y + n;
+
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    labels.num = n;
+    labels.ppLabel = plabel_name;
+    COORD aLoc[n];
+
+
+    /******设置标签束的输出位置*****/
+    for(i = 0; i < n-1; i++) {
+        if (i == 0) {
+            aLoc[i].X = rcPop.Left + 2;
+            aLoc[i].Y = rcPop.Top + 1;
+        }
+        else {
+            aLoc[i].X = rcPop.Left + 2;
+            aLoc[i].Y = aLoc[i-1].Y + 2;
+        }
+    }
+    aLoc[n-1].X = rcPop.Left + (pos.X - strlen(plabel_name[n-1]))/2;
+    aLoc[n-1].Y = aLoc[n-2].Y + 2;
+    labels.pLoc = aLoc;
+
+    /****设置热区信息****/
+    areas.num = hot_area_num;
+    SMALL_RECT aArea[hot_area_num];
+    char aSort[hot_area_num];
+    for (i = 0; i < hot_area_num-2; i++) {
+        aSort[i] = 1;
+    }
+    aSort[hot_area_num-2] = 0;
+    aSort[hot_area_num-1] = 0;
+    char aTag[hot_area_num];
+    for (i = 0; i < hot_area_num; i++) {
+        aTag[i] = i+1;
+    }
+    for (i=0; i<hot_area_num-2; i++)
+    {
+        aArea[i].Left = aLoc[i+1].X + strlen(plabel_name[i+1]);
+        aArea[i].Top = aLoc[i+1].Y ;
+        aArea[i].Right = aLoc[i+1].X + 27;
+        aArea[i].Bottom = aLoc[i+1].Y;
+    }
+    aArea[hot_area_num-2].Left = aLoc[hot_area_num-1].X ;
+    aArea[hot_area_num-2].Top = aLoc[hot_area_num-1].Y ;
+    aArea[hot_area_num-2].Right = aLoc[hot_area_num-1].X + 3;
+    aArea[hot_area_num-2].Bottom = aLoc[hot_area_num-1].Y;
+    aArea[hot_area_num-1].Left = aLoc[hot_area_num-1].X + 8;
+    aArea[hot_area_num-1].Top = aLoc[hot_area_num-1].Y ;
+    aArea[hot_area_num-1].Right = aLoc[hot_area_num-1].X + 11;
+    aArea[hot_area_num-1].Bottom = aLoc[hot_area_num-1].Y;
+
+    areas.pArea = aArea;
+    areas.pSort = aSort;
+    areas.pTag = aTag;
+    PopUp(&rcPop, att, &labels, &areas);
+    DrawBox(&rcPop);
+    pos.X = rcPop.Left + 2;
+    pos.Y = aLoc[hot_area_num-1].Y+1;
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+
+    if (DealInput2(&areas, &iHot, ppcondition) != 13)
+    {
+        return -1;
+    }
+    else {
+        return iHot;
+    }
+}
+
+int PopChoiceMenu(char *plabel_name[], int choice_num) {
+    LABEL_BUNDLE labels;
+    HOT_AREA areas;
+    SMALL_RECT rcPop;
+    COORD pos;
+    WORD att;
+    int iHot = 1, n = choice_num;
+    int i, maxlen, str_len;
+
+    for (i=0,maxlen=0; i<n; i++)
+    {
+        str_len = strlen(plabel_name[i]);
+        if (maxlen < str_len)
+        {
+            maxlen = str_len;
+        }
+    }
+
+    /**************将弹出窗口居中*********************/
+    pos.X = maxlen + 6;
+    pos.Y = n + 5;
+    rcPop.Left = (SCR_COL - pos.X) / 2;
+    rcPop.Right = rcPop.Left + pos.X - 1;
+    rcPop.Top = (SCR_ROW - pos.Y) / 2-8;
+    rcPop.Bottom = rcPop.Top + pos.Y - 1;
+
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    labels.num = n;
+    labels.ppLabel = plabel_name;
+    COORD aLoc[n];
+
+
+    /******设置标签束的输出位置*****/
+    for (i=0; i<n; i++)
+    {
+        aLoc[i].X = rcPop.Left + 3;
+        aLoc[i].Y = rcPop.Top + 2 + i;
+
+    }
+    str_len = strlen(plabel_name[n-1]);
+    aLoc[n-1].X = rcPop.Left + 3 + (maxlen-str_len)/2;
+    aLoc[n-1].Y = aLoc[n-1].Y + 2;
+
+    labels.pLoc = aLoc;
+
+    areas.num = n;
+    SMALL_RECT aArea[n];
+    char aSort[n];
+    char aTag[n];
+    for (i=0; i<n; i++)
+    {
+        aArea[i].Left = aLoc[i].X;
+        aArea[i].Top = aLoc[i].Y ;
+        aArea[i].Right = aLoc[i].X + strlen(plabel_name[i]) - 1;
+        aArea[i].Bottom = aLoc[i].Y;
+        aSort[i] = 0;
+        aTag[i] = i + 1;
+    }
+
+    areas.pArea = aArea;
+    areas.pSort = aSort;
+    areas.pTag = aTag;
+    PopUp(&rcPop, att, &labels, &areas);
+    DrawBox(&rcPop);
+    pos.X = rcPop.Left + 1;
+    pos.Y = rcPop.Top + 2 + n;
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    if (DealInput2(&areas, &iHot, NULL) != 13)
+    {
+        return -1;
+    }
+    return iHot;
+}
 /**
  * 函数名称: PopMenu
  * 函数功能: 弹出指定主菜单项对应的子菜单.
@@ -1026,7 +1192,8 @@ void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea)
     /*将弹出窗口覆盖区域的字符信息保存，用于在关闭弹出窗口时恢复原样*/
     ReadConsoleOutput(gh_std_out, nextLayer->pContent, size, pos, pRc);
     for (i=pRc->Top; i<=pRc->Bottom; i++)
-    {   /*此二重循环将所覆盖字符单元的原先属性值存入动态存储区，便于以后恢复*/
+    {
+        /*此二重循环将所覆盖字符单元的原先属性值存入动态存储区，便于以后恢复*/
         for (j=pRc->Left; j<=pRc->Right; j++)
         {
             *pCh = gp_scr_att[i*SCR_COL+j];
@@ -1054,7 +1221,8 @@ void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea)
     }
     /*设置弹出窗口区域字符单元的新属性*/
     for (i=pRc->Top; i<=pRc->Bottom; i++)
-    {   /*此二重循环设置字符单元的层号*/
+    {
+        /*此二重循环设置字符单元的层号*/
         for (j=pRc->Left; j<=pRc->Right; j++)
         {
             gp_scr_att[i*SCR_COL+j] = gp_top_layer->LayerNo;
@@ -1062,7 +1230,8 @@ void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea)
     }
 
     for (i=0; i<pHotArea->num; i++)
-    {   /*此二重循环设置所有热区中字符单元的热区类型和热区编号*/
+    {
+        /*此二重循环设置所有热区中字符单元的热区类型和热区编号*/
         row = pHotArea->pArea[i].Top;
         for (j=pHotArea->pArea[i].Left; j<=pHotArea->pArea[i].Right; j++)
         {
@@ -1238,7 +1407,283 @@ void LocSubMenu(int num, SMALL_RECT *rc)
     }
     return;
 }
+/**
+ * 函数名称: DealInput
+ * 函数功能: 在弹出窗口区域设置热区, 等待并相应用户输入.
+ * 输入参数: pHotArea
+ *           piHot 焦点热区编号的存放地址, 即指向焦点热区编号的指针
+ * 输出参数: piHot 用鼠标单击、按回车或空格时返回当前热区编号
+ * 返 回 值:
+ *
+ * 调用说明:
+ */
+int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition)
+{
+    INPUT_RECORD inRec[2];
+    DWORD res;
+    COORD pos = {0, 0};
+    int num = *piHot, arrow, iRet = 0;
+    int cNo, cTag, cSort;/*cNo:层号, cTag:热区编号, cSort: 热区类型*/
+    char vkc, asc;       /*vkc:虚拟键代码, asc:字符的ASCII码值*/
+    int i, j , TxtHotAreaNum = 0;
 
+    for (i=0; i<pHotArea->num; i++) /*计算文本框热区数量*/
+    {
+        if(pHotArea->pSort[i] == 1)
+        {
+            TxtHotAreaNum++;
+        }
+    }
+    for (i=0; i<TxtHotAreaNum; i++)
+    {
+        ppcondition[i] = (char*)malloc(30*sizeof(char));
+        ppcondition[i][0] = '\0';
+    }
+
+    SetHotPoint(pHotArea, *piHot);
+
+    while (TRUE)
+    {
+        /*循环*/
+        ReadConsoleInput(gh_std_in, &inRec, 2, &res);
+        if ((inRec[0].EventType == MOUSE_EVENT) &&
+            (inRec[0].Event.MouseEvent.dwButtonState
+             == FROM_LEFT_1ST_BUTTON_PRESSED))
+        {
+            pos = inRec[0].Event.MouseEvent.dwMousePosition;
+            cNo = gp_scr_att[pos.Y * SCR_COL + pos.X] & 3;   /*取出弹出窗口的层数*/
+            cTag = (gp_scr_att[pos.Y * SCR_COL + pos.X] >> 2) & 15;  /*取出字符单元的热区编号*/
+            cSort = (gp_scr_att[pos.Y * SCR_COL + pos.X] >> 6) & 3;  /*取出热区类型*/
+
+            if ((cNo == gp_top_layer->LayerNo) && cTag > 0)
+            {
+                *piHot = cTag;
+                num = *piHot;
+                SetHotPoint(pHotArea, *piHot);
+                if (cSort == 0)  /*选中的是取消按钮*/
+                {
+                    iRet = 13;
+                    break;
+                }
+                else
+                {
+                    j = 0;
+                    for (i=0; i<num; i++)
+                    {
+                        if(pHotArea->pSort[i] == 1)
+                        {
+                            j++;
+                        }
+                    }
+                    /**设置光标位置，使其始终出现在已输入字符串的后面**/
+                    COORD CursorPosition = {pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]),
+                                            pHotArea->pArea[num-1].Top
+                    };
+                    SetConsoleCursorPosition(gh_std_out, CursorPosition);
+                }
+            }
+        }
+        else if (inRec[0].EventType == KEY_EVENT && inRec[0].Event.KeyEvent.bKeyDown)
+        {
+            vkc = inRec[0].Event.KeyEvent.wVirtualKeyCode;
+            asc = inRec[0].Event.KeyEvent.uChar.AsciiChar;
+            if (asc == 0)
+            {
+                arrow = 0;
+                switch (vkc)
+                {
+                    /*方向键(左、上、右、下)的处理*/
+                    case 37:
+                        arrow = 1;
+                        break;
+                    case 38:
+                        arrow = 2;
+                        break;
+                    case 39:
+                        arrow = 3;
+                        break;
+                    case 40:
+                        arrow = 4;
+                        break;
+                }
+                if (arrow > 0)
+                {
+                    num = *piHot;
+                    while (TRUE)
+                    {
+                        if (arrow < 3)
+                        {
+                            num--;
+                        }
+                        else
+                        {
+                            num++;
+                        }
+                        if (num == 0)
+                        {
+                            num = pHotArea->num;
+                        }
+                        if (num == pHotArea->num + 1)
+                        {
+                            num = 1;
+                        }
+                        if (((arrow % 2) && (pHotArea->pArea[num-1].Top
+                                             == pHotArea->pArea[*piHot-1].Top)) || ((!(arrow % 2))
+                                                                                    && (pHotArea->pArea[num-1].Top
+                                                                                        != pHotArea->pArea[*piHot-1].Top)) || num == *piHot)
+                        {
+                            /*同行的热区左右键切换，不同行的上下键切换，或者是同一个热区也执行break*/
+                            break;
+                        }
+                    }
+                    if (num > 0 && num <= pHotArea->num)
+                    {
+                        *piHot = num;
+                        SetHotPoint(pHotArea, *piHot);
+                        if (pHotArea->pSort[num-1] == 1)
+                        {
+                            j = 0;
+                            for (i=0; i<num; i++)
+                            {
+                                if(pHotArea->pSort[i] == 1)
+                                {
+                                    j++;
+                                }
+                            }
+                            /**设置光标位置，使其始终出现在已输入字符串的后面**/
+                            COORD CursorPosition = {pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]),
+                                                    pHotArea->pArea[num-1].Top
+                            };
+                            SetConsoleCursorPosition(gh_std_out, CursorPosition);
+                        }
+                    }
+                }
+            }
+            else if (vkc == 8)
+            {
+                /*退格键*/
+                if (pHotArea->pSort[num-1] == 1)
+                {
+                    COORD CursorPosition;
+                    j=0;
+                    for (i=0; i<num; i++)
+                    {
+                        if(pHotArea->pSort[i] == 1)
+                        {
+                            j++;
+                        }
+                    }
+                    if (*(ppcondition[j-1]+strlen(ppcondition[j-1])-1) > 31
+                        && *(ppcondition[j-1]+strlen(ppcondition[j-1])-1) < 127)/*如果是非中文字符*/
+                    {
+                        *(ppcondition[j-1]+strlen(ppcondition[j-1])-1) = '\0';
+                        CursorPosition.X = pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]);
+                        CursorPosition.Y = pHotArea->pArea[num-1].Top;
+                        SetConsoleCursorPosition(gh_std_out, CursorPosition);
+                        FillConsoleOutputCharacter(gh_std_out, '\0', 1, CursorPosition, &ul);   /*删除的位置由空字符填充*/
+                    }
+                    else/*如果最后字符是中文汉字，删除两个个字符，即一个汉字*/
+                    {
+                        *(ppcondition[j-1]+strlen(ppcondition[j-1])-2) = '\0';
+                        CursorPosition.X = pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]);
+                        CursorPosition.Y = pHotArea->pArea[num-1].Top;
+                        SetConsoleCursorPosition(gh_std_out, CursorPosition);
+                        FillConsoleOutputCharacter(gh_std_out, '\0', 2, CursorPosition, &ul);/*删除的位置由空字符填充*/
+                    }
+                }
+            }
+            else if (vkc == 9)
+            {
+                /*tab键表示切换热区*/
+
+                num++;
+                if (num == pHotArea->num + 1)
+                {
+                    num = 1;
+                }
+                *piHot = num;
+                SetHotPoint(pHotArea, *piHot);
+            }
+            else if (vkc == 27)
+            {
+                /*ESC键*/
+
+                iRet = 27;
+                /*隐藏光标*/
+                CONSOLE_CURSOR_INFO console_cursor_info;
+                console_cursor_info.dwSize = 20;
+                console_cursor_info.bVisible = FALSE;
+                SetConsoleCursorInfo(gh_std_out, &console_cursor_info);
+                break;
+            }
+
+            else if (vkc == 13)
+            {
+                /*回车键表示按下当前按钮*/
+                if (pHotArea->pSort[num-1] == 0) /*如果当前被激活的是按键类热区*/
+                {
+                    iRet = 13;
+                    break;
+                }
+                else
+                {
+                    num++;    /*如果是文本框热区，则切换至下一个热区*/
+                    *piHot = num;
+                    SetHotPoint(pHotArea, *piHot);
+                    if (pHotArea->pSort[num-1] == 1) /*如果此时是文本框热区*/
+                    {
+                        j = 0;
+                        for (i=0; i<num; i++)
+                        {
+                            if(pHotArea->pSort[i] == 1)
+                            {
+                                j++;
+                            }
+                        }
+                        /**设置光标位置，使其始终出现在已输入字符串的后面**/
+                        COORD CursorPosition = {pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]),
+                                                pHotArea->pArea[num-1].Top
+                        };
+                        SetConsoleCursorPosition(gh_std_out, CursorPosition);
+                    }
+                }
+            }
+            else  /*按下普通键*/
+            {
+                if (pHotArea->pSort[num-1] == 1)
+                {
+                    char string[10];
+                    j=0;
+                    for (i=0; i<num; i++)
+                    {
+                        if(pHotArea->pSort[i] == 1)
+                        {
+                            j++;
+                        }
+                    }
+
+                    /*输入的字符数不得大于该热区的长度*/
+                    if (strlen(ppcondition[j-1])<pHotArea->pArea[num-1].Right - pHotArea->pArea[num-1].Left)
+                    {
+                        for (i=0; i<res; i++)
+                        {
+                            string[i] = inRec[i].Event.KeyEvent.uChar.AsciiChar;
+                        }
+                        string[i] = '\0';
+                        strcat(ppcondition[j-1],string);
+                        CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info;
+                        DWORD NumOfAttsWritten;
+                        WORD att_new = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE;
+                        GetConsoleScreenBufferInfo(gh_std_out, &console_screen_buffer_info);
+                        printf("%s", string);
+                        FillConsoleOutputAttribute(gh_std_out, att_new, strlen(string), console_screen_buffer_info.dwCursorPosition, &NumOfAttsWritten);
+                    }
+                }
+            }
+        }
+    }
+    return iRet;
+}
 /**
  * 函数名称: DealInput
  * 函数功能: 在弹出窗口区域设置热区, 等待并相应用户输入.
@@ -1344,19 +1789,27 @@ void SetHotPoint(HOT_AREA *pHotArea, int iHot)
 {
     CONSOLE_CURSOR_INFO lpCur;
     COORD pos = {0, 0};
-    WORD att1, att2;
+    WORD att1, att2, att3;
     int i, width;
 
-    att1 = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;  /*黑底白字*/
-    att2 = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;  /*白底黑字*/
+    att1 = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;  /*被选中热区的文本属性黑底白字*/
+    att2 = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*青底黑字*/
+    att3 = BACKGROUND_BLUE | BACKGROUND_GREEN |BACKGROUND_RED ;  /*白底黑字*/
     for (i=0; i<pHotArea->num; i++)
-    {  /*将按钮类热区置为白底黑字*/
+    {
+        /*将按钮类热区置为白底黑字*/
         pos.X = pHotArea->pArea[i].Left;
         pos.Y = pHotArea->pArea[i].Top;
         width = pHotArea->pArea[i].Right - pHotArea->pArea[i].Left + 1;
         if (pHotArea->pSort[i] == 0)
-        {  /*热区是按钮类*/
+        {
+            /*热区是按钮类*/
             FillConsoleOutputAttribute(gh_std_out, att2, width, pos, &ul);
+        }
+        else
+        {
+            /*热区是文本类*/
+            FillConsoleOutputAttribute(gh_std_out, att3, width, pos, &ul);
         }
     }
 
@@ -1364,11 +1817,16 @@ void SetHotPoint(HOT_AREA *pHotArea, int iHot)
     pos.Y = pHotArea->pArea[iHot-1].Top;
     width = pHotArea->pArea[iHot-1].Right - pHotArea->pArea[iHot-1].Left + 1;
     if (pHotArea->pSort[iHot-1] == 0)
-    {  /*被激活热区是按钮类*/
+    {
+        /*被激活热区是按钮类*/
         FillConsoleOutputAttribute(gh_std_out, att1, width, pos, &ul);
+        GetConsoleCursorInfo(gh_std_out, &lpCur);
+        lpCur.bVisible = FALSE;
+        SetConsoleCursorInfo(gh_std_out, &lpCur);
     }
     else if (pHotArea->pSort[iHot-1] == 1)
-    {  /*被激活热区是文本框类*/
+    {
+        /*被激活热区是文本框类*/
         SetConsoleCursorPosition(gh_std_out, pos);
         GetConsoleCursorInfo(gh_std_out, &lpCur);
         lpCur.bVisible = TRUE;
@@ -1398,25 +1856,18 @@ BOOL ExeFunction(int m, int s)
     pFunction[1] = BackupData;
     pFunction[2] = RestoreData;
     pFunction[3] = ExitSys;
-    pFunction[4] = MaintainSexCode;
-    pFunction[5] = MaintainTypeCode;
-    pFunction[6] = NULL;
-    pFunction[7] = MaintainDormInfo;
-    pFunction[8] = MaintainStuInfo;
-    pFunction[9] = MaintainChargeInfo;
-    pFunction[10] = QuerySexCode;
-    pFunction[11] = QueryTypeCode;
-    pFunction[12] = NULL;
-    pFunction[13] = QueryDormInfo;
-    pFunction[14] = QueryStuInfo;
-    pFunction[15] = QueryChargeInfo;
-    pFunction[16] = StatUsedRate;
-    pFunction[17] = StatStuType;
-    pFunction[18] = StatCharge;
-    pFunction[19] = StatUncharge;
-    pFunction[20] = HelpTopic;
-    pFunction[21] = NULL;
-    pFunction[22] = AboutDorm;
+
+    pFunction[4] = MaintainCityInfo;
+    pFunction[5] = MaintainScenicAreaInfo;
+    pFunction[6] = MaintainAttractionInfo;
+    pFunction[7] = QueryCityInfo;
+    pFunction[8] = QueryScenicAreaInfo;
+    pFunction[9] = QueryAttractionInfo;
+    pFunction[10] = RandomView;
+    pFunction[11] = StatusCityInfo;
+    pFunction[12] = HelpTopic;
+    pFunction[13] = NULL;
+    pFunction[14] = AboutDorm;
 
     for (i=1,loc=0; i<m; i++)  /*根据主菜单号和子菜单号计算对应下标*/
     {
@@ -1522,6 +1973,511 @@ BOOL ExitSys(void)
     }
     PopOff();
 
+    return bRet;
+}
+BOOL MaintainCityInfo(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"录入城市信息",
+                           "修改城市信息",
+                           "删除城市信息",
+                           "取消"
+    };
+
+    int iHot = PopChoiceMenu(plabel_name, 4);
+
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1){
+            PopOff();
+            InsertCityNodeSubMenu();
+
+        }
+        else if (iHot == 2) {
+            PopOff();
+            ModifyCityNodeSubMenu();
+        }
+        else if (iHot == 3) {
+            PopOff();
+            DeleteCityNodeSubMenu();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL InsertCityNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"请输入待录入的城市信息",
+                           "城  市ID",
+                           "城市名称",
+                           "监督电话",
+                           "咨询电话",
+                           "确定    取消"
+    };
+    int n = 6;
+    int inputNum = 6;
+    char *ppcondition[inputNum];
+    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 5) {
+            PopOff();
+        }
+        else if (iHot == 6){
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL ModifyCityNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据城市名称修改",
+                           "根据城  市ID修改",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL DeleteCityNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据城市名称删除",
+                           "根据城  市ID删除",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL MaintainScenicAreaInfo(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"录入景区信息",
+                           "修改景区信息",
+                           "删除景区信息",
+                           "取消"
+    };
+
+    int iHot = PopChoiceMenu(plabel_name, 4);
+
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1){
+            PopOff();
+            InsertScenicAreaNodeSubMenu();
+
+        }
+        else if (iHot == 2) {
+            PopOff();
+            ModifyScenicAreaNodeSubMenu();
+        }
+        else if (iHot == 3) {
+            PopOff();
+            DeleteScenicAreaNodeSubMenu();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+
+}
+
+BOOL InsertScenicAreaNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"请输入待录入的景区信息",
+                           "景区名称",
+                           "景  区ID",
+                           "所属城市",
+                           "景区级别",
+                           "景区地址",
+                           "门票价格",
+                           "开放时间",
+                           "咨询电话",
+                           "确定    取消"
+    };
+    int n = 10;
+    int inputNum = 10;
+    char *ppcondition[inputNum];
+    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 9) {
+            PopOff();
+        }
+        else if (iHot == 10){
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL ModifyScenicAreaNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据景区名称修改",
+                           "根据景  区ID修改",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL DeleteScenicAreaNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据景区名称删除",
+                           "根据景  区ID删除",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL MaintainAttractionInfo(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"录入景点信息",
+                           "修改景点信息",
+                           "删除景点信息",
+                           "取消"
+    };
+
+    int iHot = PopChoiceMenu(plabel_name, 4);
+
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1){
+            PopOff();
+            InsertAttractionNodeSubMenu();
+
+        }
+        else if (iHot == 2) {
+            PopOff();
+            ModifyAttractionNodeSubMenu();
+        }
+        else if (iHot == 3) {
+            PopOff();
+            DeleteAttractionNodeSubMenu();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL InsertAttractionNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"请输入待录入的景点信息",
+                           "景点名称",
+                           "景  点ID",
+                           "所属景区",
+                           "景区级别",
+                           "景点位置",
+                           "浏览时间",
+                           "景点特点",
+                           "确定    取消"
+    };
+    int n = 9;
+    int inputNum = 9;
+    char *ppcondition[inputNum];
+    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 8) {
+            PopOff();
+        }
+        else if (iHot == 9){
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL ModifyAttractionNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据景点名称修改",
+                           "根据景  点ID修改",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL DeleteAttractionNodeSubMenu(void) {
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据景点名称删除",
+                           "根据景  点ID删除",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL QueryCityInfo(void)
+{
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据城市名称查询",
+                           "根据城  市ID查询",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL QueryScenicAreaInfo(void)
+{
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据景区名称查询",
+                           "根据景  区ID查询",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL RandomView(void)
+{
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"随便看看城市",
+                           "随便看看景区",
+                           "随便看看景点",
+                           "取消"
+    };
+    int n = 4;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL StatusCityInfo(void)
+{
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"随便看看城市",
+                           "随便看看景区",
+                           "随便看看景点",
+                           "取消"
+    };
+    int n = 4;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
+    return bRet;
+}
+
+BOOL QueryAttractionInfo(void)
+{
+    BOOL bRet = TRUE;
+    char *plabel_name[] = {"根据景点名称修改",
+                           "根据景  点ID修改",
+                           "取消"
+    };
+    int n = 3;
+    int iHot = PopChoiceMenu(plabel_name, n);
+    if (iHot == -1) {
+        PopOff();
+    }
+    else {
+        if (iHot == 1) {
+            PopOff();
+        }
+        else if (iHot == 2){
+            PopOff();
+        }
+        else if (iHot == 3) {
+            PopOff();
+        }
+        else {
+            PopOff();
+        }
+    }
     return bRet;
 }
 
