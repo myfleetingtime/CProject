@@ -1364,16 +1364,16 @@ BOOL ExeFunction(int m, int s)
     pFunction[2] = RestoreData;
     pFunction[3] = ExitSys;
     pFunction[4] = MaintainCityInfo;
-    pFunction[5] = MaintainRegionInfo;
-    pFunction[6] = MaintainSpotInfo;
+    pFunction[5] = MaintainScenicAreaInfo;
+    pFunction[6] = MaintainAttractionInfo;
     pFunction[7] = QueryCityInfo;
-    pFunction[8] = QueryRegionInfo;
-    pFunction[9] = QuerySpotInfo;
-    pFunction[10] = StatCharge;
-    pFunction[11] = StatUncharge;
+    pFunction[8] = QueryScenicAreaInfo;
+    pFunction[9] = QueryAttractionInfo;
+    pFunction[10] = RandomView;
+    pFunction[11] = StatusCityInfo;
     pFunction[12] = HelpTopic;
     pFunction[13] = NULL;
-    pFunction[14] = AboutThis;
+    pFunction[14] = AboutDorm;
 
     for (i=1,loc=0; i<m; i++)  /*根据主菜单号和子菜单号计算对应下标*/
     {
@@ -1495,7 +1495,7 @@ BOOL MaintainCityInfo(void)
     return bRet;
 }
 
-BOOL MaintainRegionInfo(void)
+BOOL MaintainScenicAreaInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
@@ -1508,7 +1508,7 @@ BOOL MaintainRegionInfo(void)
     return bRet;
 }
 
-BOOL MaintainSpotInfo(void)
+BOOL MaintainAttractionInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
@@ -1534,7 +1534,7 @@ BOOL QueryCityInfo(void)
     return bRet;
 }
 
-BOOL QueryRegionInfo(void)
+BOOL QueryScenicAreaInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
@@ -1547,7 +1547,7 @@ BOOL QueryRegionInfo(void)
     return bRet;
 }
 
-BOOL QuerySpotInfo(void)
+BOOL QueryAttractionInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
@@ -1560,7 +1560,7 @@ BOOL QuerySpotInfo(void)
     return bRet;
 }
 
-BOOL StatCharge(void)
+BOOL RandomView(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据统计",
@@ -1573,7 +1573,7 @@ BOOL StatCharge(void)
     return bRet;
 }
 
-BOOL StatUncharge(void)
+BOOL StatusCityInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据统计",
