@@ -54,6 +54,7 @@ typedef struct spot_node {
     char name[10];                /**< 景点名称*/
     char address[15];             /**< 景点位置*/
     char opentime[15];            /**< 浏览时间*/
+    char feature[255];            /**< 景点特色*/
     struct spot_node *next;       /**< 指向下一景区结点的指针*/
 } SPOT_NODE;
 
@@ -144,12 +145,11 @@ typedef struct hot_area {
 LAYER_NODE *gp_top_layer = NULL;               /*弹出窗口信息链链头*/
 CITY_NODE *gp_head = NULL;                     /*主链头指针*/
 
-char *gp_sys_name = "学生住宿信息管理系统";    /*系统名称*/
-char *gp_region_info_filename = "region.dat";        /*学生基本信息数据文件*/
-char *gp_spot_info_filename = "spot.dat";  /*住宿缴费信息数据文件*/
-char *gp_city_info_filename = "city.dat";      /*宿舍楼信息数据文件*/
-char *gp_sex_code_filename = "sex.dat";        /*性别代码数据文件*/
-char *gp_type_code_filename = "type.dat";      /*学生类别代码数据文件*/
+char *gp_sys_name = "景区信息管理系统";    /*系统名称*/
+
+char *gp_city_info_filename = "city.dat";      /*城市信息数据文件*/
+char *gp_region_info_filename = "region.dat";  /*景区信息数据文件*/
+char *gp_spot_info_filename = "spot.dat";      /*景点信息数据文件*/
 
 char *ga_main_menu[] = {"文件(F)",             /*系统主菜单名*/
                         "数据维护(M)",
@@ -163,31 +163,23 @@ char *ga_sub_menu[] = {"[S] 数据保存",          /*系统子菜单名*/
                        "[R] 数据恢复",
                        "[X] 退出    Alt+X",
         //
-                       "[S] 性别代码",
-                       "[T] 学生类别代码",
-                       "",           /*空串用来在弹出菜单中分隔子菜单项，下同*/
-                       "[D] 宿舍楼信息",
-                       "[P] 学生基本信息",
-                       "[C] 住宿缴费信息",
+                       "[C] 城市信息",
+                       "[R] 景区信息",
+                       "[S] 景点信息",
         //
-                       "[S] 性别代码",
-                       "[T] 学生类别代码",
-                       "",
-                       "[D] 宿舍楼信息",
-                       "[P] 学生基本信息",
-                       "[C] 住宿缴费信息",
+                       "[C] 城市信息",
+                       "[R] 景区信息",
+                       "[S] 景点信息",
         //
-                       "[I] 宿舍楼入住率",
-                       "[T] 在住学生分类",
-                       "[C] 住宿费缴纳情况",
-                       "[U] 住宿费欠缴情况",
+                       "[R] 随便看看",
+                       "[C] 城市景区统计"
         //
                        "[T] 帮助主题",
                        "",
                        "[A] 关于..."
 };
 
-int ga_sub_menu_count[] = {4, 6, 6, 4, 3};  /*各主菜单项下子菜单的个数*/
+int ga_sub_menu_count[] = {4, 3, 3, 2, 3};  /*各主菜单项下子菜单的个数*/
 int gi_sel_menu = 1;                        /*被选中的主菜单项号,初始为1*/
 int gi_sel_sub_menu = 0;                    /*被选中的子菜单项号,初始为0,表示未选中*/
 
@@ -195,19 +187,14 @@ CHAR_INFO *gp_buff_menubar_info = NULL;     /*存放菜单条屏幕区字符信息的缓冲区*/
 CHAR_INFO *gp_buff_stateBar_info = NULL;    /*存放状态条屏幕区字符信息的缓冲区*/
 
 char *gp_scr_att = NULL;    /*存放屏幕上字符单元属性值的缓冲区*/
-char *gp_sex_code = NULL;   /*存放性别代码表的数据缓冲区*/
-char *gp_type_code = NULL;  /*存放学生类别代码表的数据缓冲区*/
 char gc_sys_state = '\0';   /*用来保存系统状态的字符*/
-
-unsigned long gul_sex_code_len = 0;    /*性别代码表长度*/
-unsigned long gul_type_code_len = 0;   /*学生类别代码表长度*/
 
 HANDLE gh_std_out;          /*标准输出设备句柄*/
 HANDLE gh_std_in;           /*标准输入设备句柄*/
 
 int LoadCode(char *filename, char **ppbuffer);  /*代码表加载*/
 int CreatList(CITY_NODE **pphead);              /*数据链表初始化*/
-void InitInterface(void);                 /*系统界面初始化*/
+void InitInterface(void);                       /*系统界面初始化*/
 void ClearScreen(void);                         /*清屏*/
 void ShowMenu(void);                            /*显示菜单栏*/
 void PopMenu(int num);                          /*显示下拉菜单*/

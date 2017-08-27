@@ -34,39 +34,6 @@ int main()
 BOOL LoadData()
 {
     int Re = 0;
-
-    if (gp_sex_code != NULL)
-    {
-        free(gp_sex_code);
-    }
-    gul_sex_code_len = LoadCode(gp_sex_code_filename, &gp_sex_code);
-    if (gul_sex_code_len < 3)
-    {
-        printf("性别代码表加载失败!\n");
-        gc_sys_state &= 0xfe;
-    }
-    else
-    {
-        printf("性别代码表加载成功!\n");
-        gc_sys_state |= 1;
-    }
-
-    if (gp_type_code != NULL)
-    {
-        free(gp_type_code);
-    }
-    gul_type_code_len = LoadCode(gp_type_code_filename, &gp_type_code);
-    if (gul_type_code_len < 4)
-    {
-        printf("景区类别代码表加载失败!\n");
-        gc_sys_state &= ~2;
-    }
-    else
-    {
-        printf("景区类别代码表加载成功!\n");
-        gc_sys_state |= 2;
-    }
-
     Re = CreatList(&gp_head);
     gc_sys_state |= Re;
     gc_sys_state &= ~(4 + 8 + 16 - Re);
@@ -593,8 +560,6 @@ void CloseSys(CITY_NODE *hd)
     /*释放存放菜单条、状态条、性别代码和景区类别代码等信息动态存储区*/
     free(gp_buff_menubar_info);
     free(gp_buff_stateBar_info);
-    free(gp_sex_code);
-    free(gp_type_code);
 
     /*关闭标准输入和输出设备句柄*/
     CloseHandle(gh_std_out);
@@ -1398,25 +1363,17 @@ BOOL ExeFunction(int m, int s)
     pFunction[1] = BackupData;
     pFunction[2] = RestoreData;
     pFunction[3] = ExitSys;
-    pFunction[4] = MaintainSexCode;
-    pFunction[5] = MaintainTypeCode;
-    pFunction[6] = NULL;
-    pFunction[7] = MaintainDormInfo;
-    pFunction[8] = MaintainStuInfo;
-    pFunction[9] = MaintainChargeInfo;
-    pFunction[10] = QuerySexCode;
-    pFunction[11] = QueryTypeCode;
-    pFunction[12] = NULL;
-    pFunction[13] = QueryDormInfo;
-    pFunction[14] = QueryStuInfo;
-    pFunction[15] = QueryChargeInfo;
-    pFunction[16] = StatUsedRate;
-    pFunction[17] = StatStuType;
-    pFunction[18] = StatCharge;
-    pFunction[19] = StatUncharge;
-    pFunction[20] = HelpTopic;
-    pFunction[21] = NULL;
-    pFunction[22] = AboutDorm;
+    pFunction[4] = MaintainCityInfo;
+    pFunction[5] = MaintainRegionInfo;
+    pFunction[6] = MaintainSpotInfo;
+    pFunction[7] = QueryCityInfo;
+    pFunction[8] = QueryRegionInfo;
+    pFunction[9] = QuerySpotInfo;
+    pFunction[10] = StatCharge;
+    pFunction[11] = StatUncharge;
+    pFunction[12] = HelpTopic;
+    pFunction[13] = NULL;
+    pFunction[14] = AboutThis;
 
     for (i=1,loc=0; i<m; i++)  /*根据主菜单号和子菜单号计算对应下标*/
     {
@@ -1525,11 +1482,11 @@ BOOL ExitSys(void)
     return bRet;
 }
 
-BOOL MaintainSexCode(void)
+BOOL MaintainCityInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
-                           "子菜单项：性别代码",
+                           "子菜单项：城市信息",
                            "确认"
     };
 
@@ -1538,11 +1495,11 @@ BOOL MaintainSexCode(void)
     return bRet;
 }
 
-BOOL MaintainTypeCode(void)
+BOOL MaintainRegionInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
-                           "子菜单项：景区类别代码",
+                           "子菜单项：景区信息",
                            "确认"
     };
 
@@ -1551,33 +1508,7 @@ BOOL MaintainTypeCode(void)
     return bRet;
 }
 
-BOOL MaintainDormInfo(void)
-{
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：数据维护",
-                           "子菜单项：宿舍楼信息",
-                           "确认"
-    };
-
-    ShowModule(plabel_name, 3);
-
-    return bRet;
-}
-
-BOOL MaintainStuInfo(void)
-{
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：数据维护",
-                           "子菜单项：景区基本信息",
-                           "确认"
-    };
-
-    ShowModule(plabel_name, 3);
-
-    return bRet;
-}
-
-BOOL MaintainChargeInfo(void)
+BOOL MaintainSpotInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据维护",
@@ -1590,33 +1521,7 @@ BOOL MaintainChargeInfo(void)
     return bRet;
 }
 
-BOOL QuerySexCode(void)
-{
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：数据查询",
-                           "子菜单项：性别代码",
-                           "确认"
-    };
-
-    ShowModule(plabel_name, 3);
-
-    return bRet;
-}
-
-BOOL QueryTypeCode(void)
-{
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：数据查询",
-                           "子菜单项：景区类别代码",
-                           "确认"
-    };
-
-    ShowModule(plabel_name, 3);
-
-    return bRet;
-}
-
-BOOL QueryDormInfo(void)
+BOOL QueryCityInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
@@ -1629,7 +1534,7 @@ BOOL QueryDormInfo(void)
     return bRet;
 }
 
-BOOL QueryStuInfo(void)
+BOOL QueryRegionInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
@@ -1642,37 +1547,11 @@ BOOL QueryStuInfo(void)
     return bRet;
 }
 
-BOOL QueryChargeInfo(void)
+BOOL QuerySpotInfo(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据查询",
                            "子菜单项：景点信息",
-                           "确认"
-    };
-
-    ShowModule(plabel_name, 3);
-
-    return bRet;
-}
-
-BOOL StatUsedRate(void)
-{
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：数据统计",
-                           "子菜单项：宿舍楼入住率",
-                           "确认"
-    };
-
-    ShowModule(plabel_name, 3);
-
-    return bRet;
-}
-
-BOOL StatStuType(void)
-{
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：数据统计",
-                           "子菜单项：在住景区分类",
                            "确认"
     };
 
@@ -1685,7 +1564,7 @@ BOOL StatCharge(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据统计",
-                           "子菜单项：住宿费缴纳情况",
+                           "子菜单项：随便看看",
                            "确认"
     };
 
@@ -1698,7 +1577,7 @@ BOOL StatUncharge(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：数据统计",
-                           "子菜单项：住宿费欠缴情况",
+                           "子菜单项：城市景区统计",
                            "确认"
     };
 
@@ -1720,7 +1599,7 @@ BOOL HelpTopic(void)
     return bRet;
 }
 
-BOOL AboutDorm(void)
+BOOL AboutThis(void)
 {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：帮助",
@@ -1750,10 +1629,10 @@ BOOL InsertChargeNode(CITY_NODE *hd, SPOT_NODE *pSPOT_NODE)
 }
 
 /**
- * 函数名称: DelChargeNode
- * 函数功能: 从十字链表中删除指定的缴费信息结点.
+ * 函数名称: DelRegionNode
+ * 函数功能: 从十字链表中删除指定的景区结点.
  * 输入参数: hd 主链头指针
- *           region_id 缴费景区学号
+ *           region_id 景区编号
  *           date 缴费日期
  * 输出参数: 无
  * 返 回 值: BOOL类型, TRUE表示删除成功, FALSE表示删除失败
@@ -2021,4 +1900,32 @@ BOOL ShowModule(char **pString, int n)
 
     return bRet;
 
+}
+
+
+BOOL add_city(CITY_NODE **head, CITY_NODE *pcity_node) {
+    CITY_NODE *test;
+    pcity_node->rnext = NULL;
+    pcity_node->next = NULL;
+
+    test = *head;
+    while (test != NULL)
+    {
+        if (strcmp(test->city_id, pcity_node->city_id) == 0 ||
+            strcmp(test->name, pcity_node->name) == 0)
+        {
+            return FALSE;
+        }
+        test = test->next;
+    }
+    if (*head == NULL) {
+        *head = pcity_node;
+        (*head)->next = NULL;
+        (*head)->rnext = NULL;
+    }
+    else {
+        pcity_node->next = (*head)->next;
+        (*head)->next = pcity_node;
+    }
+    return TRUE;
 }
