@@ -1363,6 +1363,7 @@ BOOL ExeFunction(int m, int s)
     pFunction[1] = BackupData;
     pFunction[2] = RestoreData;
     pFunction[3] = ExitSys;
+
     pFunction[4] = MaintainCityInfo;
     pFunction[5] = MaintainScenicAreaInfo;
     pFunction[6] = MaintainAttractionInfo;
