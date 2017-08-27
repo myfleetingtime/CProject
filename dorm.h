@@ -18,50 +18,46 @@
 #define SCR_COL 100             /*屏幕列数*/
 
 /**
- *缴费信息链结点结构
+ *城市信息链结点结构
  */
-typedef struct charge_node {
-    char stu_id[12];           /**< 学号*/
-    char name[10];             /**< 姓名*/
-    char date[12];             /**< 缴费日期*/
-    float sum;                 /**< 缴费金额*/
-    char payee[10];            /**< 收费人*/
-    char notes[5];             /**< 备注*/
-    struct charge_node *next;  /**< 指向下一结点的指针*/
-} CHARGE_NODE;
+typedef struct city_node {
+    char city_id[6];              /**< 城市编号*/
+    char name[10];                /**< 城市名称*/
+    char jiandu_num[15];          /**< 监督电话*/
+    char zixun_num[15];           /**< 咨询电话*/
+    struct city_node *next;       /**< 指向下一城市结点的指针*/
+    struct region_node *rnext;    /**< 指向景区节点的指针*/
+} CITY_NODE;
 
 /**
- *学生基本信息链结点结构
+ *景区信息链结点结构
  */
-typedef struct stu_node {
-    char stu_id[12];            /**< 学号*/
-    char name[10];              /**< 姓名*/
-    char sex;                   /**< 性别*/
-    char birthday[12];          /**< 出生日期*/
-    char type[3];               /**< 学生类别*/
-    char term;                  /**< 学制*/
-    char enroll_date[8];        /**< 入学年月*/
-    char class_id[10];          /**< 班级*/
-    char dorm_id[5];            /**< 宿舍楼号*/
-    char room[5];               /**< 房间号*/
-    char tel[20];               /**< 联系电话*/
-    struct charge_node *cnext;  /**< 指向缴费信息支链的指针*/
-    struct stu_node *next;      /**< 指向下一结点的指针*/
-} STU_NODE;
+typedef struct region_node {
+    char city_id[6];              /**< 所属城市编号*/
+    char region_id[6];            /**< 景区编号*/
+    char name[10];                /**< 景区名称*/
+    char level[15];               /**< 景区级别*/
+    char address[15];             /**< 景区地址*/
+    char price[5];                /**< 门票价格*/
+    char opentime[15];            /**< 开放时间*/
+    struct region_node *next;     /**< 指向下一景区结点的指针*/
+    struct spot_node *snext;      /**< 指向景点结点的指针*/
+} REGION_NODE;
+
 
 /**
- *宿舍楼信息链结点结构
+ *景点信息链结点结构
  */
-typedef struct dorm_node {
-    char dorm_id[5];         /**< 宿舍楼号*/
-    char name[10];           /**< 姓名*/
-    char tel[20];            /**< 联系电话*/
-    short room_amount;       /**< 房间数目*/
-    short bed_amount;        /**< 床位数目*/
-    float fee;               /**< 每床位每年住宿费*/
-    struct stu_node *snext;  /**< 指向学生基本信息支链的指针*/
-    struct dorm_node *next;  /**< 指向下一结点的指针*/
-} DORM_NODE;
+typedef struct spot_node {
+    char city_id[6];              /**< 所属城市编号*/
+    char region_id[6];            /**< 所属景区编号*/
+    char spot_id[6];              /**< 景点编号*/
+    char name[10];                /**< 景点名称*/
+    char address[15];             /**< 景点位置*/
+    char opentime[15];            /**< 浏览时间*/
+    char feature[255];            /**< 景点特色*/
+    struct spot_node *next;       /**< 指向下一景区结点的指针*/
+} SPOT_NODE;
 
 /**
  *宿舍楼入住率统计信息链结点结构
@@ -148,14 +144,13 @@ typedef struct hot_area {
 } HOT_AREA;
 
 LAYER_NODE *gp_top_layer = NULL;               /*弹出窗口信息链链头*/
-DORM_NODE *gp_head = NULL;                     /*主链头指针*/
+CITY_NODE *gp_head = NULL;                     /*主链头指针*/
 
-char *gp_sys_name = "学生住宿信息管理系统";    /*系统名称*/
-char *gp_stu_info_filename = "stu.dat";        /*学生基本信息数据文件*/
-char *gp_charge_info_filename = "charge.dat";  /*住宿缴费信息数据文件*/
-char *gp_dorm_info_filename = "Dorm.dat";      /*宿舍楼信息数据文件*/
-char *gp_sex_code_filename = "sex.dat";        /*性别代码数据文件*/
-char *gp_type_code_filename = "type.dat";      /*学生类别代码数据文件*/
+char *gp_sys_name = "景区信息管理系统";    /*系统名称*/
+
+char *gp_city_info_filename = "city.dat";      /*城市信息数据文件*/
+char *gp_region_info_filename = "region.dat";  /*景区信息数据文件*/
+char *gp_spot_info_filename = "spot.dat";      /*景点信息数据文件*/
 
 char *ga_main_menu[] = {"文件(F)",             /*系统主菜单名*/
                         "数据维护(M)",
@@ -193,19 +188,14 @@ CHAR_INFO *gp_buff_menubar_info = NULL;     /*存放菜单条屏幕区字符信息的缓冲区*/
 CHAR_INFO *gp_buff_stateBar_info = NULL;    /*存放状态条屏幕区字符信息的缓冲区*/
 
 char *gp_scr_att = NULL;    /*存放屏幕上字符单元属性值的缓冲区*/
-char *gp_sex_code = NULL;   /*存放性别代码表的数据缓冲区*/
-char *gp_type_code = NULL;  /*存放学生类别代码表的数据缓冲区*/
 char gc_sys_state = '\0';   /*用来保存系统状态的字符*/
-
-unsigned long gul_sex_code_len = 0;    /*性别代码表长度*/
-unsigned long gul_type_code_len = 0;   /*学生类别代码表长度*/
 
 HANDLE gh_std_out;          /*标准输出设备句柄*/
 HANDLE gh_std_in;           /*标准输入设备句柄*/
 
 int LoadCode(char *filename, char **ppbuffer);  /*代码表加载*/
-int CreatList(DORM_NODE **pphead);              /*数据链表初始化*/
-void InitInterface(void);                 /*系统界面初始化*/
+int CreatList(CITY_NODE **pphead);              /*数据链表初始化*/
+void InitInterface(void);                       /*系统界面初始化*/
 void ClearScreen(void);                         /*清屏*/
 void ShowMenu(void);                            /*显示菜单栏*/
 void PopMenu(int num);                          /*显示下拉菜单*/
@@ -220,9 +210,9 @@ void TagSubMenu(int num);                       /*标记被选中的子菜单项*/
 int DealConInput(HOT_AREA *phot_area, int *pihot_num);  /*控制台输入处理*/
 int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition);
 void SetHotPoint(HOT_AREA *phot_area, int hot_num);     /*设置热区*/
-void RunSys(DORM_NODE **pphd);                  /*系统功能模块的选择和运行*/
+void RunSys(CITY_NODE **pphd);                  /*系统功能模块的选择和运行*/
 BOOL ExeFunction(int main_menu_num, int sub_menu_num);  /*功能模块的调用*/
-void CloseSys(DORM_NODE *phd);                  /*退出系统*/
+void CloseSys(CITY_NODE *phd);                  /*退出系统*/
 BOOL ShowModule(char **pString, int n);
 
 BOOL LoadData(void);           /*数据加载*/
@@ -261,19 +251,19 @@ BOOL StatStuType(void);        /*学生分类统计*/
 BOOL StatCharge(void);         /*学生缴费信息统计*/
 BOOL StatUncharge(void);       /*学生欠费信息统计*/
 
-BOOL InsertChargeNode(DORM_NODE *phd, CHARGE_NODE *pcharge_node);/*插入缴费信息结点*/
-BOOL DelChargeNode(DORM_NODE *phd, char *stu_id, char *date);/*删除缴费信息结点*/
-BOOL ModifChargeNode(DORM_NODE *phd, char *stu_id, char *date, CHARGE_NODE *pcharge_node);/*修改缴费信息结点*/
-STU_NODE *SeekStuNode(DORM_NODE *phd, char *stu_id);  /*查找学生基本信息结点*/
-CHARGE_NODE *SeekChargeNode(DORM_NODE *phd, char *stu_id, char *date);/*查找缴费信息结点*/
-STU_NODE *SeekStuNodeM (DORM_NODE *phd, int cond_num, ...);/*模糊查询学生信息结点*/
-BOOL JudgeStuNodeItem(STU_NODE *pstu_node, char *pcond);/*判断学生信息数据项是否满足查询条件*/
+BOOL InsertChargeNode(CITY_NODE *phd, SPOT_NODE *pspot_node);/*插入缴费信息结点*/
+BOOL DelChargeNode(CITY_NODE *phd, char *stu_id, char *date);/*删除缴费信息结点*/
+BOOL ModifChargeNode(CITY_NODE *phd, char *stu_id, char *date, SPOT_NODE *pspot_node);/*修改缴费信息结点*/
+REGION_NODE *SeekStuNode(CITY_NODE *phd, char *stu_id);  /*查找学生基本信息结点*/
+SPOT_NODE *SeekChargeNode(CITY_NODE *phd, char *stu_id, char *date);/*查找缴费信息结点*/
+REGION_NODE *SeekStuNodeM (CITY_NODE *phd, int cond_num, ...);/*模糊查询学生信息结点*/
+BOOL JudgeStuNodeItem(REGION_NODE *pregion_node, char *pcond);/*判断学生信息数据项是否满足查询条件*/
 BOOL MatchString(char *string_item, char *pcond);/*字符串与查询条件是否满足指定的运算关系*/
 BOOL MatchChar(char char_item, char *pcond);/*字符与查询条件是否满足指定的运算关系*/
-UNCHARGE_NODE *StatUnchargeInfo(DORM_NODE *phd);        /*学生欠费信息统计*/
+UNCHARGE_NODE *StatUnchargeInfo(CITY_NODE *phd);        /*学生欠费信息统计*/
 void SortUnchargeInfo(UNCHARGE_NODE *puncharge_hd);     /*欠费信息链排序*/
-BOOL SaveSysData(DORM_NODE *phd);                       /*保存系统数据*/
-BOOL BackupSysData(DORM_NODE *phd, char *filename);     /*备份系统数据*/
-BOOL RestoreSysData(DORM_NODE **pphd, char *filename);  /*恢复系统数据*/
+BOOL SaveSysData(CITY_NODE *phd);                       /*保存系统数据*/
+BOOL BackupSysData(CITY_NODE *phd, char *filename);     /*备份系统数据*/
+BOOL RestoreSysData(CITY_NODE **pphd, char *filename);  /*恢复系统数据*/
 
 #endif /**< TYPE_H_INCLUDED*/
