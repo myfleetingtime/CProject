@@ -333,6 +333,7 @@ BOOL RestoreSysData(CITY_NODE **pphd, char *filename);  /*恢复系统数据*/
 
 
 // buliuzi
+
 BOOL add_city(CITY_NODE **head, CITY_NODE *pcity_node);
 BOOL ConfirmCityInsertion(CITY_NODE **head, CITY_NODE *pcity_node);
 CITY_NODE *SeekCityNodeByID(CITY_NODE *hd, char *id);
