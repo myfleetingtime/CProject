@@ -2165,7 +2165,7 @@ int DealInput(HOT_AREA *pHotArea, int *piHot)
 
 BOOL ShowResult(char **pString, int n,int col )
 {
-    
+
     LABEL_BUNDLE labels;
     HOT_AREA areas;
     BOOL bRet = TRUE;
