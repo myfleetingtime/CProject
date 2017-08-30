@@ -12,12 +12,23 @@ int main()
     SetConsoleTitle(gp_sys_name);                 /*设置窗口标题*/
     SetConsoleScreenBufferSize(gh_std_out, size); /*设置窗口缓冲区大小80*25*/
 
-    LoadData();                   /*数据加载*/
+    LoadData2();                   /*数据加载*/
     InitInterface();          /*界面初始化*/
     RunSys(&gp_head);             /*系统功能模块的选择及运行*/
     CloseSys(gp_head);            /*退出系统*/
 
     return 0;
+}
+
+BOOL LoadData2()
+{
+    int Re = 0;
+    Re = CreatList2(&gp_head2);
+    gc_sys_state |= Re;
+    gc_sys_state &= ~(4 + 8 + 16 - Re);
+    printf("\n按任意键继续......");
+    getch();
+    return TRUE;
 }
 
 /**
@@ -67,7 +78,7 @@ BOOL LoadData()
         gc_sys_state |= 2;
     }
 
-    Re = CreatList(&gp_head);
+    Re = CreatList2(&gp_head2);
     gc_sys_state |= Re;
     gc_sys_state &= ~(4 + 8 + 16 - Re);
     if (gc_sys_state < (1 | 2 | 4 | 8 | 16))
@@ -164,6 +175,101 @@ int LoadCode(char *FileName, char **pBuffer)
     free(pTemp);  /*释放最先申请的动态存储区*/
 
     return loc2;  /*返回存放代码串的内存缓冲区实际大小*/
+}
+
+int CreatList2(CITY_NODE **phead)
+{
+    // 完成主链创建工作
+    CITY_NODE *pCityNode = NULL, cityTmp, *hd = NULL;
+    REGION_NODE *pRegionNode = NULL, regionTmp;
+    SPOT_NODE *pSpotNode = NULL, spotTmp;
+
+    int re = 0;
+
+    FILE *pFile = NULL;
+
+    if ((pFile = fopen(gp_city_info_filename, "rb")) == NULL)
+    {
+        printf("服装分类信息数据文件打开失败!\n");
+        return re;
+    }
+    printf("服装分类信息数据文件打开成功!\n");
+
+    printf("城市信息链表文件加载成功！\n");
+    while(fread(&cityTmp, sizeof(CITY_NODE), 1, pFile) == 1) {
+        pCityNode = (CITY_NODE *)malloc(sizeof(CITY_NODE));
+        *pCityNode = cityTmp;
+        pCityNode->rnext = NULL;
+        pCityNode->next = hd;
+        hd = pCityNode;
+    }
+    fclose(pFile);
+
+    if (hd == NULL)
+    {
+        printf("城市信息链表创建失败！\n");
+        return re;
+    }
+    printf("城市信息链表创建成功！\n");
+    *phead = hd;
+    re += 4;
+
+    ;
+    if((pFile = fopen(gp_region_info_filename, "rb")) == NULL) {
+        printf("景区链表文件打开错误！\n");
+        return re;
+    }
+    printf("景区信息链表文件加载成功！\n");
+
+    while(fread(&regionTmp, sizeof(REGION_NODE),1,pFile)==1) {
+        pRegionNode = (REGION_NODE*)malloc(sizeof(REGION_NODE));
+        *pRegionNode = regionTmp;
+
+        for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+            if(strcmp(pCityNode->city_id,pRegionNode->city_id)==0) {
+                break;
+            }
+        }
+
+        if(pCityNode == NULL) {
+            free(pRegionNode);
+        }
+        else {
+            pRegionNode->next = pCityNode->rnext;
+            pCityNode->rnext = pRegionNode;
+        }
+    }
+    fclose(pFile);
+
+    if((pFile = fopen(gp_spot_info_filename, "rb")) == NULL) {
+        printf("景点链表文件打开错误！\n");
+        return re;
+    }
+    printf("景点信息链表文件加载成功！\n");
+    re += 16;
+
+    while(fread(&spotTmp, sizeof(SPOT_NODE),1,pFile)) {
+        pSpotNode = (SPOT_NODE*)malloc(sizeof(SPOT_NODE));
+        *pSpotNode = spotTmp;
+        int find = 0;
+
+        for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+            for(pRegionNode=pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
+                if((strcmp(pCityNode->city_id, pRegionNode->city_id)==0)&&(strcmp(pRegionNode->region_id,pSpotNode->region_id)==0)) {
+                    find = 1;
+                }
+            }
+        }
+        if(find) {
+            pSpotNode->next = pRegionNode->snext;
+            pRegionNode->snext = pSpotNode;
+        }
+        else {
+            free(pSpotNode);
+        }
+    }
+    fclose(pFile);
+    return re;
 }
 
 /**
@@ -616,6 +722,278 @@ void CloseSys(DORM_NODE *hd)
  * 调用说明:
  */
 void RunSys(DORM_NODE **phead)
+{
+    INPUT_RECORD inRec;
+    DWORD res;
+    COORD pos = {0, 0};
+    BOOL bRet = TRUE;
+    int i, loc, num;
+    int cNo, cAtt;      /*cNo:字符单元层号, cAtt:字符单元属性*/
+    char vkc, asc;      /*vkc:虚拟键代码, asc:字符的ASCII码值*/
+
+    while (bRet)
+    {
+        /*从控制台输入缓冲区中读一条记录*/
+        ReadConsoleInput(gh_std_in, &inRec, 1, &res);
+
+        if (inRec.EventType == MOUSE_EVENT) /*如果记录由鼠标事件产生*/
+        {
+            pos = inRec.Event.MouseEvent.dwMousePosition;  /*获取鼠标坐标位置*/
+            cNo = gp_scr_att[pos.Y * SCR_COL + pos.X] & 3; /*取该位置的层号*/
+            cAtt = gp_scr_att[pos.Y * SCR_COL + pos.X] >> 2;/*取该字符单元属性*/
+            if (cNo == 0) /*层号为0，表明该位置未被弹出子菜单覆盖*/
+            {
+                /* cAtt > 0 表明该位置处于热区(主菜单项字符单元)
+                 * cAtt != gi_sel_menu 表明该位置的主菜单项未被选中
+                 * gp_top_layer->LayerNo > 0 表明当前有子菜单弹出
+                 */
+                if (cAtt > 0 && cAtt != gi_sel_menu && gp_top_layer->LayerNo > 0)
+                {
+                    PopOff();            /*关闭弹出的子菜单*/
+                    gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
+                    PopMenu(cAtt);       /*弹出鼠标所在主菜单项对应的子菜单*/
+                }
+            }
+            else if (cAtt > 0) /*鼠标所在位置为弹出子菜单的菜单项字符单元*/
+            {
+                TagSubMenu(cAtt); /*在该子菜单项上做选中标记*/
+            }
+
+            if (inRec.Event.MouseEvent.dwButtonState
+                == FROM_LEFT_1ST_BUTTON_PRESSED) /*如果按下鼠标左边第一键*/
+            {
+                if (cNo == 0) /*层号为0，表明该位置未被弹出子菜单覆盖*/
+                {
+                    if (cAtt > 0) /*如果该位置处于热区(主菜单项字符单元)*/
+                    {
+                        PopMenu(cAtt);   /*弹出鼠标所在主菜单项对应的子菜单*/
+                    }
+                        /*如果该位置不属于主菜单项字符单元，且有子菜单弹出*/
+                    else if (gp_top_layer->LayerNo > 0)
+                    {
+                        PopOff();            /*关闭弹出的子菜单*/
+                        gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
+                    }
+                }
+                else /*层号不为0，表明该位置被弹出子菜单覆盖*/
+                {
+                    if (cAtt > 0) /*如果该位置处于热区(子菜单项字符单元)*/
+                    {
+                        PopOff(); /*关闭弹出的子菜单*/
+                        gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
+
+                        /*执行对应功能函数:gi_sel_menu主菜单项号,cAtt子菜单项号*/
+                        bRet = ExeFunction(gi_sel_menu, cAtt);
+                    }
+                }
+            }
+            else if (inRec.Event.MouseEvent.dwButtonState
+                     == RIGHTMOST_BUTTON_PRESSED) /*如果按下鼠标右键*/
+            {
+                if (cNo == 0) /*层号为0，表明该位置未被弹出子菜单覆盖*/
+                {
+                    PopOff();            /*关闭弹出的子菜单*/
+                    gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
+                }
+            }
+        }
+        else if (inRec.EventType == KEY_EVENT  /*如果记录由按键产生*/
+                 && inRec.Event.KeyEvent.bKeyDown) /*且键被按下*/
+        {
+            vkc = inRec.Event.KeyEvent.wVirtualKeyCode; /*获取按键的虚拟键码*/
+            asc = inRec.Event.KeyEvent.uChar.AsciiChar; /*获取按键的ASC码*/
+
+            /*系统快捷键的处理*/
+            if (vkc == 112) /*如果按下F1键*/
+            {
+                if (gp_top_layer->LayerNo != 0) /*如果当前有子菜单弹出*/
+                {
+                    PopOff();            /*关闭弹出的子菜单*/
+                    gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
+                }
+                bRet = ExeFunction(5, 1);  /*运行帮助主题功能函数*/
+            }
+            else if (inRec.Event.KeyEvent.dwControlKeyState
+                     & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
+            { /*如果按下左或右Alt键*/
+                switch (vkc)  /*判断组合键Alt+字母*/
+                {
+                    case 88:  /*Alt+X 退出*/
+                        if (gp_top_layer->LayerNo != 0)
+                        {
+                            PopOff();
+                            gi_sel_sub_menu = 0;
+                        }
+                        bRet = ExeFunction(1,4);
+                        break;
+                    case 70:  /*Alt+F*/
+                        PopMenu(1);
+                        break;
+                    case 77: /*Alt+M*/
+                        PopMenu(2);
+                        break;
+                    case 81: /*Alt+Q*/
+                        PopMenu(3);
+                        break;
+                    case 83: /*Alt+S*/
+                        PopMenu(4);
+                        break;
+                    case 72: /*Alt+H*/
+                        PopMenu(5);
+                        break;
+                }
+            }
+            else if (asc == 0) /*其他控制键的处理*/
+            {
+                if (gp_top_layer->LayerNo == 0) /*如果未弹出子菜单*/
+                {
+                    switch (vkc) /*处理方向键(左、右、下)，不响应其他控制键*/
+                    {
+                        case 37:
+                            gi_sel_menu--;
+                            if (gi_sel_menu == 0)
+                            {
+                                gi_sel_menu = 5;
+                            }
+                            TagMainMenu(gi_sel_menu);
+                            break;
+                        case 39:
+                            gi_sel_menu++;
+                            if (gi_sel_menu == 6)
+                            {
+                                gi_sel_menu = 1;
+                            }
+                            TagMainMenu(gi_sel_menu);
+                            break;
+                        case 40:
+                            PopMenu(gi_sel_menu);
+                            TagSubMenu(1);
+                            break;
+                    }
+                }
+                else  /*已弹出子菜单时*/
+                {
+                    for (loc=0,i=1; i<gi_sel_menu; i++)
+                    {
+                        loc += ga_sub_menu_count[i-1];
+                    }  /*计算该子菜单中的第一项在子菜单字符串数组中的位置(下标)*/
+                    switch (vkc) /*方向键(左、右、上、下)的处理*/
+                    {
+                        case 37:
+                            gi_sel_menu--;
+                            if (gi_sel_menu < 1)
+                            {
+                                gi_sel_menu = 5;
+                            }
+                            TagMainMenu(gi_sel_menu);
+                            PopOff();
+                            PopMenu(gi_sel_menu);
+                            TagSubMenu(1);
+                            break;
+                        case 38:
+                            num = gi_sel_sub_menu - 1;
+                            if (num < 1)
+                            {
+                                num = ga_sub_menu_count[gi_sel_menu-1];
+                            }
+                            if (strlen(ga_sub_menu[loc+num-1]) == 0)
+                            {
+                                num--;
+                            }
+                            TagSubMenu(num);
+                            break;
+                        case 39:
+                            gi_sel_menu++;
+                            if (gi_sel_menu > 5)
+                            {
+                                gi_sel_menu = 1;
+                            }
+                            TagMainMenu(gi_sel_menu);
+                            PopOff();
+                            PopMenu(gi_sel_menu);
+                            TagSubMenu(1);
+                            break;
+                        case 40:
+                            num = gi_sel_sub_menu + 1;
+                            if (num > ga_sub_menu_count[gi_sel_menu-1])
+                            {
+                                num = 1;
+                            }
+                            if (strlen(ga_sub_menu[loc+num-1]) == 0)
+                            {
+                                num++;
+                            }
+                            TagSubMenu(num);
+                            break;
+                    }
+                }
+            }
+            else if ((asc-vkc == 0) || (asc-vkc == 32)){  /*按下普通键*/
+                if (gp_top_layer->LayerNo == 0)  /*如果未弹出子菜单*/
+                {
+                    switch (vkc)
+                    {
+                        case 70: /*f或F*/
+                            PopMenu(1);
+                            break;
+                        case 77: /*m或M*/
+                            PopMenu(2);
+                            break;
+                        case 81: /*q或Q*/
+                            PopMenu(3);
+                            break;
+                        case 83: /*s或S*/
+                            PopMenu(4);
+                            break;
+                        case 72: /*h或H*/
+                            PopMenu(5);
+                            break;
+                        case 13: /*回车*/
+                            PopMenu(gi_sel_menu);
+                            TagSubMenu(1);
+                            break;
+                    }
+                }
+                else /*已弹出子菜单时的键盘输入处理*/
+                {
+                    if (vkc == 27) /*如果按下ESC键*/
+                    {
+                        PopOff();
+                        gi_sel_sub_menu = 0;
+                    }
+                    else if(vkc == 13) /*如果按下回车键*/
+                    {
+                        num = gi_sel_sub_menu;
+                        PopOff();
+                        gi_sel_sub_menu = 0;
+                        bRet = ExeFunction(gi_sel_menu, num);
+                    }
+                    else /*其他普通键的处理*/
+                    {
+                        /*计算该子菜单中的第一项在子菜单字符串数组中的位置(下标)*/
+                        for (loc=0,i=1; i<gi_sel_menu; i++)
+                        {
+                            loc += ga_sub_menu_count[i-1];
+                        }
+
+                        /*依次与当前子菜单中每一项的代表字符进行比较*/
+                        for (i=loc; i<loc+ga_sub_menu_count[gi_sel_menu-1]; i++)
+                        {
+                            if (strlen(ga_sub_menu[i])>0 && vkc==ga_sub_menu[i][1])
+                            { /*如果匹配成功*/
+                                PopOff();
+                                gi_sel_sub_menu = 0;
+                                bRet = ExeFunction(gi_sel_menu, i-loc+1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void RunSys2(CITY_NODE **phead)
 {
     INPUT_RECORD inRec;
     DWORD res;
@@ -1785,6 +2163,108 @@ int DealInput(HOT_AREA *pHotArea, int *piHot)
     return iRet;
 }
 
+BOOL ShowResult(char **pString, int n,int col )
+{
+    LABEL_BUNDLE labels;
+    HOT_AREA areas;
+    BOOL bRet = TRUE;
+    SMALL_RECT rcPop;
+    COORD pos;
+    WORD att;
+    int iHot = 1;
+    int i, j, maxlen, str_len, row;
+
+    if ((n - 2) % col == 0)
+    {
+        row = (n - 2) / col;
+    }
+    else
+    {
+        row = (n - 2) / col + 1;
+    }
+    /**找出字符串字总长最长的一行**/
+    for (j=0,maxlen=0; j<row; j++)
+    {
+        for (i=0, str_len=0; i<col; i++)
+        {
+            if (j*col+i+1==n-1)
+            {
+                break;
+            }
+            str_len += strlen(pString[j*col+i+1]);
+        }
+        if (maxlen < str_len)
+        {
+            maxlen = str_len;
+        }
+    }
+    /**设置窗口大小**/
+    pos.X = maxlen + col * 6 -1;
+    pos.Y = row + 7;
+    rcPop.Left = (SCR_COL - pos.X) / 2;
+    rcPop.Right = rcPop.Left + pos.X - 1;
+    rcPop.Top = (SCR_ROW - pos.Y) / 2;
+    rcPop.Bottom = rcPop.Top + pos.Y - 1;
+    /**设置输出字符串信息**/
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    labels.num = n;
+    labels.ppLabel = pString;
+    COORD aLoc[n];
+    /**设置输出字符串的位置**/
+    aLoc[0].X = (pos.X - strlen(pString[0])) / 2 + rcPop.Left;
+    aLoc[0].Y = rcPop.Top + 1;
+    aLoc[1].X = rcPop.Left + 2;
+    aLoc[1].Y = rcPop.Top + 3;
+    for (i=1; i<col; i++)
+    {
+        aLoc[i+1].X = aLoc[i].X + strlen(pString[i]) + 6;/*使相邻字符之间相隔固定字符数*/
+        aLoc[i+1].Y = rcPop.Top + 3;
+    }
+    for (j=1; j<row; j++)
+    {
+        for (i=0; i<col; i++)
+        {
+            if (j*col+i+1==n-1)
+            {
+                break;
+            }
+            aLoc[j*col+i+1].X = aLoc[i+1].X;
+            aLoc[j*col+i+1].Y = rcPop.Top + 4 + j;
+        }
+    }
+    aLoc[n-1].X = (pos.X - strlen(pString[n-1])) / 2 + rcPop.Left;
+    aLoc[n-1].Y = rcPop.Bottom - 1;
+
+    labels.pLoc = aLoc;
+
+    /*设置热区信息*/
+    areas.num = 1;
+    SMALL_RECT aArea[] = {{
+                                  aLoc[n-1].X, aLoc[n-1].Y,
+                                  aLoc[n-1].X + 3, aLoc[n-1].Y
+                          }
+    };
+    char aSort[] = {0};
+    char aTag[] = {1};
+
+    areas.pArea = aArea;
+    areas.pSort = aSort;
+    areas.pTag = aTag;
+    PopUp(&rcPop, att, &labels, &areas);
+    DrawBox(&rcPop);
+    pos.X = rcPop.Left + 1;
+    pos.Y = rcPop.Bottom - 2;
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    pos.X = rcPop.Left + 1;
+    pos.Y = rcPop.Top + 4;
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+
+    DealInput2(&areas, &iHot, NULL);
+    PopOff();
+
+    return bRet;
+}
+
 void SetHotPoint(HOT_AREA *pHotArea, int iHot)
 {
     CONSOLE_CURSOR_INFO lpCur;
@@ -1885,26 +2365,36 @@ BOOL ExeFunction(int m, int s)
 
 BOOL SaveData(void)
 {
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：文件",
-                           "子菜单项：数据保存",
-                           "确认"
-    };
+    BOOL bRet;
 
-    ShowModule(plabel_name, 3);
-
+    bRet = SaveSysData2(gp_head2);
+    if(bRet)
+    {
+        char *plabel_name[] = {"数据保存成功",
+                               "确定"
+        };
+        ShowModule(plabel_name, 2);
+    }
     return bRet;
 }
 
 BOOL BackupData(void)
 {
-    BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：文件",
-                           "子菜单项：数据备份",
-                           "确认"
-    };
+    BOOL bRet;
+    time_t current_time;
+    struct tm *current_tm;
+    char backupfile[30] = "Backup ";
+    time(&current_time);                         /*取出系统当前时间*/
+    current_tm = localtime(&current_time);       /*取出年月日*/
+    strncat(backupfile,asctime(current_tm), 10);
+    bRet = BackupSysData(gp_head2, backupfile);
+    char *plabel_name[] =
+            {
+                    "数据备份成功",
+                    "确认"
+            };
 
-    ShowModule(plabel_name, 3);
+    ShowModule(plabel_name, 2);
 
     return bRet;
 }
@@ -1912,13 +2402,87 @@ BOOL BackupData(void)
 BOOL RestoreData(void)
 {
     BOOL bRet = TRUE;
-    char *plabel_name[] = {"主菜单项：文件",
-                           "子菜单项：数据恢复",
-                           "确认"
+    LABEL_BUNDLE labels;
+    HOT_AREA areas;
+    SMALL_RECT rcPop;
+    COORD pos;
+    WORD att;
+    int iHot = 1;
+    char *plabel_name[] = {"请输入待导入的文件名",
+                           "确认    取消"
     };
+    /**************将弹出窗口居中*********************/
+    pos.X = strlen(plabel_name[0]) + 6;
+    pos.Y = 8;
+    rcPop.Left = (SCR_COL - pos.X) / 2;
+    rcPop.Right = rcPop.Left + pos.X - 1;
+    rcPop.Top = (SCR_ROW - pos.Y) / 2;
+    rcPop.Bottom = rcPop.Top + pos.Y - 1;
 
-    ShowModule(plabel_name, 3);
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    labels.num = 2;
+    labels.ppLabel = plabel_name;
+    COORD aLoc[2];
 
+    /******设置标签束的输出位置*****/
+
+    aLoc[0].X = rcPop.Left + (pos.X-strlen(plabel_name[0]))/2;
+    aLoc[0].Y = rcPop.Top + 2;
+    aLoc[1].X = rcPop.Left + (pos.X-strlen(plabel_name[1]))/2;
+    aLoc[1].Y = rcPop.Top + 6;
+
+    labels.pLoc = aLoc;
+
+    /******设置热区******/
+    areas.num = 3;
+    SMALL_RECT aArea[3];
+    char aSort[3] = {1, 0, 0};
+    char aTag[3] = {1, 2, 3};
+    aArea[0].Left = aLoc[0].X;
+    aArea[0].Top = aLoc[0].Y + 2 ;
+    aArea[0].Right = aLoc[0].X + strlen(plabel_name[0]) - 1;
+    aArea[0].Bottom = aLoc[0].Y + 2;
+    aArea[1].Left = aLoc[1].X;
+    aArea[1].Top = aLoc[1].Y ;
+    aArea[1].Right = aLoc[1].X + 3;
+    aArea[1].Bottom = aLoc[1].Y;
+    aArea[2].Left = aLoc[1].X + 8;
+    aArea[2].Top = aLoc[1].Y ;
+    aArea[2].Right = aLoc[1].X + 11;
+    aArea[2].Bottom = aLoc[1].Y;
+
+    areas.pArea = aArea;
+    areas.pSort = aSort;
+    areas.pTag = aTag;
+    PopUp(&rcPop, att, &labels, &areas);
+    DrawBox(&rcPop);
+
+    char *ppcondition[1];
+    if (DealInput2(&areas, &iHot, ppcondition) == 13)
+    {
+        PopOff();
+        if (iHot == 2) /*调用备份函数*/
+        {
+            if (*ppcondition[0] == '\0')
+            {
+                char *plabel_name[] = {"你输入的信息为空",
+                                       "确认"
+                };
+                ShowModule(plabel_name, 2);
+            }
+            else if (RestoreSysData(&gp_head2, ppcondition[0]))
+            {
+                char *plabel_name[] = {"信息导入成功！",
+                                       "确认"
+                };
+                ShowModule(plabel_name, 2);
+            }
+        }
+    }
+    else
+    {
+        PopOff();
+    }
     return bRet;
 }
 
@@ -1992,7 +2556,6 @@ BOOL MaintainCityInfo(void) {
         if (iHot == 1){
             PopOff();
             InsertCityNodeSubMenu();
-
         }
         else if (iHot == 2) {
             PopOff();
@@ -2019,15 +2582,48 @@ BOOL InsertCityNodeSubMenu(void) {
                            "确定    取消"
     };
     int n = 6;
-    int inputNum = 6;
+    int inputNum = 4;
     char *ppcondition[inputNum];
-    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
+    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum+2);
     if (iHot == -1) {
         PopOff();
     }
     else {
         if (iHot == 5) {
             PopOff();
+            if((strlen(ppcondition[0])==0) || (strlen(ppcondition[1])==0)) {
+                char *error_plabel_name[] = {"必须填写合法的城市ID和城市名！",
+                                       "确认"
+                };
+                ShowModule(error_plabel_name, 2);
+                return FALSE;
+            }
+            else {
+                CITY_NODE *cityFound = SeekCityNodeByID(gp_head2, ppcondition[0]);
+                if(cityFound!=NULL) {
+                    char *error_plabel_name[] = {"您将要插入的城市信息已存在！请先删除或先修改！",
+                                                 "确认"
+                    };
+                    ShowModule(error_plabel_name, 2);
+                    return FALSE;
+                }
+                else{
+                    CITY_NODE *pCityNode = (CITY_NODE *)malloc(sizeof(CITY_NODE));
+                    pCityNode->rnext = NULL;
+                    pCityNode->next = NULL;
+                    strcpy(pCityNode->city_id, ppcondition[0]);
+                    strcpy(pCityNode->name, ppcondition[1]);
+                    strcpy(pCityNode->jiandu_num, ppcondition[2]);
+                    strcpy(pCityNode->jiandu_num, ppcondition[3]);
+                    ConfirmCityInsertion(&gp_head2, pCityNode);
+                    char *error_plabel_name[] = {"城市添加成功！",
+                                                 "确认"
+                    };
+                    ShowModule(error_plabel_name, 2);
+                    return bRet;
+                }
+
+            }
         }
         else if (iHot == 6){
             PopOff();
@@ -2132,26 +2728,62 @@ BOOL InsertScenicAreaNodeSubMenu(void) {
     char *plabel_name[] = {"请输入待录入的景区信息",
                            "景区名称",
                            "景  区ID",
-                           "所属城市",
+                           "城  市ID",
                            "景区级别",
                            "景区地址",
                            "门票价格",
                            "开放时间",
-                           "咨询电话",
                            "确定    取消"
     };
-    int n = 10;
-    int inputNum = 10;
+    int n = 9;
+    int inputNum = 9;
     char *ppcondition[inputNum];
     int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
     if (iHot == -1) {
         PopOff();
     }
     else {
-        if (iHot == 9) {
+        if (iHot == 8) {
             PopOff();
+            if((strlen(ppcondition[0])==0) || (strlen(ppcondition[1])==0)) {
+                char *error_plabel_name[] = {"必须填写合法的景区ID和景区名！",
+                                             "确认"
+                };
+                ShowModule(error_plabel_name, 2);
+                return FALSE;
+            }
+            else {
+                REGION_NODE *cityFound = SeekRegionNodeByID(gp_head2, ppcondition[1]);
+
+                if(cityFound!=NULL) {
+                    char *error_plabel_name[] = {"您将要插入的景区信息已存在！请先删除或先修改！",
+                                                 "确认"
+                    };
+                    ShowModule(error_plabel_name, 2);
+                    return FALSE;
+                }
+                else{
+                    REGION_NODE *pRegionNode = (REGION_NODE *)malloc(sizeof(REGION_NODE));
+                    pRegionNode->snext = NULL;
+                    pRegionNode->next = NULL;
+                    strcpy(pRegionNode->name, ppcondition[0]);
+                    strcpy(pRegionNode->region_id, ppcondition[1]);
+                    strcpy(pRegionNode->city_id, ppcondition[2]);
+                    strcpy(pRegionNode->level, ppcondition[3]);
+                    strcpy(pRegionNode->address, ppcondition[4]);
+                    strcpy(pRegionNode->price, ppcondition[5]);
+                    strcpy(pRegionNode->opentime, ppcondition[6]);
+                    ConfirmRegionInsertion(gp_head2, pRegionNode);
+                    char *error_plabel_name[] = {"景区添加成功！",
+                                                 "确认"
+                    };
+                    ShowModule(error_plabel_name, 2);
+                    return bRet;
+                }
+
+            }
         }
-        else if (iHot == 10){
+        else if (iHot == 9){
             PopOff();
         }
     }
@@ -2253,25 +2885,67 @@ BOOL InsertAttractionNodeSubMenu(void) {
     char *plabel_name[] = {"请输入待录入的景点信息",
                            "景点名称",
                            "景  点ID",
-                           "所属景区",
-                           "景区级别",
+                           "景  区ID",
                            "景点位置",
                            "浏览时间",
                            "景点特点",
                            "确定    取消"
     };
-    int n = 9;
-    int inputNum = 9;
+    int n = 8;
+    int inputNum = 8;
     char *ppcondition[inputNum];
     int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
     if (iHot == -1) {
         PopOff();
     }
     else {
-        if (iHot == 8) {
+        if (iHot == 7) {
             PopOff();
+            if((strlen(ppcondition[0])==0) || (strlen(ppcondition[1])==0)) {
+                char *error_plabel_name[] = {"必须填写合法的景点ID和景点名！",
+                                             "确认"
+                };
+                ShowModule(error_plabel_name, 2);
+                return FALSE;
+            }
+            else {
+                REGION_NODE *cityFound = SeekRegionNodeByID(gp_head2, ppcondition[2]);
+                if(cityFound==NULL) {
+                    char *error_plabel_name[] = {"您将要插入的景点的归属景区不存在！",
+                                                 "确认"
+                    };
+                    ShowModule(error_plabel_name, 2);
+                    return FALSE;
+                }
+                SPOT_NODE *spotFound = SeekSpotNodeById(gp_head2, ppcondition[1]);
+
+                if(spotFound!=NULL) {
+                    char *error_plabel_name[] = {"您将要插入的景点信息已存在！请先删除或先修改！",
+                                                 "确认"
+                    };
+                    ShowModule(error_plabel_name, 2);
+                    return FALSE;
+                }
+                else{
+                    SPOT_NODE *pSpotNode = (SPOT_NODE *)malloc(sizeof(SPOT_NODE));
+                    pSpotNode->next = NULL;
+                    strcpy(pSpotNode->name, ppcondition[0]);
+                    strcpy(pSpotNode->spot_id, ppcondition[1]);
+                    strcpy(pSpotNode->region_id, ppcondition[2]);
+                    strcpy(pSpotNode->address, ppcondition[3]);
+                    strcpy(pSpotNode->opentime, ppcondition[4]);
+                    strcpy(pSpotNode->feature, ppcondition[5]);
+                    ConfirmSpotInsertion(gp_head2, pSpotNode);
+                    char *error_plabel_name[] = {"景点添加成功！",
+                                                 "确认"
+                    };
+                    ShowModule(error_plabel_name, 2);
+                    return bRet;
+                }
+
+            }
         }
-        else if (iHot == 9){
+        else if (iHot == 8){
             PopOff();
         }
     }
@@ -2352,6 +3026,39 @@ BOOL QueryCityInfo(void)
         }
         else if (iHot == 2){
             PopOff();
+            char *plabel[] = {"请输入待查询的城市ID信息",
+                                   "城  市ID",
+                                   "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if(aHot==2) {
+                PopOff();
+                CITY_NODE *pCityNode = SeekCityNodeByID(gp_head2, ppcondition[0]);
+                if(pCityNode==NULL) {
+                    char *plabel_name[] = {"你查询的城市不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                }
+                else {
+                    char *plabel_ret[6];
+                    plabel_ret[0] = "你查询的城市信息";
+                    plabel_ret[1] = "城市名称";
+                    plabel_ret[2] = "城  市ID";
+                    plabel_ret[3] = pCityNode->name;
+                    plabel_ret[4] = pCityNode->city_id;
+                    plabel_ret[5] = "确定";
+                    ShowResult(plabel_ret, 6, 2);
+                }
+
+            }
+            else{
+                PopOff();
+            }
+
         }
         else if (iHot == 3) {
             PopOff();
@@ -2381,6 +3088,38 @@ BOOL QueryScenicAreaInfo(void)
         }
         else if (iHot == 2){
             PopOff();
+            char *plabel[] = {"请输入待查询的景区ID信息",
+                              "景  区ID",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if(aHot==2) {
+                PopOff();
+                REGION_NODE *pRegionNode = SeekRegionNodeByID(gp_head2, ppcondition[0]);
+                if(pRegionNode==NULL) {
+                    char *plabel_name[] = {"你查询的景区不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                }
+                else {
+                    char *plabel_ret[6];
+                    plabel_ret[0] = "你查询的景区信息";
+                    plabel_ret[1] = "景区名称";
+                    plabel_ret[2] = "景  区ID";
+                    plabel_ret[3] = pRegionNode->name;
+                    plabel_ret[4] = pRegionNode->city_id;
+                    plabel_ret[5] = "确定";
+                    ShowResult(plabel_ret, 6, 2);
+                }
+
+            }
+            else{
+                PopOff();
+            }
         }
         else if (iHot == 3) {
             PopOff();
@@ -2470,6 +3209,38 @@ BOOL QueryAttractionInfo(void)
         }
         else if (iHot == 2){
             PopOff();
+            char *plabel[] = {"请输入待查询的景区ID信息",
+                              "景  区ID",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if(aHot==2) {
+                PopOff();
+                SPOT_NODE *pSpotNode = SeekSpotNodeById(gp_head2, ppcondition[0]);
+                if(pSpotNode==NULL) {
+                    char *plabel_name[] = {"你查询的景点不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                }
+                else {
+                    char *plabel_ret[6];
+                    plabel_ret[0] = "你查询的景点信息";
+                    plabel_ret[1] = "景点名称";
+                    plabel_ret[2] = "景  点ID";
+                    plabel_ret[3] = pSpotNode->name;
+                    plabel_ret[4] = pSpotNode->spot_id;
+                    plabel_ret[5] = "确定";
+                    ShowResult(plabel_ret, 6, 2);
+                }
+
+            }
+            else{
+                PopOff();
+            }
         }
         else if (iHot == 3) {
             PopOff();
@@ -2879,6 +3650,43 @@ void SortUnchargeInfo(UNCHARGE_NODE *uncharge_hd)
  */
 BOOL SaveSysData(DORM_NODE *hd)
 {
+    return TRUE;
+}
+
+BOOL SaveSysData2(CITY_NODE *hd)
+{
+    CITY_NODE *pCityNode = NULL;
+    REGION_NODE *pRegionNode = NULL;
+    SPOT_NODE *pSpotNode = NULL;
+    FILE *pFile;
+
+    pFile = fopen(gp_city_info_filename, "wb");
+    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+        fwrite(pCityNode, sizeof(CITY_NODE),1, pFile);
+    }
+    fclose(pFile);
+
+    pFile = fopen(gp_region_info_filename, "wb");
+    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+        pRegionNode = pCityNode->rnext;
+        while(pRegionNode!=NULL) {
+            fwrite(pRegionNode, sizeof(REGION_NODE), 1, pFile);
+            pRegionNode = pRegionNode->next;
+        }
+    }
+    fclose(pFile);
+
+    pFile = fopen(gp_spot_info_filename, "wb");
+    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
+            pSpotNode = pRegionNode->snext;
+            while(pSpotNode!=NULL){
+                fwrite(pSpotNode, sizeof(SPOT_NODE), 1, pFile);
+                pSpotNode = pSpotNode->next;
+            }
+        }
+    }
+    fclose(pFile);
 
     return TRUE;
 }
@@ -2893,9 +3701,71 @@ BOOL SaveSysData(DORM_NODE *hd)
  *
  * 调用说明:
  */
-BOOL BackupSysData(DORM_NODE *hd, char *filename)
+BOOL BackupSysData(CITY_NODE *hd, char *filename)
 {
 
+    CITY_NODE *pcity_node;
+    REGION_NODE *pregion_node;
+    SPOT_NODE *pspot_node;
+    unsigned long type_city_num = 0;
+    unsigned long region_node_num = 0;
+    unsigned long pspot_node_num = 0;
+    int handle;
+    /*遍历十字链，分别统计三种基础数据信息的记录总数*/
+    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
+    {
+        type_city_num++;
+        for (pregion_node = pcity_node->rnext; pregion_node!=NULL; pregion_node=pregion_node->next)
+        {
+            region_node_num++;
+            for (pspot_node = pregion_node->snext; pspot_node!=NULL; pspot_node=pspot_node->next)
+            {
+                pspot_node_num++;
+            }
+        }
+    }
+
+    if((handle=open(filename, O_WRONLY|O_BINARY))==-1)
+    {
+        handle=open(filename, O_CREAT|O_BINARY|O_WRONLY, S_IWRITE);
+    }
+
+    /*保存三类基础数据的记录总数*/
+    write(handle, (char*)&type_city_num, sizeof(type_city_num));
+    write(handle, (char*)&region_node_num, sizeof(region_node_num));
+    write(handle, (char*)&pspot_node_num, sizeof(pspot_node_num));
+
+    /*保存服装分类信息*/
+    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
+    {
+        write(handle, (char*)pcity_node, sizeof(CITY_NODE));
+    }
+
+    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
+    {
+        /*保存服装基本信息*/
+        pregion_node = pcity_node->rnext;
+        while (pregion_node != NULL)
+        {
+            write(handle, (char*)pregion_node, sizeof(REGION_NODE));
+            pregion_node = pregion_node->next;
+        }
+    }
+
+    /*保存服装销售信息*/
+    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
+    {
+        for(pregion_node=pcity_node->rnext; pregion_node!=NULL; pregion_node=pregion_node->next)
+        {
+            pspot_node = pregion_node->snext;
+            while (pspot_node != NULL)
+            {
+                write(handle, (char*)pspot_node, sizeof(SPOT_NODE));
+                pspot_node = pspot_node->next;
+            }
+        }
+    }
+    close(handle);
     return TRUE;
 }
 
@@ -2909,10 +3779,104 @@ BOOL BackupSysData(DORM_NODE *hd, char *filename)
  *
  * 调用说明:
  */
-BOOL RestoreSysData(DORM_NODE **phead, char *filename)
+BOOL RestoreSysData(CITY_NODE **phead, char *filename)
 {
+    CITY_NODE *hd = NULL;
+    CITY_NODE *pcity_node;
+    REGION_NODE *pregion_node;
+    SPOT_NODE *pspot_node;
+    unsigned long city_node_num = 0;
+    unsigned long region_node_num = 0;
+    unsigned long spot_node_num = 0;
+    unsigned long ulloop;
+    int handle;
+    int find;
 
-    return TRUE;
+    if ((handle=open(filename, O_RDONLY|O_BINARY))==-1)
+    {
+        /*如果此文件不存在，则弹出提示窗口并返回FALSE*/
+        char *plabel_name[] = {"你输入的文件不存在！","确定"};
+        ShowModule(plabel_name, 2);
+        return FALSE;
+    }
+    else
+    {
+        /*读取三种基础数据信息的记录数*/
+        read(handle, (char*)&city_node_num, sizeof(city_node_num));
+        read(handle, (char*)&region_node_num, sizeof(region_node_num));
+        read(handle, (char*)&spot_node_num, sizeof(spot_node_num));
+
+        /*读取城市信息，建立十字链主链*/
+        for (ulloop=1; ulloop<=city_node_num; ulloop++)
+        {
+            pcity_node = (CITY_NODE*)malloc(sizeof(CITY_NODE));
+            read(handle, (char*)pcity_node, sizeof(CITY_NODE));
+            pcity_node->rnext = NULL;
+            pcity_node->next = hd;
+            hd = pcity_node;
+        }
+        *phead = hd;
+
+        for (ulloop=1; ulloop<=region_node_num; ulloop++)
+        {
+            pregion_node = (REGION_NODE*)malloc(sizeof(REGION_NODE));
+            read(handle, (char*)pregion_node, sizeof(REGION_NODE));
+            pregion_node->snext = NULL;
+            pcity_node = hd;
+            while (pcity_node != NULL
+                   && pcity_node->city_id != pregion_node->city_id)
+            {
+                pcity_node = pcity_node->next;
+            }
+
+            if (pcity_node != NULL)
+            {
+                pregion_node->next = pcity_node->rnext;
+                pcity_node->rnext = pregion_node;
+            }
+            else
+            {
+                free(pregion_node);
+            }
+        }
+
+        /*读取景区信息，建立景区信息支链*/
+        for (ulloop=1; ulloop<=spot_node_num; ulloop++)
+        {
+            pspot_node = (SPOT_NODE*)malloc(sizeof(SPOT_NODE));
+            read(handle, (char*)pspot_node, sizeof(SPOT_NODE));
+            pcity_node = hd;
+            find = 0;
+
+            while (pcity_node!=NULL && find==0)
+            {
+                pregion_node = pcity_node->rnext;
+                while(pregion_node!=NULL && find==0)
+                {
+                    if(strcmp(pregion_node->region_id, pspot_node->region_id) == 0)
+                    {
+                        find = 1;
+                        break;
+                    }
+                    pregion_node = pregion_node->next;
+                }
+                pcity_node = pcity_node->next;
+            }
+
+            if (find)
+            {
+                pspot_node->next = pregion_node->snext;
+                pregion_node->snext = pspot_node;
+            }
+            else
+            {
+                free(pspot_node);
+            }
+        }
+        close(handle);
+        SaveSysData2(hd);  /*将内存中数据保存到数据文件*/
+        return TRUE;
+    }
 }
 
 BOOL ShowModule(char **pString, int n)
@@ -2978,3 +3942,273 @@ BOOL ShowModule(char **pString, int n)
     return bRet;
 
 }
+
+
+// buliuzi
+
+BOOL add_city(CITY_NODE **head, CITY_NODE *pcity_node) {
+    CITY_NODE *city = *head;
+    if(city == NULL) {
+        (*head) = pcity_node;
+        return TRUE;;
+    }
+    CITY_NODE *rCity = SeekCityNodeByID(city, pcity_node->city_id);
+    if (rCity != NULL) {
+        return FALSE;
+    }
+    else {
+        while (city->next != NULL){
+            city = city->next;
+        }
+        if(city->next == NULL) {
+            city->next = pcity_node;
+            return TRUE;
+        }
+    }
+
+}
+
+CITY_NODE *SeekCityNodeByID(CITY_NODE *hd, char *id)
+{
+    CITY_NODE *pcity_node;
+    int find = 0;
+
+    pcity_node = hd;
+    while(pcity_node != NULL)
+    {
+        if (strcmp(pcity_node->city_id, id) == 0)
+        {
+            find = 1;
+            break;
+        }
+        pcity_node = pcity_node->next;
+    }
+    if (find)
+        return pcity_node;
+    else
+        return NULL;
+}
+
+BOOL ConfirmCityInsertion(CITY_NODE **head, CITY_NODE *pcity_node)
+{
+    CITY_NODE *city = *head;
+    if(city == NULL) {
+        (*head) = pcity_node;
+        return TRUE;;
+    }
+    CITY_NODE *rCity = SeekCityNodeByID(city, pcity_node->city_id);
+    if (rCity != NULL) {
+        return FALSE;
+    }
+    else {
+        while (city->next != NULL){
+            city = city->next;
+        }
+        if(city->next == NULL) {
+            city->next = pcity_node;
+            return TRUE;
+        }
+    }
+}
+
+BOOL add_region(CITY_NODE *head, REGION_NODE *pregion_node)
+{
+    CITY_NODE *pcity_node = head;
+    REGION_NODE *region_node = NULL;
+
+    if (pcity_node -> rnext == NULL)
+    {
+        pcity_node -> rnext = pregion_node;
+        return TRUE;
+    }
+    else
+    {
+        region_node = pcity_node -> rnext;
+        while (region_node -> next != NULL)
+        {
+            region_node = region_node -> next;
+        }
+        if (region_node -> next == NULL)
+        {
+            region_node -> next = pregion_node;
+            pregion_node -> snext = NULL;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+REGION_NODE *SeekRegionNodeByID(CITY_NODE *hd, char *id)
+{
+    CITY_NODE *pCityNode = NULL;
+    REGION_NODE *pRegionNode = NULL, *tmp = NULL;
+    SPOT_NODE *pSpotNode = NULL;
+    int find = 0;
+    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
+            if(strcmp(pRegionNode->region_id, id)==0){
+                tmp = pRegionNode;
+                find = 1;
+                break;
+            }
+        }
+        if(find==1){
+            break;
+        }
+    }
+    return tmp;
+
+}
+
+BOOL ConfirmRegionInsertion(CITY_NODE *pcity_node, REGION_NODE *pregion_node)
+{
+    CITY_NODE *city = SeekCityNodeByID(pcity_node, pregion_node->city_id);
+    BOOL flag = add_region(city, pregion_node);
+    return flag;
+}
+
+BOOL add_spot(REGION_NODE *pregion_node, SPOT_NODE *pspot_node)
+{
+    REGION_NODE *region_node = pregion_node;
+    SPOT_NODE *spot_node = NULL;
+    if (region_node->snext == NULL)
+    {
+        region_node->snext = pspot_node;
+        return TRUE;
+    }
+    else
+    {
+        spot_node = region_node->snext;
+        while (spot_node->next != NULL)
+        {
+            spot_node = spot_node->next;
+        }
+        if (spot_node->next == NULL)
+        {
+            spot_node->next = pspot_node;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+SPOT_NODE *SeekSpotNodeById(CITY_NODE *hd, char *id){
+    CITY_NODE *pCityNode = NULL;
+    REGION_NODE *pRegionNode = NULL;
+    SPOT_NODE *pSpotNode = NULL, *tmp=NULL;
+    int find = 1;
+    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
+            pSpotNode = pRegionNode->snext;
+            while(pSpotNode!=NULL){
+                if(strcmp(pSpotNode->spot_id, id)==0) {
+                    tmp = pSpotNode;
+                    find = 1;
+                }
+                pSpotNode = pSpotNode->next;
+            }
+            if(find==1){
+                break;
+            }
+        }
+        if(find==1){
+            break;
+        }
+    }
+    return tmp;
+}
+
+BOOL ConfirmSpotInsertion(CITY_NODE *pcity_node, SPOT_NODE *pspot_node)
+{
+    REGION_NODE *pregion_node = SeekRegionNodeByID(pcity_node, pspot_node->region_id);
+    BOOL flag = add_spot(pregion_node, pspot_node);
+    return flag;
+}
+
+/*删除城市信息*/
+BOOL delete_city(CITY_NODE **head, char *id)
+{
+    int flag = 0;
+    CITY_NODE *prior, *cp = *head;
+    prior = (CITY_NODE *)malloc(sizeof(CITY_NODE));
+    while (cp != NULL)                         /*查找要删除的城市节点*/
+    {
+        if (!strcmp(cp->city_id, id))
+        {
+            if (flag == 0)     //头指针
+                *head = cp->next;
+            else
+                prior->next = cp->next;
+            free(cp);                  /*删除找到的节点*/
+            return TRUE;
+        }
+        flag = 1;
+        prior = cp;
+        cp = cp->next;
+    }
+    return FALSE;
+}
+
+BOOL delete_region(CITY_NODE **head, char *id)
+{
+    CITY_NODE *cp = *head;
+    REGION_NODE *qp, *prior;
+
+    while (cp != NULL)                         /*查找要删除的节点*/
+    {
+        qp = cp->rnext;
+        while (qp != NULL)
+        {
+            if (!strcmp(qp->region_id, id))
+            {
+                if (qp == cp->rnext)
+                    cp->rnext = qp->next;
+                else
+                    prior->next = qp->next;
+                free(qp);                  /*删除找到的景区节点*/
+                return TRUE;
+            }
+            prior = qp;
+            qp = qp->next;
+        }
+        cp = cp->next;
+    }
+    return FALSE;
+}
+
+BOOL delete_spot(CITY_NODE **head, char *id)
+{
+    CITY_NODE *cp = *head;
+    REGION_NODE *qp;
+    SPOT_NODE *dp, *prior;
+    while (cp != NULL)                       /*查找要删除的景点节点*/
+    {
+        qp = cp->rnext;
+        while (qp != NULL)
+        {
+            dp = qp->snext;
+            while (dp != NULL)
+            {
+                if (!strcmp(dp->spot_id, id))
+                {
+                    if (dp == qp->snext)
+                        qp->snext = dp->next;
+                    else
+                        prior->next = dp->next;
+                    free(dp);                      /*删除找到的花卉节点*/
+                    return TRUE;
+                }
+                prior = dp;
+                dp = dp->next;
+            }
+            qp = qp->next;
+        }
+        cp = cp->next;
+    }
+    return FALSE;
+}
+
+
+
+
