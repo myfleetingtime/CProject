@@ -14,322 +14,274 @@
 #ifndef TYPE_H_INCLUDED
 #define TYPE_H_INCLUDED
 
-#define SCR_ROW 40             /*å±å¹•è¡Œæ•°*/
-#define SCR_COL 100             /*å±å¹•åˆ—æ•°*/
+#define SCR_ROW 40             /*ÆÁÄ»ĞĞÊı*/
+#define SCR_COL 100             /*ÆÁÄ»ÁĞÊı*/
 typedef struct city_node {
-    char city_id[6];              /**< åŸå¸‚ç¼–å·*/
-    char name[10];                /**< åŸå¸‚åç§°*/
-    char jiandu_num[15];          /**< ç›‘ç£ç”µè¯*/
-    char zixun_num[15];           /**< å’¨è¯¢ç”µè¯*/
-    struct city_node *next;       /**< æŒ‡å‘ä¸‹ä¸€åŸå¸‚ç»“ç‚¹çš„æŒ‡é’ˆ*/
-    struct region_node *rnext;    /**< æŒ‡å‘æ™¯åŒºèŠ‚ç‚¹çš„æŒ‡é’ˆ*/
+    char city_id[6];              /**< ³ÇÊĞ±àºÅ*/
+    char name[10];                /**< ³ÇÊĞÃû³Æ*/
+    char jiandu_num[15];          /**< ¼à¶½µç»°*/
+    char zixun_num[15];           /**< ×ÉÑ¯µç»°*/
+    struct city_node *next;       /**< Ö¸ÏòÏÂÒ»³ÇÊĞ½áµãµÄÖ¸Õë*/
+    struct region_node *rnext;    /**< Ö¸Ïò¾°Çø½ÚµãµÄÖ¸Õë*/
 } CITY_NODE;
 typedef struct region_node {
-    char city_id[6];              /**< æ‰€å±åŸå¸‚ç¼–å·*/
-    char region_id[6];            /**< æ™¯åŒºç¼–å·*/
-    char name[10];                /**< æ™¯åŒºåç§°*/
-    char level[15];               /**< æ™¯åŒºçº§åˆ«*/
-    char address[15];             /**< æ™¯åŒºåœ°å€*/
-    char price[5];                /**< é—¨ç¥¨ä»·æ ¼*/
-    char opentime[15];            /**< å¼€æ”¾æ—¶é—´*/
-    struct region_node *next;     /**< æŒ‡å‘ä¸‹ä¸€æ™¯åŒºç»“ç‚¹çš„æŒ‡é’ˆ*/
-    struct spot_node *snext;      /**< æŒ‡å‘æ™¯ç‚¹ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char city_id[6];              /**< ËùÊô³ÇÊĞ±àºÅ*/
+    char region_id[6];            /**< ¾°Çø±àºÅ*/
+    char name[10];                /**< ¾°ÇøÃû³Æ*/
+    char level[15];               /**< ¾°Çø¼¶±ğ*/
+    char address[15];             /**< ¾°ÇøµØÖ·*/
+    char price[5];                /**< ÃÅÆ±¼Û¸ñ*/
+    char opentime[15];            /**< ¿ª·ÅÊ±¼ä*/
+    struct region_node *next;     /**< Ö¸ÏòÏÂÒ»¾°Çø½áµãµÄÖ¸Õë*/
+    struct spot_node *snext;      /**< Ö¸Ïò¾°µã½áµãµÄÖ¸Õë*/
 } REGION_NODE;
 
 typedef struct spot_node {
-    char city_id[6];              /**< æ‰€å±åŸå¸‚ç¼–å·*/
-    char region_id[6];            /**< æ‰€å±æ™¯åŒºç¼–å·*/
-    char spot_id[6];              /**< æ™¯ç‚¹ç¼–å·*/
-    char name[10];                /**< æ™¯ç‚¹åç§°*/
-    char address[15];             /**< æ™¯ç‚¹ä½ç½®*/
-    char opentime[15];            /**< æµè§ˆæ—¶é—´*/
-    char feature[255];            /**< æ™¯ç‚¹ç‰¹è‰²*/
-    struct spot_node *next;       /**< æŒ‡å‘ä¸‹ä¸€æ™¯åŒºç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char region_id[6];            /**< ËùÊô¾°Çø±àºÅ*/
+    char spot_id[6];              /**< ¾°µã±àºÅ*/
+    char name[10];                /**< ¾°µãÃû³Æ*/
+    char address[15];             /**< ¾°µãÎ»ÖÃ*/
+    char opentime[15];            /**< ä¯ÀÀÊ±¼ä*/
+    char feature[255];            /**< ¾°µãÌØÉ«*/
+    struct spot_node *next;       /**< Ö¸ÏòÏÂÒ»¾°Çø½áµãµÄÖ¸Õë*/
 } SPOT_NODE;
 
 /**
- *ç¼´è´¹ä¿¡æ¯é“¾ç»“ç‚¹ç»“æ„
+ *½É·ÑĞÅÏ¢Á´½áµã½á¹¹
  */
 typedef struct charge_node {
-    char stu_id[12];           /**< å­¦å·*/
-    char name[10];             /**< å§“å*/
-    char date[12];             /**< ç¼´è´¹æ—¥æœŸ*/
-    float sum;                 /**< ç¼´è´¹é‡‘é¢*/
-    char payee[10];            /**< æ”¶è´¹äºº*/
-    char notes[5];             /**< å¤‡æ³¨*/
-    struct charge_node *next;  /**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char stu_id[12];           /**< Ñ§ºÅ*/
+    char name[10];             /**< ĞÕÃû*/
+    char date[12];             /**< ½É·ÑÈÕÆÚ*/
+    float sum;                 /**< ½É·Ñ½ğ¶î*/
+    char payee[10];            /**< ÊÕ·ÑÈË*/
+    char notes[5];             /**< ±¸×¢*/
+    struct charge_node *next;  /**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } CHARGE_NODE;
 
 /**
- *å­¦ç”ŸåŸºæœ¬ä¿¡æ¯é“¾ç»“ç‚¹ç»“æ„
+ *Ñ§Éú»ù±¾ĞÅÏ¢Á´½áµã½á¹¹
  */
 typedef struct stu_node {
-    char stu_id[12];            /**< å­¦å·*/
-    char name[10];              /**< å§“å*/
-    char sex;                   /**< æ€§åˆ«*/
-    char birthday[12];          /**< å‡ºç”Ÿæ—¥æœŸ*/
-    char type[3];               /**< å­¦ç”Ÿç±»åˆ«*/
-    char term;                  /**< å­¦åˆ¶*/
-    char enroll_date[8];        /**< å…¥å­¦å¹´æœˆ*/
-    char class_id[10];          /**< ç­çº§*/
-    char dorm_id[5];            /**< å®¿èˆæ¥¼å·*/
-    char room[5];               /**< æˆ¿é—´å·*/
-    char tel[20];               /**< è”ç³»ç”µè¯*/
-    struct charge_node *cnext;  /**< æŒ‡å‘ç¼´è´¹ä¿¡æ¯æ”¯é“¾çš„æŒ‡é’ˆ*/
-    struct stu_node *next;      /**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char stu_id[12];            /**< Ñ§ºÅ*/
+    char name[10];              /**< ĞÕÃû*/
+    char sex;                   /**< ĞÔ±ğ*/
+    char birthday[12];          /**< ³öÉúÈÕÆÚ*/
+    char type[3];               /**< Ñ§ÉúÀà±ğ*/
+    char term;                  /**< Ñ§ÖÆ*/
+    char enroll_date[8];        /**< ÈëÑ§ÄêÔÂ*/
+    char class_id[10];          /**< °à¼¶*/
+    char dorm_id[5];            /**< ËŞÉáÂ¥ºÅ*/
+    char room[5];               /**< ·¿¼äºÅ*/
+    char tel[20];               /**< ÁªÏµµç»°*/
+    struct charge_node *cnext;  /**< Ö¸Ïò½É·ÑĞÅÏ¢Ö§Á´µÄÖ¸Õë*/
+    struct stu_node *next;      /**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } STU_NODE;
 
 /**
- *å®¿èˆæ¥¼ä¿¡æ¯é“¾ç»“ç‚¹ç»“æ„
+ *ËŞÉáÂ¥ĞÅÏ¢Á´½áµã½á¹¹
  */
 typedef struct dorm_node {
-    char dorm_id[5];         /**< å®¿èˆæ¥¼å·*/
-    char name[10];           /**< å§“å*/
-    char tel[20];            /**< è”ç³»ç”µè¯*/
-    short room_amount;       /**< æˆ¿é—´æ•°ç›®*/
-    short bed_amount;        /**< åºŠä½æ•°ç›®*/
-    float fee;               /**< æ¯åºŠä½æ¯å¹´ä½å®¿è´¹*/
-    struct stu_node *snext;  /**< æŒ‡å‘å­¦ç”ŸåŸºæœ¬ä¿¡æ¯æ”¯é“¾çš„æŒ‡é’ˆ*/
-    struct dorm_node *next;  /**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char dorm_id[5];         /**< ËŞÉáÂ¥ºÅ*/
+    char name[10];           /**< ĞÕÃû*/
+    char tel[20];            /**< ÁªÏµµç»°*/
+    short room_amount;       /**< ·¿¼äÊıÄ¿*/
+    short bed_amount;        /**< ´²Î»ÊıÄ¿*/
+    float fee;               /**< Ã¿´²Î»Ã¿Äê×¡ËŞ·Ñ*/
+    struct stu_node *snext;  /**< Ö¸ÏòÑ§Éú»ù±¾ĞÅÏ¢Ö§Á´µÄÖ¸Õë*/
+    struct dorm_node *next;  /**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } DORM_NODE;
 
 /**
- *å®¿èˆæ¥¼å…¥ä½ç‡ç»Ÿè®¡ä¿¡æ¯é“¾ç»“ç‚¹ç»“æ„
+ *ËŞÉáÂ¥Èë×¡ÂÊÍ³¼ÆĞÅÏ¢Á´½áµã½á¹¹
  */
 typedef struct use_rate_node {
-    char dorm_id[5];            	/**< å®¿èˆæ¥¼å·*/
-    unsigned short total_num;     	/**< å¯ä½å­¦ç”Ÿæ•°*/
-    unsigned short used_num;     	/**< åœ¨ä½å­¦ç”Ÿæ•°*/
-    unsigned short free_num;     	/**< ç©ºåºŠä½æ•°*/
-    float use_rate;              	/**< å…¥ä½ç‡*/
-    struct use_rate_node *next;   	/**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char dorm_id[5];            	/**< ËŞÉáÂ¥ºÅ*/
+    unsigned short total_num;     	/**< ¿É×¡Ñ§ÉúÊı*/
+    unsigned short used_num;     	/**< ÔÚ×¡Ñ§ÉúÊı*/
+    unsigned short free_num;     	/**< ¿Õ´²Î»Êı*/
+    float use_rate;              	/**< Èë×¡ÂÊ*/
+    struct use_rate_node *next;   	/**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } USE_RATE_NODE;
 
 /**
- *åœ¨ä½å­¦ç”Ÿåˆ†ç±»ç»Ÿè®¡ä¿¡æ¯é“¾ç»“ç‚¹ç»“æ„
+ *ÔÚ×¡Ñ§Éú·ÖÀàÍ³¼ÆĞÅÏ¢Á´½áµã½á¹¹
  */
 typedef struct stu_type_node {
-    char grade[5];               	/**< å¹´çº§*/
-    unsigned short school_boy1;   	/**< ç”·ä¸“ç§‘ç”Ÿæ•°*/
-    unsigned short school_girl1;   	/**< å¥³ä¸“ç§‘ç”Ÿæ•°*/
-    unsigned short school_boy2;   	/**< ç”·æœ¬ç§‘ç”Ÿæ•°*/
-    unsigned short school_girl2;   	/**< å¥³æœ¬ç§‘ç”Ÿæ•°*/
-    unsigned short school_boy3;   	/**< ç”·ç¡•å£«ç”Ÿæ•°*/
-    unsigned short school_girl3;   	/**< å¥³ç¡•å£«ç”Ÿæ•°*/
-    unsigned short school_boy4;   	/**< ç”·åšå£«ç”Ÿæ•°*/
-    unsigned short school_girl4;   	/**< å¥³åšå£«ç”Ÿæ•°*/
-    unsigned short school_boy5;   	/**< å…¶ä»–ç”·ç”Ÿæ•°*/
-    unsigned short school_girl5;   	/**< å…¶ä»–å¥³ç”Ÿæ•°*/
-    struct stu_type_node *next;    	/**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char grade[5];               	/**< Äê¼¶*/
+    unsigned short school_boy1;   	/**< ÄĞ×¨¿ÆÉúÊı*/
+    unsigned short school_girl1;   	/**< Å®×¨¿ÆÉúÊı*/
+    unsigned short school_boy2;   	/**< ÄĞ±¾¿ÆÉúÊı*/
+    unsigned short school_girl2;   	/**< Å®±¾¿ÆÉúÊı*/
+    unsigned short school_boy3;   	/**< ÄĞË¶Ê¿ÉúÊı*/
+    unsigned short school_girl3;   	/**< Å®Ë¶Ê¿ÉúÊı*/
+    unsigned short school_boy4;   	/**< ÄĞ²©Ê¿ÉúÊı*/
+    unsigned short school_girl4;   	/**< Å®²©Ê¿ÉúÊı*/
+    unsigned short school_boy5;   	/**< ÆäËûÄĞÉúÊı*/
+    unsigned short school_girl5;   	/**< ÆäËûÅ®ÉúÊı*/
+    struct stu_type_node *next;    	/**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } STU_TYPE_NODE;
 
 /**
- *å®¿èˆæ¥¼å¹´åº¦ä½å®¿è´¹æ”¶å…¥ç»Ÿè®¡ä¿¡æ¯é“¾ç»“ç‚¹ç»“æ„
+ *ËŞÉáÂ¥Äê¶È×¡ËŞ·ÑÊÕÈëÍ³¼ÆĞÅÏ¢Á´½áµã½á¹¹
  */
 typedef struct income_node {
-    char dorm_id[5];            	/**< å®¿èˆæ¥¼å·*/
-    float year1_income;          	/**< å¹´åº¦1æ”¶å…¥*/
-    float year2_income;          	/**< å¹´åº¦2æ”¶å…¥*/
-    float year3_income;          	/**< å¹´åº¦3æ”¶å…¥*/
-    float year4_income;          	/**< å¹´åº¦4æ”¶å…¥*/
-    struct income_node *next;     	/**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char dorm_id[5];            	/**< ËŞÉáÂ¥ºÅ*/
+    float year1_income;          	/**< Äê¶È1ÊÕÈë*/
+    float year2_income;          	/**< Äê¶È2ÊÕÈë*/
+    float year3_income;          	/**< Äê¶È3ÊÕÈë*/
+    float year4_income;          	/**< Äê¶È4ÊÕÈë*/
+    struct income_node *next;     	/**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } INCOME_NODE;
 
 /**
- *åœ¨ä½å­¦ç”Ÿæ¬ è´¹ç»Ÿè®¡ä¿¡æ¯é“¾ç»“ç‚¹ç»“æ„
+ *ÔÚ×¡Ñ§ÉúÇ··ÑÍ³¼ÆĞÅÏ¢Á´½áµã½á¹¹
  */
 typedef struct uncharge_node {
-    char stu_id[12];             	/**< å­¦å·*/
-    char name[10];             	    /**< å§“å*/
-    char dorm_id[5];            	/**< å®¿èˆæ¥¼å·*/
-    char room_num[5];               /**< æˆ¿é—´å·*/
-    float amount;               	/**< æ¬ ç¼´é‡‘é¢*/
-    struct uncharge_node *next;   	/**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char stu_id[12];             	/**< Ñ§ºÅ*/
+    char name[10];             	    /**< ĞÕÃû*/
+    char dorm_id[5];            	/**< ËŞÉáÂ¥ºÅ*/
+    char room_num[5];               /**< ·¿¼äºÅ*/
+    float amount;               	/**< Ç·½É½ğ¶î*/
+    struct uncharge_node *next;   	/**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } UNCHARGE_NODE;
 
 /**
- *å±å¹•çª—å£ä¿¡æ¯é“¾ç»“ç‚¹ç»“ç‚¹ç»“æ„
+ *ÆÁÄ»´°¿ÚĞÅÏ¢Á´½áµã½áµã½á¹¹
  */
 typedef struct layer_node {
-    char LayerNo;            /**< å¼¹å‡ºçª—å£å±‚æ•°*/
-    SMALL_RECT rcArea;       /**< å¼¹å‡ºçª—å£åŒºåŸŸåæ ‡*/
-    CHAR_INFO *pContent;     /**< å¼¹å‡ºçª—å£åŒºåŸŸå­—ç¬¦å•å…ƒåŸä¿¡æ¯å­˜å‚¨ç¼“å†²åŒº*/
-    char *pScrAtt;           /**< å¼¹å‡ºçª—å£åŒºåŸŸå­—ç¬¦å•å…ƒåŸå±æ€§å€¼å­˜å‚¨ç¼“å†²åŒº*/
-    struct layer_node *next; /**< æŒ‡å‘ä¸‹ä¸€ç»“ç‚¹çš„æŒ‡é’ˆ*/
+    char LayerNo;            /**< µ¯³ö´°¿Ú²ãÊı*/
+    SMALL_RECT rcArea;       /**< µ¯³ö´°¿ÚÇøÓò×ø±ê*/
+    CHAR_INFO *pContent;     /**< µ¯³ö´°¿ÚÇøÓò×Ö·ûµ¥ÔªÔ­ĞÅÏ¢´æ´¢»º³åÇø*/
+    char *pScrAtt;           /**< µ¯³ö´°¿ÚÇøÓò×Ö·ûµ¥ÔªÔ­ÊôĞÔÖµ´æ´¢»º³åÇø*/
+    struct layer_node *next; /**< Ö¸ÏòÏÂÒ»½áµãµÄÖ¸Õë*/
 } LAYER_NODE;
 
 /**
- *æ ‡ç­¾æŸç»“æ„
+ *±êÇ©Êø½á¹¹
  */
 typedef struct labe1_bundle {
-    char **ppLabel;        /**< æ ‡ç­¾å­—ç¬¦ä¸²æ•°ç»„é¦–åœ°å€*/
-    COORD *pLoc;           /**< æ ‡ç­¾å®šä½æ•°ç»„é¦–åœ°å€*/
-    int num;               /**< æ ‡ç­¾ä¸ªæ•°*/
+    char **ppLabel;        /**< ±êÇ©×Ö·û´®Êı×éÊ×µØÖ·*/
+    COORD *pLoc;           /**< ±êÇ©¶¨Î»Êı×éÊ×µØÖ·*/
+    int num;               /**< ±êÇ©¸öÊı*/
 } LABEL_BUNDLE;
 
 /**
- *çƒ­åŒºç»“æ„
+ *ÈÈÇø½á¹¹
  */
 typedef struct hot_area {
-    SMALL_RECT *pArea;     /**< çƒ­åŒºå®šä½æ•°ç»„é¦–åœ°å€*/
-    char *pSort;           /**< çƒ­åŒºç±»åˆ«(æŒ‰é”®ã€æ–‡æœ¬æ¡†ã€é€‰é¡¹æ¡†)æ•°ç»„é¦–åœ°å€*/
-    char *pTag;            /**< çƒ­åŒºåºå·æ•°ç»„é¦–åœ°å€*/
-    int num;               /**< çƒ­åŒºä¸ªæ•°*/
+    SMALL_RECT *pArea;     /**< ÈÈÇø¶¨Î»Êı×éÊ×µØÖ·*/
+    char *pSort;           /**< ÈÈÇøÀà±ğ(°´¼ü¡¢ÎÄ±¾¿ò¡¢Ñ¡Ïî¿ò)Êı×éÊ×µØÖ·*/
+    char *pTag;            /**< ÈÈÇøĞòºÅÊı×éÊ×µØÖ·*/
+    int num;               /**< ÈÈÇø¸öÊı*/
 } HOT_AREA;
 
-LAYER_NODE *gp_top_layer = NULL;               /*å¼¹å‡ºçª—å£ä¿¡æ¯é“¾é“¾å¤´*/
+LAYER_NODE *gp_top_layer = NULL;               /*µ¯³ö´°¿ÚĞÅÏ¢Á´Á´Í·*/
 
-CITY_NODE *gp_head2 = NULL;                     /*ä¸»é“¾å¤´æŒ‡é’ˆ*/
-char *gp_sys_name2 = "æ™¯åŒºç®¡ç†ç³»ç»Ÿ";    /*ç³»ç»Ÿåç§°*/
-char *gp_city_info_filename = "city.dat";        /*åŸå¸‚åŸºæœ¬ä¿¡æ¯æ•°æ®æ–‡ä»¶*/
-char *gp_region_info_filename = "region.dat";  /*æ™¯åŒºä¿¡æ¯æ•°æ®æ–‡ä»¶*/
-char *gp_spot_info_filename = "spot.dat";      /*æ™¯ç‚¹ä¿¡æ¯æ•°æ®æ–‡ä»¶*/
+CITY_NODE *gp_head2 = NULL;                     /*Ö÷Á´Í·Ö¸Õë*/
+char *gp_city_info_filename = "city.dat";        /*³ÇÊĞ»ù±¾ĞÅÏ¢Êı¾İÎÄ¼ş*/
+char *gp_region_info_filename = "region.dat";  /*¾°ÇøĞÅÏ¢Êı¾İÎÄ¼ş*/
+char *gp_spot_info_filename = "spot.dat";      /*¾°µãĞÅÏ¢Êı¾İÎÄ¼ş*/
+char *gp_sys_name = "¾°ÇøĞÅÏ¢¹ÜÀíÏµÍ³";    /*ÏµÍ³Ãû³Æ*/
 
-
-
-DORM_NODE *gp_head = NULL;                     /*ä¸»é“¾å¤´æŒ‡é’ˆ*/
-char *gp_sys_name = "å­¦ç”Ÿä½å®¿ä¿¡æ¯ç®¡ç†ç³»ç»Ÿ";    /*ç³»ç»Ÿåç§°*/
-char *gp_stu_info_filename = "stu.dat";        /*å­¦ç”ŸåŸºæœ¬ä¿¡æ¯æ•°æ®æ–‡ä»¶*/
-char *gp_charge_info_filename = "charge.dat";  /*ä½å®¿ç¼´è´¹ä¿¡æ¯æ•°æ®æ–‡ä»¶*/
-char *gp_dorm_info_filename = "Dorm.dat";      /*å®¿èˆæ¥¼ä¿¡æ¯æ•°æ®æ–‡ä»¶*/
-char *gp_sex_code_filename = "sex.dat";        /*æ€§åˆ«ä»£ç æ•°æ®æ–‡ä»¶*/
-char *gp_type_code_filename = "type.dat";      /*å­¦ç”Ÿç±»åˆ«ä»£ç æ•°æ®æ–‡ä»¶*/
-
-char *ga_main_menu[] = {"æ–‡ä»¶(F)",             /*ç³»ç»Ÿä¸»èœå•å*/
-                        "æ•°æ®ç»´æŠ¤(M)",
-                        "æ•°æ®æŸ¥è¯¢(Q)",
-                        "æ•°æ®ç»Ÿè®¡(S)",
-                        "å¸®åŠ©(H)"
+char *ga_main_menu[] = {"ÎÄ¼ş(F)",             /*ÏµÍ³Ö÷²Ëµ¥Ãû*/
+                        "Êı¾İÎ¬»¤(M)",
+                        "Êı¾İ²éÑ¯(Q)",
+                        "Êı¾İÍ³¼Æ(S)",
+                        "°ïÖú(H)"
 };
 
-char *ga_sub_menu[] = {"[S] æ•°æ®ä¿å­˜",          /*ç³»ç»Ÿå­èœå•å*/
-                       "[B] æ•°æ®å¤‡ä»½",
-                       "[R] æ•°æ®æ¢å¤",
-                       "[X] é€€å‡º    Alt+X",
+char *ga_sub_menu[] = {"[S] Êı¾İ±£´æ",          /*ÏµÍ³×Ó²Ëµ¥Ãû*/
+                       "[B] Êı¾İ±¸·İ",
+                       "[R] Êı¾İ»Ö¸´",
+                       "[X] ÍË³ö    Alt+X",
         //
-                       "[S] åŸå¸‚ä¿¡æ¯",
-                       "[T] æ™¯åŒºä¿¡æ¯",
-                       "[D] æ™¯ç‚¹ä¿¡æ¯",
+                       "[S] ³ÇÊĞĞÅÏ¢",
+                       "[T] ¾°ÇøĞÅÏ¢",
+                       "[D] ¾°µãĞÅÏ¢",
         //
-                       "[S] åŸå¸‚ä¿¡æ¯",
-                       "[T] æ™¯åŒºä¿¡æ¯",
-                       "[D] æ™¯ç‚¹ä¿¡æ¯",
+                       "[S] ³ÇÊĞĞÅÏ¢",
+                       "[T] ¾°ÇøĞÅÏ¢",
+                       "[D] ¾°µãĞÅÏ¢",
         //
-                       "[I] éšä¾¿çœ‹çœ‹",
-                       "[T] åŸå¸‚æ™¯åŒºç»Ÿè®¡",
+                       "[I] Ëæ±ã¿´¿´",
+                       "[T] ³ÇÊĞ¾°ÇøÍ³¼Æ",
         //
-                       "[T] å¸®åŠ©ä¸»é¢˜",
+                       "[T] °ïÖúÖ÷Ìâ",
                        "",
-                       "[A] å…³äº..."
+                       "[A] ¹ØÓÚ..."
 };
 
-int ga_sub_menu_count[] = {4, 3, 3, 2, 3};  /*å„ä¸»èœå•é¡¹ä¸‹å­èœå•çš„ä¸ªæ•°*/
-int gi_sel_menu = 1;                        /*è¢«é€‰ä¸­çš„ä¸»èœå•é¡¹å·,åˆå§‹ä¸º1*/
-int gi_sel_sub_menu = 0;                    /*è¢«é€‰ä¸­çš„å­èœå•é¡¹å·,åˆå§‹ä¸º0,è¡¨ç¤ºæœªé€‰ä¸­*/
+int ga_sub_menu_count[] = {4, 3, 3, 2, 3};  /*¸÷Ö÷²Ëµ¥ÏîÏÂ×Ó²Ëµ¥µÄ¸öÊı*/
+int gi_sel_menu = 1;                        /*±»Ñ¡ÖĞµÄÖ÷²Ëµ¥ÏîºÅ,³õÊ¼Îª1*/
+int gi_sel_sub_menu = 0;                    /*±»Ñ¡ÖĞµÄ×Ó²Ëµ¥ÏîºÅ,³õÊ¼Îª0,±íÊ¾Î´Ñ¡ÖĞ*/
 
-CHAR_INFO *gp_buff_menubar_info = NULL;     /*å­˜æ”¾èœå•æ¡å±å¹•åŒºå­—ç¬¦ä¿¡æ¯çš„ç¼“å†²åŒº*/
-CHAR_INFO *gp_buff_stateBar_info = NULL;    /*å­˜æ”¾çŠ¶æ€æ¡å±å¹•åŒºå­—ç¬¦ä¿¡æ¯çš„ç¼“å†²åŒº*/
+CHAR_INFO *gp_buff_menubar_info = NULL;     /*´æ·Å²Ëµ¥ÌõÆÁÄ»Çø×Ö·ûĞÅÏ¢µÄ»º³åÇø*/
+CHAR_INFO *gp_buff_stateBar_info = NULL;    /*´æ·Å×´Ì¬ÌõÆÁÄ»Çø×Ö·ûĞÅÏ¢µÄ»º³åÇø*/
 
-char *gp_scr_att = NULL;    /*å­˜æ”¾å±å¹•ä¸Šå­—ç¬¦å•å…ƒå±æ€§å€¼çš„ç¼“å†²åŒº*/
-char *gp_sex_code = NULL;   /*å­˜æ”¾æ€§åˆ«ä»£ç è¡¨çš„æ•°æ®ç¼“å†²åŒº*/
-char *gp_type_code = NULL;  /*å­˜æ”¾å­¦ç”Ÿç±»åˆ«ä»£ç è¡¨çš„æ•°æ®ç¼“å†²åŒº*/
-char gc_sys_state = '\0';   /*ç”¨æ¥ä¿å­˜ç³»ç»ŸçŠ¶æ€çš„å­—ç¬¦*/
+char *gp_scr_att = NULL;    /*´æ·ÅÆÁÄ»ÉÏ×Ö·ûµ¥ÔªÊôĞÔÖµµÄ»º³åÇø*/
+char *gp_sex_code = NULL;   /*´æ·ÅĞÔ±ğ´úÂë±íµÄÊı¾İ»º³åÇø*/
+char *gp_type_code = NULL;  /*´æ·ÅÑ§ÉúÀà±ğ´úÂë±íµÄÊı¾İ»º³åÇø*/
+char gc_sys_state = '\0';   /*ÓÃÀ´±£´æÏµÍ³×´Ì¬µÄ×Ö·û*/
 
-unsigned long gul_sex_code_len = 0;    /*æ€§åˆ«ä»£ç è¡¨é•¿åº¦*/
-unsigned long gul_type_code_len = 0;   /*å­¦ç”Ÿç±»åˆ«ä»£ç è¡¨é•¿åº¦*/
+HANDLE gh_std_out;          /*±ê×¼Êä³öÉè±¸¾ä±ú*/
+HANDLE gh_std_in;           /*±ê×¼ÊäÈëÉè±¸¾ä±ú*/
 
-HANDLE gh_std_out;          /*æ ‡å‡†è¾“å‡ºè®¾å¤‡å¥æŸ„*/
-HANDLE gh_std_in;           /*æ ‡å‡†è¾“å…¥è®¾å¤‡å¥æŸ„*/
-
-int LoadCode(char *filename, char **ppbuffer);  /*ä»£ç è¡¨åŠ è½½*/
-int CreatList(DORM_NODE **pphead);
-int CreatList2(CITY_NODE **pphead);              /*æ•°æ®é“¾è¡¨åˆå§‹åŒ–*/
-void InitInterface(void);                 /*ç³»ç»Ÿç•Œé¢åˆå§‹åŒ–*/
-void ClearScreen(void);                         /*æ¸…å±*/
-void ShowMenu(void);                            /*æ˜¾ç¤ºèœå•æ */
-void PopMenu(int num);                          /*æ˜¾ç¤ºä¸‹æ‹‰èœå•*/
-void PopPrompt(int num);                        /*æ˜¾ç¤ºå¼¹å‡ºçª—å£*/
-void PopUp(SMALL_RECT *, WORD, LABEL_BUNDLE *, HOT_AREA *);  /*å¼¹å‡ºçª—å£å±å¹•ä¿¡æ¯ç»´æŠ¤*/
-void PopOff(void);                              /*å…³é—­é¡¶å±‚å¼¹å‡ºçª—å£*/
-void DrawBox(SMALL_RECT *parea);                /*ç»˜åˆ¶è¾¹æ¡†*/
-void LocSubMenu(int num, SMALL_RECT *parea);    /*ä¸»èœå•ä¸‹æ‹‰èœå•å®šä½*/
-void ShowState(void);                           /*æ˜¾ç¤ºçŠ¶æ€æ */
-void TagMainMenu(int num);                      /*æ ‡è®°è¢«é€‰ä¸­çš„ä¸»èœå•é¡¹*/
-void TagSubMenu(int num);                       /*æ ‡è®°è¢«é€‰ä¸­çš„å­èœå•é¡¹*/
-int DealConInput(HOT_AREA *phot_area, int *pihot_num);  /*æ§åˆ¶å°è¾“å…¥å¤„ç†*/
+int CreatList2(CITY_NODE **pphead);              /*Êı¾İÁ´±í³õÊ¼»¯*/
+void InitInterface(void);                 /*ÏµÍ³½çÃæ³õÊ¼»¯*/
+void ClearScreen(void);                         /*ÇåÆÁ*/
+void ShowMenu(void);                            /*ÏÔÊ¾²Ëµ¥À¸*/
+void PopMenu(int num);                          /*ÏÔÊ¾ÏÂÀ­²Ëµ¥*/
+void PopPrompt(int num);                        /*ÏÔÊ¾µ¯³ö´°¿Ú*/
+void PopUp(SMALL_RECT *, WORD, LABEL_BUNDLE *, HOT_AREA *);  /*µ¯³ö´°¿ÚÆÁÄ»ĞÅÏ¢Î¬»¤*/
+void PopOff(void);                              /*¹Ø±Õ¶¥²ãµ¯³ö´°¿Ú*/
+void DrawBox(SMALL_RECT *parea);                /*»æÖÆ±ß¿ò*/
+void LocSubMenu(int num, SMALL_RECT *parea);    /*Ö÷²Ëµ¥ÏÂÀ­²Ëµ¥¶¨Î»*/
+void ShowState(void);                           /*ÏÔÊ¾×´Ì¬À¸*/
+void TagMainMenu(int num);                      /*±ê¼Ç±»Ñ¡ÖĞµÄÖ÷²Ëµ¥Ïî*/
+void TagSubMenu(int num);                       /*±ê¼Ç±»Ñ¡ÖĞµÄ×Ó²Ëµ¥Ïî*/
+int DealConInput(HOT_AREA *phot_area, int *pihot_num);  /*¿ØÖÆÌ¨ÊäÈë´¦Àí*/
 int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition);
 BOOL ShowResult(char **pString, int n,int col );
-void SetHotPoint(HOT_AREA *phot_area, int hot_num);     /*è®¾ç½®çƒ­åŒº*/
-void RunSys(DORM_NODE **pphd);                  /*ç³»ç»ŸåŠŸèƒ½æ¨¡å—çš„é€‰æ‹©å’Œè¿è¡Œ*/
-void RunSys2(CITY_NODE **pphd);
-BOOL ExeFunction(int main_menu_num, int sub_menu_num);  /*åŠŸèƒ½æ¨¡å—çš„è°ƒç”¨*/
-void CloseSys(DORM_NODE *phd);                  /*é€€å‡ºç³»ç»Ÿ*/
+BOOL ShowSearchResult(char **pString, int n,int col );
+void SetHotPoint(HOT_AREA *phot_area, int hot_num);     /*ÉèÖÃÈÈÇø*/
+void RunSys2(CITY_NODE **pphd);                 /*ÏµÍ³¹¦ÄÜÄ£¿éµÄÑ¡ÔñºÍÔËĞĞ*/
+BOOL ExeFunction(int main_menu_num, int sub_menu_num);  /*¹¦ÄÜÄ£¿éµÄµ÷ÓÃ*/
+void CloseSys(CITY_NODE *phd);                  /*ÍË³öÏµÍ³*/
 BOOL ShowModule(char **pString, int n);
 
-BOOL LoadData(void);           /*æ•°æ®åŠ è½½*/
-BOOL LoadData2(void);           /*æ•°æ®åŠ è½½*/
-BOOL SaveData(void);           /*ä¿å­˜æ•°æ®*/
-BOOL BackupData(void);         /*å¤‡ä»½æ•°æ®*/
-BOOL RestoreData(void);        /*æ¢å¤æ•°æ®*/
-BOOL ExitSys(void);            /*é€€å‡ºç³»ç»Ÿ*/
-BOOL HelpTopic(void);          /*å¸®åŠ©ä¸»ä½“*/
-BOOL AboutDorm(void);          /*å…³äºç³»ç»Ÿ*/
+BOOL LoadData2(void);           /*Êı¾İ¼ÓÔØ*/
+BOOL SaveData(void);           /*±£´æÊı¾İ*/
+BOOL BackupData(void);         /*±¸·İÊı¾İ*/
+BOOL RestoreData(void);        /*»Ö¸´Êı¾İ*/
+BOOL ExitSys(void);            /*ÍË³öÏµÍ³*/
+BOOL HelpTopic(void);          /*°ïÖúÖ÷Ìå*/
+BOOL AboutDorm(void);          /*¹ØÓÚÏµÍ³*/
 
-BOOL MaintainCityInfo(void);           /*ç»´æŠ¤åŸå¸‚ä¿¡æ¯*/
-BOOL MaintainScenicAreaInfo(void);    /*ç»´æŠ¤æ™¯åŒºåŸºæœ¬ä¿¡æ¯*/
-BOOL MaintainAttractionInfo(void);   /*ç»´æŠ¤æ™¯ç‚¹åŸºæœ¬ä¿¡æ¯*/
+BOOL MaintainCityInfo(void);           /*Î¬»¤³ÇÊĞĞÅÏ¢*/
+BOOL MaintainScenicAreaInfo(void);    /*Î¬»¤¾°Çø»ù±¾ĞÅÏ¢*/
+BOOL MaintainAttractionInfo(void);   /*Î¬»¤¾°µã»ù±¾ĞÅÏ¢*/
 
 BOOL InsertCityNodeSubMenu(void);
 BOOL ModifyCityNodeSubMenu(void);
 BOOL DeleteCityNodeSubMenu(void);
-BOOL MaintainScenicAreaInfo(void);
 BOOL InsertScenicAreaNodeSubMenu(void);
 BOOL ModifyScenicAreaNodeSubMenu(void);
 BOOL DeleteScenicAreaNodeSubMenu(void);
-BOOL MaintainAttractionInfo(void);
 BOOL InsertAttractionNodeSubMenu(void);
 BOOL ModifyAttractionNodeSubMenu(void);
 BOOL DeleteAttractionNodeSubMenu(void);
 
-BOOL QueryCityInfo(void);           /*æŸ¥è¯¢åŸå¸‚ä¿¡æ¯*/
-BOOL QueryScenicAreaInfo(void);    /*æŸ¥è¯¢æ™¯åŒºåŸºæœ¬ä¿¡æ¯*/
-BOOL QueryAttractionInfo(void);   /*æŸ¥è¯¢æ™¯ç‚¹åŸºæœ¬ä¿¡æ¯*/
+BOOL QueryCityInfo(void);           /*²éÑ¯³ÇÊĞĞÅÏ¢*/
+BOOL QueryScenicAreaInfo(void);    /*²éÑ¯¾°Çø»ù±¾ĞÅÏ¢*/
+BOOL QueryAttractionInfo(void);   /*²éÑ¯¾°µã»ù±¾ĞÅÏ¢*/
 
-BOOL RandomView(void);    /*æŸ¥è¯¢æ™¯åŒºåŸºæœ¬ä¿¡æ¯*/
-BOOL StatusCityInfo(void);   /*æŸ¥è¯¢æ™¯ç‚¹åŸºæœ¬ä¿¡æ¯*/
+BOOL RandomView(void);    /*²éÑ¯¾°Çø»ù±¾ĞÅÏ¢*/
+BOOL StatusCityInfo(void);   /*²éÑ¯¾°µã»ù±¾ĞÅÏ¢*/
 
-BOOL MaintainSexCode(void);    /*ç»´æŠ¤æ€§åˆ«ä»£ç */
-BOOL MaintainTypeCode(void);   /*ç»´æŠ¤å­¦ç”Ÿç±»åˆ«ä»£ç */
-BOOL MaintainDormInfo(void);   /*ç»´æŠ¤å®¿èˆæ¥¼ä¿¡æ¯*/
-BOOL MaintainStuInfo(void);    /*ç»´æŠ¤å­¦ç”ŸåŸºæœ¬ä¿¡æ¯*/
-BOOL MaintainChargeInfo(void); /*ç»´æŠ¤å­¦ç”Ÿç¼´è´¹ä¿¡æ¯*/
-
-BOOL QuerySexCode(void);       /*æŸ¥è¯¢æ€§åˆ«ä»£ç */
-BOOL QueryTypeCode(void);      /*æŸ¥è¯¢å­¦ç”Ÿç±»åˆ«ä»£ç */
-BOOL QueryDormInfo(void);      /*æŸ¥è¯¢å®¿èˆæ¥¼ä¿¡æ¯*/
-BOOL QueryStuInfo(void);       /*æŸ¥è¯¢å­¦ç”ŸåŸºæœ¬ä¿¡æ¯*/
-BOOL QueryChargeInfo(void);    /*æŸ¥è¯¢ç¼´è´¹ä¿¡æ¯*/
-
-BOOL StatUsedRate(void);       /*ç»Ÿè®¡å…¥ä½ç‡*/
-BOOL StatStuType(void);        /*å­¦ç”Ÿåˆ†ç±»ç»Ÿè®¡*/
-BOOL StatCharge(void);         /*å­¦ç”Ÿç¼´è´¹ä¿¡æ¯ç»Ÿè®¡*/
-BOOL StatUncharge(void);       /*å­¦ç”Ÿæ¬ è´¹ä¿¡æ¯ç»Ÿè®¡*/
-
-BOOL InsertChargeNode(DORM_NODE *phd, CHARGE_NODE *pcharge_node);/*æ’å…¥ç¼´è´¹ä¿¡æ¯ç»“ç‚¹*/
-BOOL DelChargeNode(DORM_NODE *phd, char *stu_id, char *date);/*åˆ é™¤ç¼´è´¹ä¿¡æ¯ç»“ç‚¹*/
-BOOL ModifChargeNode(DORM_NODE *phd, char *stu_id, char *date, CHARGE_NODE *pcharge_node);/*ä¿®æ”¹ç¼´è´¹ä¿¡æ¯ç»“ç‚¹*/
-STU_NODE *SeekStuNode(DORM_NODE *phd, char *stu_id);  /*æŸ¥æ‰¾å­¦ç”ŸåŸºæœ¬ä¿¡æ¯ç»“ç‚¹*/
-CHARGE_NODE *SeekChargeNode(DORM_NODE *phd, char *stu_id, char *date);/*æŸ¥æ‰¾ç¼´è´¹ä¿¡æ¯ç»“ç‚¹*/
-STU_NODE *SeekStuNodeM (DORM_NODE *phd, int cond_num, ...);/*æ¨¡ç³ŠæŸ¥è¯¢å­¦ç”Ÿä¿¡æ¯ç»“ç‚¹*/
-BOOL JudgeStuNodeItem(STU_NODE *pstu_node, char *pcond);/*åˆ¤æ–­å­¦ç”Ÿä¿¡æ¯æ•°æ®é¡¹æ˜¯å¦æ»¡è¶³æŸ¥è¯¢æ¡ä»¶*/
-BOOL MatchString(char *string_item, char *pcond);/*å­—ç¬¦ä¸²ä¸æŸ¥è¯¢æ¡ä»¶æ˜¯å¦æ»¡è¶³æŒ‡å®šçš„è¿ç®—å…³ç³»*/
-BOOL MatchChar(char char_item, char *pcond);/*å­—ç¬¦ä¸æŸ¥è¯¢æ¡ä»¶æ˜¯å¦æ»¡è¶³æŒ‡å®šçš„è¿ç®—å…³ç³»*/
-UNCHARGE_NODE *StatUnchargeInfo(DORM_NODE *phd);        /*å­¦ç”Ÿæ¬ è´¹ä¿¡æ¯ç»Ÿè®¡*/
-void SortUnchargeInfo(UNCHARGE_NODE *puncharge_hd);     /*æ¬ è´¹ä¿¡æ¯é“¾æ’åº*/
-BOOL SaveSysData(DORM_NODE *phd);                       /*ä¿å­˜ç³»ç»Ÿæ•°æ®*/
-BOOL SaveSysData2(CITY_NODE *phd);                       /*ä¿å­˜ç³»ç»Ÿæ•°æ®*/
-BOOL BackupSysData(CITY_NODE *hd, char *filename);     /*å¤‡ä»½ç³»ç»Ÿæ•°æ®*/
-BOOL RestoreSysData(CITY_NODE **pphd, char *filename);  /*æ¢å¤ç³»ç»Ÿæ•°æ®*/
+BOOL SaveSysData2(CITY_NODE *phd);                       /*±£´æÏµÍ³Êı¾İ*/
+BOOL BackupSysData(CITY_NODE *hd, char *filename);     /*±¸·İÏµÍ³Êı¾İ*/
+BOOL RestoreSysData(CITY_NODE **pphd, char *filename);  /*»Ö¸´ÏµÍ³Êı¾İ*/
 
 
 // buliuzi
@@ -341,10 +293,14 @@ BOOL add_region(CITY_NODE *head, REGION_NODE *pregion_node);
 REGION_NODE *SeekRegionNodeByID(CITY_NODE *hd, char *id);
 BOOL ConfirmRegionInsertion(CITY_NODE *pcity_node, REGION_NODE *pregion_node);
 BOOL add_spot(REGION_NODE *pregion_node, SPOT_NODE *pspot_node);
-SPOT_NODE *SeekSpotNodeById(CITY_NODE *hd, char *id);
+SPOT_NODE *SeekSpotNodeByID(CITY_NODE *hd, char *id);
 BOOL ConfirmSpotInsertion(CITY_NODE *pcity_node, SPOT_NODE *pspot_node);
 
 BOOL delete_spot(CITY_NODE **head, char *id);
-BOOL delete_region(CITY_NODE **head, char *id);
+BOOL delete_region(CITY_NODE *head, char *id);
 BOOL delete_city(CITY_NODE **head, char *id);
+
+CITY_NODE *SeekCityNodeByName(CITY_NODE *hd, char *name);
+REGION_NODE *SeekRegionNodeByName(CITY_NODE *hd, char *name);
+SPOT_NODE * SeekSpotNodeByName(CITY_NODE *hd, char *name);
 #endif /**< TYPE_H_INCLUDED*/
