@@ -2,8 +2,7 @@
 
 unsigned long ul;
 
-int main()
-{
+int main() {
     COORD size = {SCR_COL, SCR_ROW};              /*窗口缓冲区大小*/
 
     gh_std_out = GetStdHandle(STD_OUTPUT_HANDLE); /* 获取标准输出设备句柄*/
@@ -20,8 +19,7 @@ int main()
     return 0;
 }
 
-BOOL LoadData2()
-{
+BOOL LoadData2() {
     int Re = 0;
     Re = CreatList2(&gp_head2);
     gc_sys_state |= Re;
@@ -31,8 +29,7 @@ BOOL LoadData2()
     return TRUE;
 }
 
-int CreatList2(CITY_NODE **phead)
-{
+int CreatList2(CITY_NODE **phead) {
     // 完成主链创建工作
     CITY_NODE *pCityNode = NULL, cityTmp, *hd = NULL;
     REGION_NODE *pRegionNode = NULL, regionTmp;
@@ -42,16 +39,15 @@ int CreatList2(CITY_NODE **phead)
 
     FILE *pFile = NULL;
 
-    if ((pFile = fopen(gp_city_info_filename, "rb")) == NULL)
-    {
+    if ((pFile = fopen(gp_city_info_filename, "rb")) == NULL) {
         printf("服装分类信息数据文件打开失败!\n");
         return re;
     }
     printf("服装分类信息数据文件打开成功!\n");
 
     printf("城市信息链表文件加载成功！\n");
-    while(fread(&cityTmp, sizeof(CITY_NODE), 1, pFile) == 1) {
-        pCityNode = (CITY_NODE *)malloc(sizeof(CITY_NODE));
+    while (fread(&cityTmp, sizeof(CITY_NODE), 1, pFile) == 1) {
+        pCityNode = (CITY_NODE *) malloc(sizeof(CITY_NODE));
         *pCityNode = cityTmp;
         pCityNode->rnext = NULL;
         pCityNode->next = hd;
@@ -59,8 +55,7 @@ int CreatList2(CITY_NODE **phead)
     }
     fclose(pFile);
 
-    if (hd == NULL)
-    {
+    if (hd == NULL) {
         printf("城市信息链表创建失败！\n");
         return re;
     }
@@ -69,26 +64,25 @@ int CreatList2(CITY_NODE **phead)
     re += 4;
 
     ;
-    if((pFile = fopen(gp_region_info_filename, "rb")) == NULL) {
+    if ((pFile = fopen(gp_region_info_filename, "rb")) == NULL) {
         printf("景区链表文件打开错误！\n");
         return re;
     }
     printf("景区信息链表文件加载成功！\n");
 
-    while(fread(&regionTmp, sizeof(REGION_NODE),1,pFile)==1) {
-        pRegionNode = (REGION_NODE*)malloc(sizeof(REGION_NODE));
+    while (fread(&regionTmp, sizeof(REGION_NODE), 1, pFile) == 1) {
+        pRegionNode = (REGION_NODE *) malloc(sizeof(REGION_NODE));
         *pRegionNode = regionTmp;
 
-        for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-            if(strcmp(pCityNode->city_id,pRegionNode->city_id)==0) {
+        for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+            if (strcmp(pCityNode->city_id, pRegionNode->city_id) == 0) {
                 break;
             }
         }
 
-        if(pCityNode == NULL) {
+        if (pCityNode == NULL) {
             free(pRegionNode);
-        }
-        else {
+        } else {
             pRegionNode->next = pCityNode->rnext;
             pRegionNode->snext = NULL;
             pCityNode->rnext = pRegionNode;
@@ -96,34 +90,34 @@ int CreatList2(CITY_NODE **phead)
     }
     fclose(pFile);
 
-    if((pFile = fopen(gp_spot_info_filename, "rb")) == NULL) {
+    if ((pFile = fopen(gp_spot_info_filename, "rb")) == NULL) {
         printf("景点链表文件打开错误！\n");
         return re;
     }
     printf("景点信息链表文件加载成功！\n");
     re += 16;
 
-    while(fread(&spotTmp, sizeof(SPOT_NODE),1,pFile)) {
-        pSpotNode = (SPOT_NODE*)malloc(sizeof(SPOT_NODE));
+    while (fread(&spotTmp, sizeof(SPOT_NODE), 1, pFile)) {
+        pSpotNode = (SPOT_NODE *) malloc(sizeof(SPOT_NODE));
         *pSpotNode = spotTmp;
         int find = 0;
 
-        for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-            for(pRegionNode=pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
-                if((strcmp(pCityNode->city_id, pRegionNode->city_id)==0)&&(strcmp(pRegionNode->region_id,pSpotNode->region_id)==0)) {
+        for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+            for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
+                if ((strcmp(pCityNode->city_id, pRegionNode->city_id) == 0) &&
+                    (strcmp(pRegionNode->region_id, pSpotNode->region_id) == 0)) {
                     find = 1;
                     break;
                 }
             }
-            if(find == 1){
+            if (find == 1) {
                 break;
             }
         }
-        if(find) {
+        if (find) {
             pSpotNode->next = pRegionNode->snext;
             pRegionNode->snext = pSpotNode;
-        }
-        else {
+        } else {
             free(pSpotNode);
         }
     }
@@ -140,8 +134,7 @@ int CreatList2(CITY_NODE **phead)
  *
  * 调用说明:
  */
-void InitInterface()
-{
+void InitInterface() {
     WORD att = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY
                | BACKGROUND_BLUE;  /*黄色前景和蓝色背景*/
 
@@ -150,8 +143,8 @@ void InitInterface()
     ClearScreen();  /* 清屏*/
 
     /*创建弹出窗口信息堆栈，将初始化后的屏幕窗口当作第一层弹出窗口*/
-    gp_scr_att = (char *)calloc(SCR_COL * SCR_ROW, sizeof(char));/*屏幕字符属性*/
-    gp_top_layer = (LAYER_NODE *)malloc(sizeof(LAYER_NODE));
+    gp_scr_att = (char *) calloc(SCR_COL * SCR_ROW, sizeof(char));/*屏幕字符属性*/
+    gp_top_layer = (LAYER_NODE *) malloc(sizeof(LAYER_NODE));
     gp_top_layer->LayerNo = 0;      /*弹出窗口的层号为0*/
     gp_top_layer->rcArea.Left = 0;  /*弹出窗口的区域为整个屏幕窗口*/
     gp_top_layer->rcArea.Top = 0;
@@ -176,14 +169,13 @@ void InitInterface()
  *
  * 调用说明:
  */
-void ClearScreen(void)
-{
+void ClearScreen(void) {
     CONSOLE_SCREEN_BUFFER_INFO bInfo;
     COORD home = {0, 0};
     unsigned long size;
 
-    GetConsoleScreenBufferInfo( gh_std_out, &bInfo );/*取屏幕缓冲区信息*/
-    size =  bInfo.dwSize.X * bInfo.dwSize.Y; /*计算屏幕缓冲区字符单元数*/
+    GetConsoleScreenBufferInfo(gh_std_out, &bInfo);/*取屏幕缓冲区信息*/
+    size = bInfo.dwSize.X * bInfo.dwSize.Y; /*计算屏幕缓冲区字符单元数*/
 
     /*将屏幕缓冲区所有单元的字符属性设置为当前屏幕缓冲区字符属性*/
     FillConsoleOutputAttribute(gh_std_out, bInfo.wAttributes, size, home, &ul);
@@ -203,8 +195,7 @@ void ClearScreen(void)
  *
  * 调用说明:
  */
-void ShowMenu()
-{
+void ShowMenu() {
     CONSOLE_SCREEN_BUFFER_INFO bInfo;
     CONSOLE_CURSOR_INFO lpCur;
     COORD size;
@@ -213,11 +204,11 @@ void ShowMenu()
     int PosA = 2, PosB;
     char ch;
 
-    GetConsoleScreenBufferInfo( gh_std_out, &bInfo );
+    GetConsoleScreenBufferInfo(gh_std_out, &bInfo);
     size.X = bInfo.dwSize.X;
     size.Y = 1;
     SetConsoleCursorPosition(gh_std_out, pos);
-    for (i=0; i < 5; i++) /*在窗口第一行第一列处输出主菜单项*/
+    for (i = 0; i < 5; i++) /*在窗口第一行第一列处输出主菜单项*/
     {
         printf("  %s  ", ga_main_menu[i]);
     }
@@ -227,21 +218,19 @@ void ShowMenu()
     SetConsoleCursorInfo(gh_std_out, &lpCur);  /*隐藏光标*/
 
     /*申请动态存储区作为存放菜单条屏幕区字符信息的缓冲区*/
-    gp_buff_menubar_info = (CHAR_INFO *)malloc(size.X * size.Y * sizeof(CHAR_INFO));
-    SMALL_RECT rcMenu ={0, 0, size.X-1, 0} ;
+    gp_buff_menubar_info = (CHAR_INFO *) malloc(size.X * size.Y * sizeof(CHAR_INFO));
+    SMALL_RECT rcMenu = {0, 0, size.X - 1, 0};
 
     /*将窗口第一行的内容读入到存放菜单条屏幕区字符信息的缓冲区中*/
     ReadConsoleOutput(gh_std_out, gp_buff_menubar_info, size, pos, &rcMenu);
 
     /*将这一行中英文字母置为红色，其他字符单元置为白底黑字*/
-    for (i=0; i<size.X; i++)
-    {
-        (gp_buff_menubar_info+i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
-                                               | BACKGROUND_RED;
-        ch = (char)((gp_buff_menubar_info+i)->Char.AsciiChar);
-        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
-        {
-            (gp_buff_menubar_info+i)->Attributes |= FOREGROUND_RED;
+    for (i = 0; i < size.X; i++) {
+        (gp_buff_menubar_info + i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
+                                                 | BACKGROUND_RED;
+        ch = (char) ((gp_buff_menubar_info + i)->Char.AsciiChar);
+        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
+            (gp_buff_menubar_info + i)->Attributes |= FOREGROUND_RED;
         }
     }
 
@@ -252,16 +241,14 @@ void ShowMenu()
 
     /*将菜单项置为热区，热区编号为菜单项号，热区类型为0(按钮型)*/
     i = 0;
-    do
-    {
+    do {
         PosB = PosA + strlen(ga_main_menu[i]);  /*定位第i+1号菜单项的起止位置*/
-        for (j=PosA; j<PosB; j++)
-        {
-            gp_scr_att[j] |= (i+1) << 2; /*设置菜单项所在字符单元的属性值*/
+        for (j = PosA; j < PosB; j++) {
+            gp_scr_att[j] |= (i + 1) << 2; /*设置菜单项所在字符单元的属性值*/
         }
         PosA = PosB + 4;
         i++;
-    } while (i<5);
+    } while (i < 5);
 
     TagMainMenu(gi_sel_menu);  /*在选中主菜单项上做标记，gi_sel_menu初值为1*/
 
@@ -277,28 +264,25 @@ void ShowMenu()
  *
  * 调用说明: 状态条字符属性为白底黑字, 初始状态无状态信息.
  */
-void ShowState()
-{
+void ShowState() {
     CONSOLE_SCREEN_BUFFER_INFO bInfo;
     COORD size;
     COORD pos = {0, 0};
     int i;
 
-    GetConsoleScreenBufferInfo( gh_std_out, &bInfo );
+    GetConsoleScreenBufferInfo(gh_std_out, &bInfo);
     size.X = bInfo.dwSize.X;
     size.Y = 1;
-    SMALL_RECT rcMenu ={0, bInfo.dwSize.Y-1, size.X-1, bInfo.dwSize.Y-1};
+    SMALL_RECT rcMenu = {0, bInfo.dwSize.Y - 1, size.X - 1, bInfo.dwSize.Y - 1};
 
-    if (gp_buff_stateBar_info == NULL)
-    {
-        gp_buff_stateBar_info = (CHAR_INFO *)malloc(size.X * size.Y * sizeof(CHAR_INFO));
+    if (gp_buff_stateBar_info == NULL) {
+        gp_buff_stateBar_info = (CHAR_INFO *) malloc(size.X * size.Y * sizeof(CHAR_INFO));
         ReadConsoleOutput(gh_std_out, gp_buff_stateBar_info, size, pos, &rcMenu);
     }
 
-    for (i=0; i<size.X; i++)
-    {
-        (gp_buff_stateBar_info+i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
-                                                | BACKGROUND_RED;
+    for (i = 0; i < size.X; i++) {
+        (gp_buff_stateBar_info + i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
+                                                  | BACKGROUND_RED;
 /*
         ch = (char)((gp_buff_stateBar_info+i)->Char.AsciiChar);
         if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
@@ -322,8 +306,7 @@ void ShowState()
  *
  * 调用说明:
  */
-void TagMainMenu(int num)
-{
+void TagMainMenu(int num) {
     CONSOLE_SCREEN_BUFFER_INFO bInfo;
     COORD size;
     COORD pos = {0, 0};
@@ -335,53 +318,46 @@ void TagMainMenu(int num)
     {
         PosA = 0;
         PosB = 0;
-    }
-    else  /*否则，定位选中主菜单项的起止位置: PosA为起始位置, PosB为截止位置*/
+    } else  /*否则，定位选中主菜单项的起止位置: PosA为起始位置, PosB为截止位置*/
     {
-        for (i=1; i<num; i++)
-        {
-            PosA += strlen(ga_main_menu[i-1]) + 4;
+        for (i = 1; i < num; i++) {
+            PosA += strlen(ga_main_menu[i - 1]) + 4;
         }
-        PosB = PosA + strlen(ga_main_menu[num-1]);
+        PosB = PosA + strlen(ga_main_menu[num - 1]);
     }
 
-    GetConsoleScreenBufferInfo( gh_std_out, &bInfo );
+    GetConsoleScreenBufferInfo(gh_std_out, &bInfo);
     size.X = bInfo.dwSize.X;
     size.Y = 1;
 
     /*去除选中菜单项前面的菜单项选中标记*/
-    for (i=0; i<PosA; i++)
-    {
-        (gp_buff_menubar_info+i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
-                                               | BACKGROUND_RED;
-        ch = (gp_buff_menubar_info+i)->Char.AsciiChar;
-        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
-        {
-            (gp_buff_menubar_info+i)->Attributes |= FOREGROUND_RED;
+    for (i = 0; i < PosA; i++) {
+        (gp_buff_menubar_info + i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
+                                                 | BACKGROUND_RED;
+        ch = (gp_buff_menubar_info + i)->Char.AsciiChar;
+        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
+            (gp_buff_menubar_info + i)->Attributes |= FOREGROUND_RED;
         }
     }
 
     /*在选中菜单项上做标记，黑底白字*/
-    for (i=PosA; i<PosB; i++)
-    {
-        (gp_buff_menubar_info+i)->Attributes = FOREGROUND_BLUE | FOREGROUND_GREEN
-                                               | FOREGROUND_RED;
+    for (i = PosA; i < PosB; i++) {
+        (gp_buff_menubar_info + i)->Attributes = FOREGROUND_BLUE | FOREGROUND_GREEN
+                                                 | FOREGROUND_RED;
     }
 
     /*去除选中菜单项后面的菜单项选中标记*/
-    for (i=PosB; i<bInfo.dwSize.X; i++)
-    {
-        (gp_buff_menubar_info+i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
-                                               | BACKGROUND_RED;
-        ch = (char)((gp_buff_menubar_info+i)->Char.AsciiChar);
-        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
-        {
-            (gp_buff_menubar_info+i)->Attributes |= FOREGROUND_RED;
+    for (i = PosB; i < bInfo.dwSize.X; i++) {
+        (gp_buff_menubar_info + i)->Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN
+                                                 | BACKGROUND_RED;
+        ch = (char) ((gp_buff_menubar_info + i)->Char.AsciiChar);
+        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
+            (gp_buff_menubar_info + i)->Attributes |= FOREGROUND_RED;
         }
     }
 
     /*将做好标记的菜单条信息写到窗口第一行*/
-    SMALL_RECT rcMenu ={0, 0, size.X-1, 0};
+    SMALL_RECT rcMenu = {0, 0, size.X - 1, 0};
     WriteConsoleOutput(gh_std_out, gp_buff_menubar_info, size, pos, &rcMenu);
 
     return;
@@ -396,8 +372,7 @@ void TagMainMenu(int num)
  *
  * 调用说明:
  */
-void CloseSys(CITY_NODE *hd)
-{
+void CloseSys(CITY_NODE *hd) {
     CITY_NODE *pCityNode1 = hd, *pCityNode2;
     REGION_NODE *pRegionNode1, *pRegionNode2;
     SPOT_NODE *pSpotNode1, *pSpotNode2;
@@ -441,8 +416,7 @@ void CloseSys(CITY_NODE *hd)
     return;
 }
 
-void RunSys2(CITY_NODE **phead)
-{
+void RunSys2(CITY_NODE **phead) {
     INPUT_RECORD inRec;
     DWORD res;
     COORD pos = {0, 0};
@@ -451,8 +425,7 @@ void RunSys2(CITY_NODE **phead)
     int cNo, cAtt;      /*cNo:字符单元层号, cAtt:字符单元属性*/
     char vkc, asc;      /*vkc:虚拟键代码, asc:字符的ASCII码值*/
 
-    while (bRet)
-    {
+    while (bRet) {
         /*从控制台输入缓冲区中读一条记录*/
         ReadConsoleInput(gh_std_in, &inRec, 1, &res);
 
@@ -467,14 +440,12 @@ void RunSys2(CITY_NODE **phead)
                  * cAtt != gi_sel_menu 表明该位置的主菜单项未被选中
                  * gp_top_layer->LayerNo > 0 表明当前有子菜单弹出
                  */
-                if (cAtt > 0 && cAtt != gi_sel_menu && gp_top_layer->LayerNo > 0)
-                {
+                if (cAtt > 0 && cAtt != gi_sel_menu && gp_top_layer->LayerNo > 0) {
                     PopOff();            /*关闭弹出的子菜单*/
                     gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
                     PopMenu(cAtt);       /*弹出鼠标所在主菜单项对应的子菜单*/
                 }
-            }
-            else if (cAtt > 0) /*鼠标所在位置为弹出子菜单的菜单项字符单元*/
+            } else if (cAtt > 0) /*鼠标所在位置为弹出子菜单的菜单项字符单元*/
             {
                 TagSubMenu(cAtt); /*在该子菜单项上做选中标记*/
             }
@@ -489,13 +460,11 @@ void RunSys2(CITY_NODE **phead)
                         PopMenu(cAtt);   /*弹出鼠标所在主菜单项对应的子菜单*/
                     }
                         /*如果该位置不属于主菜单项字符单元，且有子菜单弹出*/
-                    else if (gp_top_layer->LayerNo > 0)
-                    {
+                    else if (gp_top_layer->LayerNo > 0) {
                         PopOff();            /*关闭弹出的子菜单*/
                         gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
                     }
-                }
-                else /*层号不为0，表明该位置被弹出子菜单覆盖*/
+                } else /*层号不为0，表明该位置被弹出子菜单覆盖*/
                 {
                     if (cAtt > 0) /*如果该位置处于热区(子菜单项字符单元)*/
                     {
@@ -506,9 +475,8 @@ void RunSys2(CITY_NODE **phead)
                         bRet = ExeFunction(gi_sel_menu, cAtt);
                     }
                 }
-            }
-            else if (inRec.Event.MouseEvent.dwButtonState
-                     == RIGHTMOST_BUTTON_PRESSED) /*如果按下鼠标右键*/
+            } else if (inRec.Event.MouseEvent.dwButtonState
+                       == RIGHTMOST_BUTTON_PRESSED) /*如果按下鼠标右键*/
             {
                 if (cNo == 0) /*层号为0，表明该位置未被弹出子菜单覆盖*/
                 {
@@ -516,9 +484,8 @@ void RunSys2(CITY_NODE **phead)
                     gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
                 }
             }
-        }
-        else if (inRec.EventType == KEY_EVENT  /*如果记录由按键产生*/
-                 && inRec.Event.KeyEvent.bKeyDown) /*且键被按下*/
+        } else if (inRec.EventType == KEY_EVENT  /*如果记录由按键产生*/
+                   && inRec.Event.KeyEvent.bKeyDown) /*且键被按下*/
         {
             vkc = inRec.Event.KeyEvent.wVirtualKeyCode; /*获取按键的虚拟键码*/
             asc = inRec.Event.KeyEvent.uChar.AsciiChar; /*获取按键的ASC码*/
@@ -532,19 +499,16 @@ void RunSys2(CITY_NODE **phead)
                     gi_sel_sub_menu = 0; /*将选中子菜单项的项号置为0*/
                 }
                 bRet = ExeFunction(5, 1);  /*运行帮助主题功能函数*/
-            }
-            else if (inRec.Event.KeyEvent.dwControlKeyState
-                     & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
-            { /*如果按下左或右Alt键*/
+            } else if (inRec.Event.KeyEvent.dwControlKeyState
+                       & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) { /*如果按下左或右Alt键*/
                 switch (vkc)  /*判断组合键Alt+字母*/
                 {
                     case 88:  /*Alt+X 退出*/
-                        if (gp_top_layer->LayerNo != 0)
-                        {
+                        if (gp_top_layer->LayerNo != 0) {
                             PopOff();
                             gi_sel_sub_menu = 0;
                         }
-                        bRet = ExeFunction(1,4);
+                        bRet = ExeFunction(1, 4);
                         break;
                     case 70:  /*Alt+F*/
                         PopMenu(1);
@@ -562,8 +526,7 @@ void RunSys2(CITY_NODE **phead)
                         PopMenu(5);
                         break;
                 }
-            }
-            else if (asc == 0) /*其他控制键的处理*/
+            } else if (asc == 0) /*其他控制键的处理*/
             {
                 if (gp_top_layer->LayerNo == 0) /*如果未弹出子菜单*/
                 {
@@ -571,16 +534,14 @@ void RunSys2(CITY_NODE **phead)
                     {
                         case 37:
                             gi_sel_menu--;
-                            if (gi_sel_menu == 0)
-                            {
+                            if (gi_sel_menu == 0) {
                                 gi_sel_menu = 5;
                             }
                             TagMainMenu(gi_sel_menu);
                             break;
                         case 39:
                             gi_sel_menu++;
-                            if (gi_sel_menu == 6)
-                            {
+                            if (gi_sel_menu == 6) {
                                 gi_sel_menu = 1;
                             }
                             TagMainMenu(gi_sel_menu);
@@ -590,19 +551,16 @@ void RunSys2(CITY_NODE **phead)
                             TagSubMenu(1);
                             break;
                     }
-                }
-                else  /*已弹出子菜单时*/
+                } else  /*已弹出子菜单时*/
                 {
-                    for (loc=0,i=1; i<gi_sel_menu; i++)
-                    {
-                        loc += ga_sub_menu_count[i-1];
+                    for (loc = 0, i = 1; i < gi_sel_menu; i++) {
+                        loc += ga_sub_menu_count[i - 1];
                     }  /*计算该子菜单中的第一项在子菜单字符串数组中的位置(下标)*/
                     switch (vkc) /*方向键(左、右、上、下)的处理*/
                     {
                         case 37:
                             gi_sel_menu--;
-                            if (gi_sel_menu < 1)
-                            {
+                            if (gi_sel_menu < 1) {
                                 gi_sel_menu = 5;
                             }
                             TagMainMenu(gi_sel_menu);
@@ -612,20 +570,17 @@ void RunSys2(CITY_NODE **phead)
                             break;
                         case 38:
                             num = gi_sel_sub_menu - 1;
-                            if (num < 1)
-                            {
-                                num = ga_sub_menu_count[gi_sel_menu-1];
+                            if (num < 1) {
+                                num = ga_sub_menu_count[gi_sel_menu - 1];
                             }
-                            if (strlen(ga_sub_menu[loc+num-1]) == 0)
-                            {
+                            if (strlen(ga_sub_menu[loc + num - 1]) == 0) {
                                 num--;
                             }
                             TagSubMenu(num);
                             break;
                         case 39:
                             gi_sel_menu++;
-                            if (gi_sel_menu > 5)
-                            {
+                            if (gi_sel_menu > 5) {
                                 gi_sel_menu = 1;
                             }
                             TagMainMenu(gi_sel_menu);
@@ -635,24 +590,20 @@ void RunSys2(CITY_NODE **phead)
                             break;
                         case 40:
                             num = gi_sel_sub_menu + 1;
-                            if (num > ga_sub_menu_count[gi_sel_menu-1])
-                            {
+                            if (num > ga_sub_menu_count[gi_sel_menu - 1]) {
                                 num = 1;
                             }
-                            if (strlen(ga_sub_menu[loc+num-1]) == 0)
-                            {
+                            if (strlen(ga_sub_menu[loc + num - 1]) == 0) {
                                 num++;
                             }
                             TagSubMenu(num);
                             break;
                     }
                 }
-            }
-            else if ((asc-vkc == 0) || (asc-vkc == 32)){  /*按下普通键*/
+            } else if ((asc - vkc == 0) || (asc - vkc == 32)) {  /*按下普通键*/
                 if (gp_top_layer->LayerNo == 0)  /*如果未弹出子菜单*/
                 {
-                    switch (vkc)
-                    {
+                    switch (vkc) {
                         case 70: /*f或F*/
                             PopMenu(1);
                             break;
@@ -673,37 +624,31 @@ void RunSys2(CITY_NODE **phead)
                             TagSubMenu(1);
                             break;
                     }
-                }
-                else /*已弹出子菜单时的键盘输入处理*/
+                } else /*已弹出子菜单时的键盘输入处理*/
                 {
                     if (vkc == 27) /*如果按下ESC键*/
                     {
                         PopOff();
                         gi_sel_sub_menu = 0;
-                    }
-                    else if(vkc == 13) /*如果按下回车键*/
+                    } else if (vkc == 13) /*如果按下回车键*/
                     {
                         num = gi_sel_sub_menu;
                         PopOff();
                         gi_sel_sub_menu = 0;
                         bRet = ExeFunction(gi_sel_menu, num);
-                    }
-                    else /*其他普通键的处理*/
+                    } else /*其他普通键的处理*/
                     {
                         /*计算该子菜单中的第一项在子菜单字符串数组中的位置(下标)*/
-                        for (loc=0,i=1; i<gi_sel_menu; i++)
-                        {
-                            loc += ga_sub_menu_count[i-1];
+                        for (loc = 0, i = 1; i < gi_sel_menu; i++) {
+                            loc += ga_sub_menu_count[i - 1];
                         }
 
                         /*依次与当前子菜单中每一项的代表字符进行比较*/
-                        for (i=loc; i<loc+ga_sub_menu_count[gi_sel_menu-1]; i++)
-                        {
-                            if (strlen(ga_sub_menu[i])>0 && vkc==ga_sub_menu[i][1])
-                            { /*如果匹配成功*/
+                        for (i = loc; i < loc + ga_sub_menu_count[gi_sel_menu - 1]; i++) {
+                            if (strlen(ga_sub_menu[i]) > 0 && vkc == ga_sub_menu[i][1]) { /*如果匹配成功*/
                                 PopOff();
                                 gi_sel_sub_menu = 0;
-                                bRet = ExeFunction(gi_sel_menu, i-loc+1);
+                                bRet = ExeFunction(gi_sel_menu, i - loc + 1);
                             }
                         }
                     }
@@ -713,8 +658,7 @@ void RunSys2(CITY_NODE **phead)
     }
 }
 
-void PopPrompt(int num)
-{
+void PopPrompt(int num) {
 
 }
 
@@ -726,11 +670,9 @@ int PopInputMenu(char *plabel_name[], int label_num, char *ppcondition[], int ho
     WORD att;
     int iHot = 1, n = label_num;
     int i, maxlen, str_len;
-    for (i=0,maxlen=0; i<n; i++)
-    {
+    for (i = 0, maxlen = 0; i < n; i++) {
         str_len = strlen(plabel_name[i]);
-        if (maxlen < str_len)
-        {
+        if (maxlen < str_len) {
             maxlen = str_len;
         }
     }
@@ -739,59 +681,57 @@ int PopInputMenu(char *plabel_name[], int label_num, char *ppcondition[], int ho
     pos.X = maxlen + 6;
     pos.Y = n;
     rcPop.Left = (SCR_COL - pos.X) / 2;
-    rcPop.Right = rcPop.Left + 27+6;
-    rcPop.Top = (SCR_ROW - pos.Y) / 2-10;
+    rcPop.Right = rcPop.Left + 27 + 6;
+    rcPop.Top = (SCR_ROW - pos.Y) / 2 - 10;
     rcPop.Bottom = rcPop.Top + pos.Y + n;
 
-    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN;  /*弹出窗口区域青底黑字*/
     labels.num = n;
     labels.ppLabel = plabel_name;
     COORD aLoc[n];
 
 
     /******设置标签束的输出位置*****/
-    for(i = 0; i < n-1; i++) {
+    for (i = 0; i < n - 1; i++) {
         if (i == 0) {
             aLoc[i].X = rcPop.Left + 2;
             aLoc[i].Y = rcPop.Top + 1;
-        }
-        else {
+        } else {
             aLoc[i].X = rcPop.Left + 2;
-            aLoc[i].Y = aLoc[i-1].Y + 2;
+            aLoc[i].Y = aLoc[i - 1].Y + 2;
         }
     }
-    aLoc[n-1].X = rcPop.Left + (pos.X - strlen(plabel_name[n-1]))/2;
-    aLoc[n-1].Y = aLoc[n-2].Y + 2;
+    aLoc[n - 1].X = rcPop.Left + (pos.X - strlen(plabel_name[n - 1])) / 2;
+    aLoc[n - 1].Y = aLoc[n - 2].Y + 2;
     labels.pLoc = aLoc;
 
     /****设置热区信息****/
     areas.num = hot_area_num;
     SMALL_RECT aArea[hot_area_num];
     char aSort[hot_area_num];
-    for (i = 0; i < hot_area_num-2; i++) {
+    for (i = 0; i < hot_area_num - 2; i++) {
         aSort[i] = 1;
     }
-    aSort[hot_area_num-2] = 0;
-    aSort[hot_area_num-1] = 0;
+    aSort[hot_area_num - 2] = 0;
+    aSort[hot_area_num - 1] = 0;
     char aTag[hot_area_num];
     for (i = 0; i < hot_area_num; i++) {
-        aTag[i] = i+1;
+        aTag[i] = i + 1;
     }
-    for (i=0; i<hot_area_num-2; i++)
-    {
-        aArea[i].Left = aLoc[i+1].X + strlen(plabel_name[i+1]);
-        aArea[i].Top = aLoc[i+1].Y ;
-        aArea[i].Right = aLoc[i+1].X + 27;
-        aArea[i].Bottom = aLoc[i+1].Y;
+    for (i = 0; i < hot_area_num - 2; i++) {
+        aArea[i].Left = aLoc[i + 1].X + strlen(plabel_name[i + 1]);
+        aArea[i].Top = aLoc[i + 1].Y;
+        aArea[i].Right = aLoc[i + 1].X + 27;
+        aArea[i].Bottom = aLoc[i + 1].Y;
     }
-    aArea[hot_area_num-2].Left = aLoc[hot_area_num-1].X ;
-    aArea[hot_area_num-2].Top = aLoc[hot_area_num-1].Y ;
-    aArea[hot_area_num-2].Right = aLoc[hot_area_num-1].X + 3;
-    aArea[hot_area_num-2].Bottom = aLoc[hot_area_num-1].Y;
-    aArea[hot_area_num-1].Left = aLoc[hot_area_num-1].X + 8;
-    aArea[hot_area_num-1].Top = aLoc[hot_area_num-1].Y ;
-    aArea[hot_area_num-1].Right = aLoc[hot_area_num-1].X + 11;
-    aArea[hot_area_num-1].Bottom = aLoc[hot_area_num-1].Y;
+    aArea[hot_area_num - 2].Left = aLoc[hot_area_num - 1].X;
+    aArea[hot_area_num - 2].Top = aLoc[hot_area_num - 1].Y;
+    aArea[hot_area_num - 2].Right = aLoc[hot_area_num - 1].X + 3;
+    aArea[hot_area_num - 2].Bottom = aLoc[hot_area_num - 1].Y;
+    aArea[hot_area_num - 1].Left = aLoc[hot_area_num - 1].X + 8;
+    aArea[hot_area_num - 1].Top = aLoc[hot_area_num - 1].Y;
+    aArea[hot_area_num - 1].Right = aLoc[hot_area_num - 1].X + 11;
+    aArea[hot_area_num - 1].Bottom = aLoc[hot_area_num - 1].Y;
 
     areas.pArea = aArea;
     areas.pSort = aSort;
@@ -799,14 +739,12 @@ int PopInputMenu(char *plabel_name[], int label_num, char *ppcondition[], int ho
     PopUp(&rcPop, att, &labels, &areas);
     DrawBox(&rcPop);
     pos.X = rcPop.Left + 2;
-    pos.Y = aLoc[hot_area_num-1].Y+1;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    pos.Y = aLoc[hot_area_num - 1].Y + 1;
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
 
-    if (DealInput2(&areas, &iHot, ppcondition) != 13)
-    {
+    if (DealInput2(&areas, &iHot, ppcondition) != 13) {
         return -1;
-    }
-    else {
+    } else {
         return iHot;
     }
 }
@@ -820,11 +758,9 @@ int PopChoiceMenu(char *plabel_name[], int choice_num) {
     int iHot = 1, n = choice_num;
     int i, maxlen, str_len;
 
-    for (i=0,maxlen=0; i<n; i++)
-    {
+    for (i = 0, maxlen = 0; i < n; i++) {
         str_len = strlen(plabel_name[i]);
-        if (maxlen < str_len)
-        {
+        if (maxlen < str_len) {
             maxlen = str_len;
         }
     }
@@ -834,25 +770,24 @@ int PopChoiceMenu(char *plabel_name[], int choice_num) {
     pos.Y = n + 5;
     rcPop.Left = (SCR_COL - pos.X) / 2;
     rcPop.Right = rcPop.Left + pos.X - 1;
-    rcPop.Top = (SCR_ROW - pos.Y) / 2-8;
+    rcPop.Top = (SCR_ROW - pos.Y) / 2 - 8;
     rcPop.Bottom = rcPop.Top + pos.Y - 1;
 
-    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN;  /*弹出窗口区域青底黑字*/
     labels.num = n;
     labels.ppLabel = plabel_name;
     COORD aLoc[n];
 
 
     /******设置标签束的输出位置*****/
-    for (i=0; i<n; i++)
-    {
+    for (i = 0; i < n; i++) {
         aLoc[i].X = rcPop.Left + 3;
         aLoc[i].Y = rcPop.Top + 2 + i;
 
     }
-    str_len = strlen(plabel_name[n-1]);
-    aLoc[n-1].X = rcPop.Left + 3 + (maxlen-str_len)/2;
-    aLoc[n-1].Y = aLoc[n-1].Y + 2;
+    str_len = strlen(plabel_name[n - 1]);
+    aLoc[n - 1].X = rcPop.Left + 3 + (maxlen - str_len) / 2;
+    aLoc[n - 1].Y = aLoc[n - 1].Y + 2;
 
     labels.pLoc = aLoc;
 
@@ -860,10 +795,9 @@ int PopChoiceMenu(char *plabel_name[], int choice_num) {
     SMALL_RECT aArea[n];
     char aSort[n];
     char aTag[n];
-    for (i=0; i<n; i++)
-    {
+    for (i = 0; i < n; i++) {
         aArea[i].Left = aLoc[i].X;
-        aArea[i].Top = aLoc[i].Y ;
+        aArea[i].Top = aLoc[i].Y;
         aArea[i].Right = aLoc[i].X + strlen(plabel_name[i]) - 1;
         aArea[i].Bottom = aLoc[i].Y;
         aSort[i] = 0;
@@ -877,13 +811,13 @@ int PopChoiceMenu(char *plabel_name[], int choice_num) {
     DrawBox(&rcPop);
     pos.X = rcPop.Left + 1;
     pos.Y = rcPop.Top + 2 + n;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
-    if (DealInput2(&areas, &iHot, NULL) != 13)
-    {
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
+    if (DealInput2(&areas, &iHot, NULL) != 13) {
         return -1;
     }
     return iHot;
 }
+
 /**
  * 函数名称: PopMenu
  * 函数功能: 弹出指定主菜单项对应的子菜单.
@@ -893,8 +827,7 @@ int PopChoiceMenu(char *plabel_name[], int choice_num) {
  *
  * 调用说明:
  */
-void PopMenu(int num)
-{
+void PopMenu(int num) {
     LABEL_BUNDLE labels;
     HOT_AREA areas;
     SMALL_RECT rcPop;
@@ -910,8 +843,7 @@ void PopMenu(int num)
             PopOff();
             gi_sel_sub_menu = 0;
         }
-    }
-    else if (gp_top_layer->LayerNo != 0) /*若已弹出该子菜单，则返回*/
+    } else if (gp_top_layer->LayerNo != 0) /*若已弹出该子菜单，则返回*/
     {
         return;
     }
@@ -921,15 +853,14 @@ void PopMenu(int num)
     LocSubMenu(gi_sel_menu, &rcPop); /*计算弹出子菜单的区域位置, 存放在rcPop中*/
 
     /*计算该子菜单中的第一项在子菜单字符串数组中的位置(下标)*/
-    for (i=1; i<gi_sel_menu; i++)
-    {
-        loc += ga_sub_menu_count[i-1];
+    for (i = 1; i < gi_sel_menu; i++) {
+        loc += ga_sub_menu_count[i - 1];
     }
     /*将该组子菜单项项名存入标签束结构变量*/
     labels.ppLabel = ga_sub_menu + loc;   /*标签束第一个标签字符串的地址*/
-    labels.num = ga_sub_menu_count[gi_sel_menu-1]; /*标签束中标签字符串的个数*/
+    labels.num = ga_sub_menu_count[gi_sel_menu - 1]; /*标签束中标签字符串的个数*/
     COORD aLoc[labels.num];/*定义一个坐标数组，存放每个标签字符串输出位置的坐标*/
-    for (i=0; i<labels.num; i++) /*确定标签字符串的输出位置，存放在坐标数组中*/
+    for (i = 0; i < labels.num; i++) /*确定标签字符串的输出位置，存放在坐标数组中*/
     {
         aLoc[i].X = rcPop.Left + 2;
         aLoc[i].Y = rcPop.Top + i + 1;
@@ -940,8 +871,7 @@ void PopMenu(int num)
     SMALL_RECT aArea[areas.num];                    /*定义数组存放所有热区位置*/
     char aSort[areas.num];                      /*定义数组存放所有热区对应类别*/
     char aTag[areas.num];                         /*定义数组存放每个热区的编号*/
-    for (i=0; i<areas.num; i++)
-    {
+    for (i = 0; i < areas.num; i++) {
         aArea[i].Left = rcPop.Left + 2;  /*热区定位*/
         aArea[i].Top = rcPop.Top + i + 1;
         aArea[i].Right = rcPop.Right - 2;
@@ -957,26 +887,22 @@ void PopMenu(int num)
     PopUp(&rcPop, att, &labels, &areas);
     DrawBox(&rcPop);  /*给弹出窗口画边框*/
     pos.X = rcPop.Left + 2;
-    for (pos.Y=rcPop.Top+1; pos.Y<rcPop.Bottom; pos.Y++)
-    { /*此循环用来在空串子菜项位置画线形成分隔，并取消此菜单项的热区属性*/
-        pCh = ga_sub_menu[loc+pos.Y-rcPop.Top-1];
-        if (strlen(pCh)==0) /*串长为0，表明为空串*/
+    for (pos.Y = rcPop.Top + 1; pos.Y < rcPop.Bottom; pos.Y++) { /*此循环用来在空串子菜项位置画线形成分隔，并取消此菜单项的热区属性*/
+        pCh = ga_sub_menu[loc + pos.Y - rcPop.Top - 1];
+        if (strlen(pCh) == 0) /*串长为0，表明为空串*/
         {   /*首先画横线*/
-            FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-3, pos, &ul);
-            for (j=rcPop.Left+2; j<rcPop.Right-1; j++)
-            {   /*取消该区域字符单元的热区属性*/
-                gp_scr_att[pos.Y*SCR_COL+j] &= 3; /*按位与的结果保留了低两位*/
+            FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 3, pos, &ul);
+            for (j = rcPop.Left + 2; j < rcPop.Right - 1; j++) {   /*取消该区域字符单元的热区属性*/
+                gp_scr_att[pos.Y * SCR_COL + j] &= 3; /*按位与的结果保留了低两位*/
             }
         }
 
     }
     /*将子菜单项的功能键设为白底红字*/
     pos.X = rcPop.Left + 3;
-    att =  FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
-    for (pos.Y=rcPop.Top+1; pos.Y<rcPop.Bottom; pos.Y++)
-    {
-        if (strlen(ga_sub_menu[loc+pos.Y-rcPop.Top-1])==0)
-        {
+    att = FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
+    for (pos.Y = rcPop.Top + 1; pos.Y < rcPop.Bottom; pos.Y++) {
+        if (strlen(ga_sub_menu[loc + pos.Y - rcPop.Top - 1]) == 0) {
             continue;  /*跳过空串*/
         }
         FillConsoleOutputAttribute(gh_std_out, att, 1, pos, &ul);
@@ -996,8 +922,7 @@ void PopMenu(int num)
  *
  * 调用说明:
  */
-void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea)
-{
+void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea) {
     LAYER_NODE *nextLayer;
     COORD size;
     COORD pos = {0, 0};
@@ -1008,21 +933,19 @@ void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea)
     size.X = pRc->Right - pRc->Left + 1;    /*弹出窗口的宽度*/
     size.Y = pRc->Bottom - pRc->Top + 1;    /*弹出窗口的高度*/
     /*申请存放弹出窗口相关信息的动态存储区*/
-    nextLayer = (LAYER_NODE *)malloc(sizeof(LAYER_NODE));
+    nextLayer = (LAYER_NODE *) malloc(sizeof(LAYER_NODE));
     nextLayer->next = gp_top_layer;
     nextLayer->LayerNo = gp_top_layer->LayerNo + 1;
     nextLayer->rcArea = *pRc;
-    nextLayer->pContent = (CHAR_INFO *)malloc(size.X*size.Y*sizeof(CHAR_INFO));
-    nextLayer->pScrAtt = (char *)malloc(size.X*size.Y*sizeof(char));
+    nextLayer->pContent = (CHAR_INFO *) malloc(size.X * size.Y * sizeof(CHAR_INFO));
+    nextLayer->pScrAtt = (char *) malloc(size.X * size.Y * sizeof(char));
     pCh = nextLayer->pScrAtt;
     /*将弹出窗口覆盖区域的字符信息保存，用于在关闭弹出窗口时恢复原样*/
     ReadConsoleOutput(gh_std_out, nextLayer->pContent, size, pos, pRc);
-    for (i=pRc->Top; i<=pRc->Bottom; i++)
-    {
+    for (i = pRc->Top; i <= pRc->Bottom; i++) {
         /*此二重循环将所覆盖字符单元的原先属性值存入动态存储区，便于以后恢复*/
-        for (j=pRc->Left; j<=pRc->Right; j++)
-        {
-            *pCh = gp_scr_att[i*SCR_COL+j];
+        for (j = pRc->Left; j <= pRc->Right; j++) {
+            *pCh = gp_scr_att[i * SCR_COL + j];
             pCh++;
         }
     }
@@ -1030,39 +953,32 @@ void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea)
     /*设置弹出窗口区域字符的新属性*/
     pos.X = pRc->Left;
     pos.Y = pRc->Top;
-    for (i=pRc->Top; i<=pRc->Bottom; i++)
-    {
+    for (i = pRc->Top; i <= pRc->Bottom; i++) {
         FillConsoleOutputAttribute(gh_std_out, att, size.X, pos, &ul);
         pos.Y++;
     }
     /*将标签束中的标签字符串在设定的位置输出*/
-    for (i=0; i<pLabel->num; i++)
-    {
+    for (i = 0; i < pLabel->num; i++) {
         pCh = pLabel->ppLabel[i];
-        if (strlen(pCh) != 0)
-        {
+        if (strlen(pCh) != 0) {
             WriteConsoleOutputCharacter(gh_std_out, pCh, strlen(pCh),
                                         pLabel->pLoc[i], &ul);
         }
     }
     /*设置弹出窗口区域字符单元的新属性*/
-    for (i=pRc->Top; i<=pRc->Bottom; i++)
-    {
+    for (i = pRc->Top; i <= pRc->Bottom; i++) {
         /*此二重循环设置字符单元的层号*/
-        for (j=pRc->Left; j<=pRc->Right; j++)
-        {
-            gp_scr_att[i*SCR_COL+j] = gp_top_layer->LayerNo;
+        for (j = pRc->Left; j <= pRc->Right; j++) {
+            gp_scr_att[i * SCR_COL + j] = gp_top_layer->LayerNo;
         }
     }
 
-    for (i=0; i<pHotArea->num; i++)
-    {
+    for (i = 0; i < pHotArea->num; i++) {
         /*此二重循环设置所有热区中字符单元的热区类型和热区编号*/
         row = pHotArea->pArea[i].Top;
-        for (j=pHotArea->pArea[i].Left; j<=pHotArea->pArea[i].Right; j++)
-        {
-            gp_scr_att[row*SCR_COL+j] |= (pHotArea->pSort[i] << 6)
-                                         | (pHotArea->pTag[i] << 2);
+        for (j = pHotArea->pArea[i].Left; j <= pHotArea->pArea[i].Right; j++) {
+            gp_scr_att[row * SCR_COL + j] |= (pHotArea->pSort[i] << 6)
+                                             | (pHotArea->pTag[i] << 2);
         }
     }
     return;
@@ -1077,16 +993,14 @@ void PopUp(SMALL_RECT *pRc, WORD att, LABEL_BUNDLE *pLabel, HOT_AREA *pHotArea)
  *
  * 调用说明:
  */
-void PopOff(void)
-{
+void PopOff(void) {
     LAYER_NODE *nextLayer;
     COORD size;
     COORD pos = {0, 0};
     char *pCh;
     int i, j;
 
-    if ((gp_top_layer->next==NULL) || (gp_top_layer->pContent==NULL))
-    {   /*栈底存放的主界面屏幕信息，不用关闭*/
+    if ((gp_top_layer->next == NULL) || (gp_top_layer->pContent == NULL)) {   /*栈底存放的主界面屏幕信息，不用关闭*/
         return;
     }
     nextLayer = gp_top_layer->next;
@@ -1096,11 +1010,9 @@ void PopOff(void)
     WriteConsoleOutput(gh_std_out, gp_top_layer->pContent, size, pos, &(gp_top_layer->rcArea));
     /*恢复字符单元原属性*/
     pCh = gp_top_layer->pScrAtt;
-    for (i=gp_top_layer->rcArea.Top; i<=gp_top_layer->rcArea.Bottom; i++)
-    {
-        for (j=gp_top_layer->rcArea.Left; j<=gp_top_layer->rcArea.Right; j++)
-        {
-            gp_scr_att[i*SCR_COL+j] = *pCh;
+    for (i = gp_top_layer->rcArea.Top; i <= gp_top_layer->rcArea.Bottom; i++) {
+        for (j = gp_top_layer->rcArea.Left; j <= gp_top_layer->rcArea.Right; j++) {
+            gp_scr_att[i * SCR_COL + j] = *pCh;
             pCh++;
         }
     }
@@ -1121,20 +1033,17 @@ void PopOff(void)
  *
  * 调用说明:
  */
-void DrawBox(SMALL_RECT *pRc)
-{
-    char chBox[] = {'+','-','|'};  /*画框用的字符*/
+void DrawBox(SMALL_RECT *pRc) {
+    char chBox[] = {'+', '-', '|'};  /*画框用的字符*/
     COORD pos = {pRc->Left, pRc->Top};  /*定位在区域的左上角*/
 
     WriteConsoleOutputCharacter(gh_std_out, &chBox[0], 1, pos, &ul);/*画边框左上角*/
-    for (pos.X = pRc->Left + 1; pos.X < pRc->Right; pos.X++)
-    {   /*此循环画上边框横线*/
+    for (pos.X = pRc->Left + 1; pos.X < pRc->Right; pos.X++) {   /*此循环画上边框横线*/
         WriteConsoleOutputCharacter(gh_std_out, &chBox[1], 1, pos, &ul);
     }
     pos.X = pRc->Right;
     WriteConsoleOutputCharacter(gh_std_out, &chBox[0], 1, pos, &ul);/*画边框右上角*/
-    for (pos.Y = pRc->Top+1; pos.Y < pRc->Bottom; pos.Y++)
-    {   /*此循环画边框左边线和右边线*/
+    for (pos.Y = pRc->Top + 1; pos.Y < pRc->Bottom; pos.Y++) {   /*此循环画边框左边线和右边线*/
         pos.X = pRc->Left;
         WriteConsoleOutputCharacter(gh_std_out, &chBox[2], 1, pos, &ul);
         pos.X = pRc->Right;
@@ -1143,8 +1052,7 @@ void DrawBox(SMALL_RECT *pRc)
     pos.X = pRc->Left;
     pos.Y = pRc->Bottom;
     WriteConsoleOutputCharacter(gh_std_out, &chBox[0], 1, pos, &ul);/*画边框左下角*/
-    for (pos.X = pRc->Left + 1; pos.X < pRc->Right; pos.X++)
-    {   /*画下边框横线*/
+    for (pos.X = pRc->Left + 1; pos.X < pRc->Right; pos.X++) {   /*画下边框横线*/
         WriteConsoleOutputCharacter(gh_std_out, &chBox[1], 1, pos, &ul);
     }
     pos.X = pRc->Right;
@@ -1161,16 +1069,14 @@ void DrawBox(SMALL_RECT *pRc)
  *
  * 调用说明:
  */
-void TagSubMenu(int num)
-{
+void TagSubMenu(int num) {
     SMALL_RECT rcPop;
     COORD pos;
     WORD att;
     int width;
 
     LocSubMenu(gi_sel_menu, &rcPop);  /*计算弹出子菜单的区域位置, 存放在rcPop中*/
-    if ((num<1) || (num == gi_sel_sub_menu) || (num>rcPop.Bottom-rcPop.Top-1))
-    {   /*如果子菜单项号越界，或该项子菜单已被选中，则返回*/
+    if ((num < 1) || (num == gi_sel_sub_menu) || (num > rcPop.Bottom - rcPop.Top - 1)) {   /*如果子菜单项号越界，或该项子菜单已被选中，则返回*/
         return;
     }
 
@@ -1182,7 +1088,7 @@ void TagSubMenu(int num)
         att = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;  /*白底黑字*/
         FillConsoleOutputAttribute(gh_std_out, att, width, pos, &ul);
         pos.X += 1;
-        att |=  FOREGROUND_RED;/*白底红字*/
+        att |= FOREGROUND_RED;/*白底红字*/
         FillConsoleOutputAttribute(gh_std_out, att, 1, pos, &ul);
     }
     /*在制定子菜单项上做选中标记*/
@@ -1203,28 +1109,24 @@ void TagSubMenu(int num)
  *
  * 调用说明:
  */
-void LocSubMenu(int num, SMALL_RECT *rc)
-{
+void LocSubMenu(int num, SMALL_RECT *rc) {
     int i, len, loc = 0;
 
     rc->Top = 1; /*区域的上边定在第2行，行号为1*/
     rc->Left = 1;
-    for (i=1; i<num; i++)
-    {   /*计算区域左边界位置, 同时计算第一个子菜单项在子菜单字符串数组中的位置*/
-        rc->Left += strlen(ga_main_menu[i-1]) + 4;
-        loc += ga_sub_menu_count[i-1];
+    for (i = 1; i < num; i++) {   /*计算区域左边界位置, 同时计算第一个子菜单项在子菜单字符串数组中的位置*/
+        rc->Left += strlen(ga_main_menu[i - 1]) + 4;
+        loc += ga_sub_menu_count[i - 1];
     }
     rc->Right = strlen(ga_sub_menu[loc]);/*暂时存放第一个子菜单项字符串长度*/
-    for (i=1; i<ga_sub_menu_count[num-1]; i++)
-    {   /*查找最长子菜单字符串，将其长度存放在rc->Right*/
-        len = strlen(ga_sub_menu[loc+i]);
-        if (rc->Right < len)
-        {
+    for (i = 1; i < ga_sub_menu_count[num - 1]; i++) {   /*查找最长子菜单字符串，将其长度存放在rc->Right*/
+        len = strlen(ga_sub_menu[loc + i]);
+        if (rc->Right < len) {
             rc->Right = len;
         }
     }
     rc->Right += rc->Left + 3;  /*计算区域的右边界*/
-    rc->Bottom = rc->Top + ga_sub_menu_count[num-1] + 1;/*计算区域下边的行号*/
+    rc->Bottom = rc->Top + ga_sub_menu_count[num - 1] + 1;/*计算区域下边的行号*/
     if (rc->Right >= SCR_COL)  /*右边界越界的处理*/
     {
         len = rc->Right - SCR_COL + 1;
@@ -1233,6 +1135,7 @@ void LocSubMenu(int num, SMALL_RECT *rc)
     }
     return;
 }
+
 /**
  * 函数名称: DealInput
  * 函数功能: 在弹出窗口区域设置热区, 等待并相应用户输入.
@@ -1243,46 +1146,40 @@ void LocSubMenu(int num, SMALL_RECT *rc)
  *
  * 调用说明:
  */
-int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition)
-{
+int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition) {
     INPUT_RECORD inRec[2];
     DWORD res;
     COORD pos = {0, 0};
     int num = *piHot, arrow, iRet = 0;
     int cNo, cTag, cSort;/*cNo:层号, cTag:热区编号, cSort: 热区类型*/
     char vkc, asc;       /*vkc:虚拟键代码, asc:字符的ASCII码值*/
-    int i, j , TxtHotAreaNum = 0;
+    int i, j, TxtHotAreaNum = 0;
 
-    for (i=0; i<pHotArea->num; i++) /*计算文本框热区数量*/
+    for (i = 0; i < pHotArea->num; i++) /*计算文本框热区数量*/
     {
-        if(pHotArea->pSort[i] == 1)
-        {
+        if (pHotArea->pSort[i] == 1) {
             TxtHotAreaNum++;
         }
     }
-    for (i=0; i<TxtHotAreaNum; i++)
-    {
-        ppcondition[i] = (char*)malloc(30*sizeof(char));
+    for (i = 0; i < TxtHotAreaNum; i++) {
+        ppcondition[i] = (char *) malloc(30 * sizeof(char));
         ppcondition[i][0] = '\0';
     }
 
     SetHotPoint(pHotArea, *piHot);
 
-    while (TRUE)
-    {
+    while (TRUE) {
         /*循环*/
         ReadConsoleInput(gh_std_in, &inRec, 2, &res);
         if ((inRec[0].EventType == MOUSE_EVENT) &&
             (inRec[0].Event.MouseEvent.dwButtonState
-             == FROM_LEFT_1ST_BUTTON_PRESSED))
-        {
+             == FROM_LEFT_1ST_BUTTON_PRESSED)) {
             pos = inRec[0].Event.MouseEvent.dwMousePosition;
             cNo = gp_scr_att[pos.Y * SCR_COL + pos.X] & 3;   /*取出弹出窗口的层数*/
             cTag = (gp_scr_att[pos.Y * SCR_COL + pos.X] >> 2) & 15;  /*取出字符单元的热区编号*/
             cSort = (gp_scr_att[pos.Y * SCR_COL + pos.X] >> 6) & 3;  /*取出热区类型*/
 
-            if ((cNo == gp_top_layer->LayerNo) && cTag > 0)
-            {
+            if ((cNo == gp_top_layer->LayerNo) && cTag > 0) {
                 *piHot = cTag;
                 num = *piHot;
                 SetHotPoint(pHotArea, *piHot);
@@ -1290,34 +1187,26 @@ int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition)
                 {
                     iRet = 13;
                     break;
-                }
-                else
-                {
+                } else {
                     j = 0;
-                    for (i=0; i<num; i++)
-                    {
-                        if(pHotArea->pSort[i] == 1)
-                        {
+                    for (i = 0; i < num; i++) {
+                        if (pHotArea->pSort[i] == 1) {
                             j++;
                         }
                     }
                     /**设置光标位置，使其始终出现在已输入字符串的后面**/
-                    COORD CursorPosition = {pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]),
-                                            pHotArea->pArea[num-1].Top
+                    COORD CursorPosition = {pHotArea->pArea[num - 1].Left + strlen(ppcondition[j - 1]),
+                                            pHotArea->pArea[num - 1].Top
                     };
                     SetConsoleCursorPosition(gh_std_out, CursorPosition);
                 }
             }
-        }
-        else if (inRec[0].EventType == KEY_EVENT && inRec[0].Event.KeyEvent.bKeyDown)
-        {
+        } else if (inRec[0].EventType == KEY_EVENT && inRec[0].Event.KeyEvent.bKeyDown) {
             vkc = inRec[0].Event.KeyEvent.wVirtualKeyCode;
             asc = inRec[0].Event.KeyEvent.uChar.AsciiChar;
-            if (asc == 0)
-            {
+            if (asc == 0) {
                 arrow = 0;
-                switch (vkc)
-                {
+                switch (vkc) {
                     /*方向键(左、上、右、下)的处理*/
                     case 37:
                         arrow = 1;
@@ -1332,106 +1221,85 @@ int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition)
                         arrow = 4;
                         break;
                 }
-                if (arrow > 0)
-                {
+                if (arrow > 0) {
                     num = *piHot;
-                    while (TRUE)
-                    {
-                        if (arrow < 3)
-                        {
+                    while (TRUE) {
+                        if (arrow < 3) {
                             num--;
-                        }
-                        else
-                        {
+                        } else {
                             num++;
                         }
-                        if (num == 0)
-                        {
+                        if (num == 0) {
                             num = pHotArea->num;
                         }
-                        if (num == pHotArea->num + 1)
-                        {
+                        if (num == pHotArea->num + 1) {
                             num = 1;
                         }
-                        if (((arrow % 2) && (pHotArea->pArea[num-1].Top
-                                             == pHotArea->pArea[*piHot-1].Top)) || ((!(arrow % 2))
-                                                                                    && (pHotArea->pArea[num-1].Top
-                                                                                        != pHotArea->pArea[*piHot-1].Top)) || num == *piHot)
-                        {
+                        if (((arrow % 2) && (pHotArea->pArea[num - 1].Top
+                                             == pHotArea->pArea[*piHot - 1].Top)) || ((!(arrow % 2))
+                                                                                      && (pHotArea->pArea[num - 1].Top
+                                                                                          != pHotArea->pArea[*piHot -
+                                                                                                             1].Top)) ||
+                            num == *piHot) {
                             /*同行的热区左右键切换，不同行的上下键切换，或者是同一个热区也执行break*/
                             break;
                         }
                     }
-                    if (num > 0 && num <= pHotArea->num)
-                    {
+                    if (num > 0 && num <= pHotArea->num) {
                         *piHot = num;
                         SetHotPoint(pHotArea, *piHot);
-                        if (pHotArea->pSort[num-1] == 1)
-                        {
+                        if (pHotArea->pSort[num - 1] == 1) {
                             j = 0;
-                            for (i=0; i<num; i++)
-                            {
-                                if(pHotArea->pSort[i] == 1)
-                                {
+                            for (i = 0; i < num; i++) {
+                                if (pHotArea->pSort[i] == 1) {
                                     j++;
                                 }
                             }
                             /**设置光标位置，使其始终出现在已输入字符串的后面**/
-                            COORD CursorPosition = {pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]),
-                                                    pHotArea->pArea[num-1].Top
+                            COORD CursorPosition = {pHotArea->pArea[num - 1].Left + strlen(ppcondition[j - 1]),
+                                                    pHotArea->pArea[num - 1].Top
                             };
                             SetConsoleCursorPosition(gh_std_out, CursorPosition);
                         }
                     }
                 }
-            }
-            else if (vkc == 8)
-            {
+            } else if (vkc == 8) {
                 /*退格键*/
-                if (pHotArea->pSort[num-1] == 1)
-                {
+                if (pHotArea->pSort[num - 1] == 1) {
                     COORD CursorPosition;
-                    j=0;
-                    for (i=0; i<num; i++)
-                    {
-                        if(pHotArea->pSort[i] == 1)
-                        {
+                    j = 0;
+                    for (i = 0; i < num; i++) {
+                        if (pHotArea->pSort[i] == 1) {
                             j++;
                         }
                     }
-                    if (*(ppcondition[j-1]+strlen(ppcondition[j-1])-1) > 31
-                        && *(ppcondition[j-1]+strlen(ppcondition[j-1])-1) < 127)/*如果是非中文字符*/
+                    if (*(ppcondition[j - 1] + strlen(ppcondition[j - 1]) - 1) > 31
+                        && *(ppcondition[j - 1] + strlen(ppcondition[j - 1]) - 1) < 127)/*如果是非中文字符*/
                     {
-                        *(ppcondition[j-1]+strlen(ppcondition[j-1])-1) = '\0';
-                        CursorPosition.X = pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]);
-                        CursorPosition.Y = pHotArea->pArea[num-1].Top;
+                        *(ppcondition[j - 1] + strlen(ppcondition[j - 1]) - 1) = '\0';
+                        CursorPosition.X = pHotArea->pArea[num - 1].Left + strlen(ppcondition[j - 1]);
+                        CursorPosition.Y = pHotArea->pArea[num - 1].Top;
                         SetConsoleCursorPosition(gh_std_out, CursorPosition);
                         FillConsoleOutputCharacter(gh_std_out, '\0', 1, CursorPosition, &ul);   /*删除的位置由空字符填充*/
-                    }
-                    else/*如果最后字符是中文汉字，删除两个个字符，即一个汉字*/
+                    } else/*如果最后字符是中文汉字，删除两个个字符，即一个汉字*/
                     {
-                        *(ppcondition[j-1]+strlen(ppcondition[j-1])-2) = '\0';
-                        CursorPosition.X = pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]);
-                        CursorPosition.Y = pHotArea->pArea[num-1].Top;
+                        *(ppcondition[j - 1] + strlen(ppcondition[j - 1]) - 2) = '\0';
+                        CursorPosition.X = pHotArea->pArea[num - 1].Left + strlen(ppcondition[j - 1]);
+                        CursorPosition.Y = pHotArea->pArea[num - 1].Top;
                         SetConsoleCursorPosition(gh_std_out, CursorPosition);
                         FillConsoleOutputCharacter(gh_std_out, '\0', 2, CursorPosition, &ul);/*删除的位置由空字符填充*/
                     }
                 }
-            }
-            else if (vkc == 9)
-            {
+            } else if (vkc == 9) {
                 /*tab键表示切换热区*/
 
                 num++;
-                if (num == pHotArea->num + 1)
-                {
+                if (num == pHotArea->num + 1) {
                     num = 1;
                 }
                 *piHot = num;
                 SetHotPoint(pHotArea, *piHot);
-            }
-            else if (vkc == 27)
-            {
+            } else if (vkc == 27) {
                 /*ESC键*/
 
                 iRet = 27;
@@ -1441,68 +1309,56 @@ int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition)
                 console_cursor_info.bVisible = FALSE;
                 SetConsoleCursorInfo(gh_std_out, &console_cursor_info);
                 break;
-            }
-
-            else if (vkc == 13)
-            {
+            } else if (vkc == 13) {
                 /*回车键表示按下当前按钮*/
-                if (pHotArea->pSort[num-1] == 0) /*如果当前被激活的是按键类热区*/
+                if (pHotArea->pSort[num - 1] == 0) /*如果当前被激活的是按键类热区*/
                 {
                     iRet = 13;
                     break;
-                }
-                else
-                {
+                } else {
                     num++;    /*如果是文本框热区，则切换至下一个热区*/
                     *piHot = num;
                     SetHotPoint(pHotArea, *piHot);
-                    if (pHotArea->pSort[num-1] == 1) /*如果此时是文本框热区*/
+                    if (pHotArea->pSort[num - 1] == 1) /*如果此时是文本框热区*/
                     {
                         j = 0;
-                        for (i=0; i<num; i++)
-                        {
-                            if(pHotArea->pSort[i] == 1)
-                            {
+                        for (i = 0; i < num; i++) {
+                            if (pHotArea->pSort[i] == 1) {
                                 j++;
                             }
                         }
                         /**设置光标位置，使其始终出现在已输入字符串的后面**/
-                        COORD CursorPosition = {pHotArea->pArea[num-1].Left+strlen(ppcondition[j-1]),
-                                                pHotArea->pArea[num-1].Top
+                        COORD CursorPosition = {pHotArea->pArea[num - 1].Left + strlen(ppcondition[j - 1]),
+                                                pHotArea->pArea[num - 1].Top
                         };
                         SetConsoleCursorPosition(gh_std_out, CursorPosition);
                     }
                 }
-            }
-            else  /*按下普通键*/
+            } else  /*按下普通键*/
             {
-                if (pHotArea->pSort[num-1] == 1)
-                {
+                if (pHotArea->pSort[num - 1] == 1) {
                     char string[10];
-                    j=0;
-                    for (i=0; i<num; i++)
-                    {
-                        if(pHotArea->pSort[i] == 1)
-                        {
+                    j = 0;
+                    for (i = 0; i < num; i++) {
+                        if (pHotArea->pSort[i] == 1) {
                             j++;
                         }
                     }
 
                     /*输入的字符数不得大于该热区的长度*/
-                    if (strlen(ppcondition[j-1])<pHotArea->pArea[num-1].Right - pHotArea->pArea[num-1].Left)
-                    {
-                        for (i=0; i<res; i++)
-                        {
+                    if (strlen(ppcondition[j - 1]) < pHotArea->pArea[num - 1].Right - pHotArea->pArea[num - 1].Left) {
+                        for (i = 0; i < res; i++) {
                             string[i] = inRec[i].Event.KeyEvent.uChar.AsciiChar;
                         }
                         string[i] = '\0';
-                        strcat(ppcondition[j-1],string);
+                        strcat(ppcondition[j - 1], string);
                         CONSOLE_SCREEN_BUFFER_INFO console_screen_buffer_info;
                         DWORD NumOfAttsWritten;
                         WORD att_new = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE;
                         GetConsoleScreenBufferInfo(gh_std_out, &console_screen_buffer_info);
                         printf("%s", string);
-                        FillConsoleOutputAttribute(gh_std_out, att_new, strlen(string), console_screen_buffer_info.dwCursorPosition, &NumOfAttsWritten);
+                        FillConsoleOutputAttribute(gh_std_out, att_new, strlen(string),
+                                                   console_screen_buffer_info.dwCursorPosition, &NumOfAttsWritten);
                     }
                 }
             }
@@ -1510,6 +1366,7 @@ int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition)
     }
     return iRet;
 }
+
 /**
  * 函数名称: DealInput
  * 函数功能: 在弹出窗口区域设置热区, 等待并相应用户输入.
@@ -1520,8 +1377,7 @@ int DealInput2(HOT_AREA *pHotArea, int *piHot, char **ppcondition)
  *
  * 调用说明:
  */
-int DealInput(HOT_AREA *pHotArea, int *piHot)
-{
+int DealInput(HOT_AREA *pHotArea, int *piHot) {
     INPUT_RECORD inRec;
     DWORD res;
     COORD pos = {0, 0};
@@ -1530,79 +1386,69 @@ int DealInput(HOT_AREA *pHotArea, int *piHot)
     char vkc, asc;       /*vkc:虚拟键代码, asc:字符的ASCII码值*/
 
     SetHotPoint(pHotArea, *piHot);
-    while (TRUE)
-    {    /*循环*/
+    while (TRUE) {    /*循环*/
         ReadConsoleInput(gh_std_in, &inRec, 1, &res);
         if ((inRec.EventType == MOUSE_EVENT) &&
             (inRec.Event.MouseEvent.dwButtonState
-             == FROM_LEFT_1ST_BUTTON_PRESSED))
-        {
+             == FROM_LEFT_1ST_BUTTON_PRESSED)) {
             pos = inRec.Event.MouseEvent.dwMousePosition;
             cNo = gp_scr_att[pos.Y * SCR_COL + pos.X] & 3;
             cTag = (gp_scr_att[pos.Y * SCR_COL + pos.X] >> 2) & 15;
             cSort = (gp_scr_att[pos.Y * SCR_COL + pos.X] >> 6) & 3;
 
-            if ((cNo == gp_top_layer->LayerNo) && cTag > 0)
-            {
+            if ((cNo == gp_top_layer->LayerNo) && cTag > 0) {
                 *piHot = cTag;
                 SetHotPoint(pHotArea, *piHot);
-                if (cSort == 0)
-                {
+                if (cSort == 0) {
                     iRet = 13;
                     break;
                 }
             }
-        }
-        else if (inRec.EventType == KEY_EVENT && inRec.Event.KeyEvent.bKeyDown)
-        {
+        } else if (inRec.EventType == KEY_EVENT && inRec.Event.KeyEvent.bKeyDown) {
             vkc = inRec.Event.KeyEvent.wVirtualKeyCode;
             asc = inRec.Event.KeyEvent.uChar.AsciiChar;;
-            if (asc == 0)
-            {
+            if (asc == 0) {
                 arrow = 0;
-                switch (vkc)
-                {  /*方向键(左、上、右、下)的处理*/
-                    case 37: arrow = 1; break;
-                    case 38: arrow = 2; break;
-                    case 39: arrow = 3; break;
-                    case 40: arrow = 4; break;
+                switch (vkc) {  /*方向键(左、上、右、下)的处理*/
+                    case 37:
+                        arrow = 1;
+                        break;
+                    case 38:
+                        arrow = 2;
+                        break;
+                    case 39:
+                        arrow = 3;
+                        break;
+                    case 40:
+                        arrow = 4;
+                        break;
                 }
-                if (arrow > 0)
-                {
+                if (arrow > 0) {
                     num = *piHot;
-                    while (TRUE)
-                    {
-                        if (arrow < 3)
-                        {
+                    while (TRUE) {
+                        if (arrow < 3) {
                             num--;
-                        }
-                        else
-                        {
+                        } else {
                             num++;
                         }
                         if ((num < 1) || (num > pHotArea->num) ||
-                            ((arrow % 2) && (pHotArea->pArea[num-1].Top
-                                             == pHotArea->pArea[*piHot-1].Top)) || ((!(arrow % 2))
-                                                                                    && (pHotArea->pArea[num-1].Top
-                                                                                        != pHotArea->pArea[*piHot-1].Top)))
-                        {
+                            ((arrow % 2) && (pHotArea->pArea[num - 1].Top
+                                             == pHotArea->pArea[*piHot - 1].Top)) || ((!(arrow % 2))
+                                                                                      && (pHotArea->pArea[num - 1].Top
+                                                                                          != pHotArea->pArea[*piHot -
+                                                                                                             1].Top))) {
                             break;
                         }
                     }
-                    if (num > 0 && num <= pHotArea->num)
-                    {
+                    if (num > 0 && num <= pHotArea->num) {
                         *piHot = num;
                         SetHotPoint(pHotArea, *piHot);
                     }
                 }
-            }
-            else if (vkc == 27)
-            {  /*ESC键*/
+            } else if (vkc == 27) {  /*ESC键*/
                 iRet = 27;
                 break;
-            }
-            else if (vkc == 13 || vkc == 32)
-            {  /*回车键或空格表示按下当前按钮*/
+            } else if (vkc == 13 || vkc == 32) {  /*回车键或空格表示按下当前按钮*/
                 iRet = 13;
                 break;
             }
@@ -1611,8 +1457,7 @@ int DealInput(HOT_AREA *pHotArea, int *piHot)
     return iRet;
 }
 
-BOOL ShowResult(char **pString, int n,int col )
-{
+BOOL ShowResult(char **pString, int n, int col) {
     LABEL_BUNDLE labels;
     HOT_AREA areas;
     BOOL bRet = TRUE;
@@ -1622,39 +1467,32 @@ BOOL ShowResult(char **pString, int n,int col )
     int iHot = 1;
     int i, j, maxlen, str_len, row;
 
-    if ((n - 2) % col == 0)
-    {
+    if ((n - 2) % col == 0) {
         row = (n - 2) / col;
-    }
-    else
-    {
+    } else {
         row = (n - 2) / col + 1;
     }
     /**找出字符串字总长最长的一行**/
-    for (j=0,maxlen=0; j<row; j++)
-    {
-        for (i=0, str_len=0; i<col; i++)
-        {
-            if (j*col+i+1==n-1)
-            {
+    for (j = 0, maxlen = 0; j < row; j++) {
+        for (i = 0, str_len = 0; i < col; i++) {
+            if (j * col + i + 1 == n - 1) {
                 break;
             }
-            str_len += strlen(pString[j*col+i+1]);
+            str_len += strlen(pString[j * col + i + 1]);
         }
-        if (maxlen < str_len)
-        {
+        if (maxlen < str_len) {
             maxlen = str_len;
         }
     }
     /**设置窗口大小**/
-    pos.X = maxlen + col * 6 -1;
+    pos.X = maxlen + col * 6 - 1;
     pos.Y = row + 7;
     rcPop.Left = (SCR_COL - pos.X) / 2;
     rcPop.Right = rcPop.Left + pos.X - 1;
     rcPop.Top = (SCR_ROW - pos.Y) / 2;
     rcPop.Bottom = rcPop.Top + pos.Y - 1;
     /**设置输出字符串信息**/
-    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN;  /*弹出窗口区域青底黑字*/
     labels.num = n;
     labels.ppLabel = pString;
     COORD aLoc[n];
@@ -1663,33 +1501,29 @@ BOOL ShowResult(char **pString, int n,int col )
     aLoc[0].Y = rcPop.Top + 1;
     aLoc[1].X = rcPop.Left + 2;
     aLoc[1].Y = rcPop.Top + 3;
-    for (i=1; i<col; i++)
-    {
-        aLoc[i+1].X = aLoc[i].X + strlen(pString[i]) + 6;/*使相邻字符之间相隔固定字符数*/
-        aLoc[i+1].Y = rcPop.Top + 3;
+    for (i = 1; i < col; i++) {
+        aLoc[i + 1].X = aLoc[i].X + strlen(pString[i]) + 6;/*使相邻字符之间相隔固定字符数*/
+        aLoc[i + 1].Y = rcPop.Top + 3;
     }
-    for (j=1; j<row; j++)
-    {
-        for (i=0; i<col; i++)
-        {
-            if (j*col+i+1==n-1)
-            {
+    for (j = 1; j < row; j++) {
+        for (i = 0; i < col; i++) {
+            if (j * col + i + 1 == n - 1) {
                 break;
             }
-            aLoc[j*col+i+1].X = aLoc[i+1].X;
-            aLoc[j*col+i+1].Y = rcPop.Top + 4 + j;
+            aLoc[j * col + i + 1].X = aLoc[i + 1].X;
+            aLoc[j * col + i + 1].Y = rcPop.Top + 4 + j;
         }
     }
-    aLoc[n-1].X = (pos.X - strlen(pString[n-1])) / 2 + rcPop.Left;
-    aLoc[n-1].Y = rcPop.Bottom - 1;
+    aLoc[n - 1].X = (pos.X - strlen(pString[n - 1])) / 2 + rcPop.Left;
+    aLoc[n - 1].Y = rcPop.Bottom - 1;
 
     labels.pLoc = aLoc;
 
     /*设置热区信息*/
     areas.num = 1;
     SMALL_RECT aArea[] = {{
-                                  aLoc[n-1].X, aLoc[n-1].Y,
-                                  aLoc[n-1].X + 3, aLoc[n-1].Y
+                                  aLoc[n - 1].X, aLoc[n - 1].Y,
+                                  aLoc[n - 1].X + 3, aLoc[n - 1].Y
                           }
     };
     char aSort[] = {0};
@@ -1702,10 +1536,10 @@ BOOL ShowResult(char **pString, int n,int col )
     DrawBox(&rcPop);
     pos.X = rcPop.Left + 1;
     pos.Y = rcPop.Bottom - 2;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
     pos.X = rcPop.Left + 1;
     pos.Y = rcPop.Top + 2;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
 
     DealInput2(&areas, &iHot, NULL);
     PopOff();
@@ -1713,8 +1547,7 @@ BOOL ShowResult(char **pString, int n,int col )
     return bRet;
 }
 
-int ShowSearchResult(char **pString, int n,int col )
-{
+int ShowSearchResult(char **pString, int n, int col) {
     LABEL_BUNDLE labels;
     HOT_AREA areas;
     BOOL bRet = TRUE;
@@ -1724,39 +1557,32 @@ int ShowSearchResult(char **pString, int n,int col )
     int iHot = 1;
     int i, j, maxlen, str_len, row;
 
-    if ((n - 2) % col == 0)
-    {
+    if ((n - 2) % col == 0) {
         row = (n - 2) / col;
-    }
-    else
-    {
+    } else {
         row = (n - 2) / col + 1;
     }
     /**找出字符串字总长最长的一行**/
-    for (j=0,maxlen=0; j<row; j++)
-    {
-        for (i=0, str_len=0; i<col; i++)
-        {
-            if (j*col+i+1==n-1)
-            {
+    for (j = 0, maxlen = 0; j < row; j++) {
+        for (i = 0, str_len = 0; i < col; i++) {
+            if (j * col + i + 1 == n - 1) {
                 break;
             }
-            str_len += strlen(pString[j*col+i+1]);
+            str_len += strlen(pString[j * col + i + 1]);
         }
-        if (maxlen < str_len)
-        {
+        if (maxlen < str_len) {
             maxlen = str_len;
         }
     }
     /**设置窗口大小**/
-    pos.X = maxlen + col * 6 -1;
+    pos.X = maxlen + col * 6 - 1;
     pos.Y = row + 7;
     rcPop.Left = (SCR_COL - pos.X) / 2;
     rcPop.Right = rcPop.Left + pos.X - 1;
     rcPop.Top = (SCR_ROW - pos.Y) / 2;
     rcPop.Bottom = rcPop.Top + pos.Y - 1;
     /**设置输出字符串信息**/
-    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN;  /*弹出窗口区域青底黑字*/
     labels.num = n;
     labels.ppLabel = pString;
     COORD aLoc[n];
@@ -1765,25 +1591,21 @@ int ShowSearchResult(char **pString, int n,int col )
     aLoc[0].Y = rcPop.Top + 1;
     aLoc[1].X = rcPop.Left + 2;
     aLoc[1].Y = rcPop.Top + 3;
-    for (i=1; i<col; i++)
-    {
-        aLoc[i+1].X = aLoc[i].X + strlen(pString[i]) + 6;/*使相邻字符之间相隔固定字符数*/
-        aLoc[i+1].Y = rcPop.Top + 3;
+    for (i = 1; i < col; i++) {
+        aLoc[i + 1].X = aLoc[i].X + strlen(pString[i]) + 6;/*使相邻字符之间相隔固定字符数*/
+        aLoc[i + 1].Y = rcPop.Top + 3;
     }
-    for (j=1; j<row; j++)
-    {
-        for (i=0; i<col; i++)
-        {
-            if (j*col+i+1==n-1)
-            {
+    for (j = 1; j < row; j++) {
+        for (i = 0; i < col; i++) {
+            if (j * col + i + 1 == n - 1) {
                 break;
             }
-            aLoc[j*col+i+1].X = aLoc[i+1].X;
-            aLoc[j*col+i+1].Y = rcPop.Top + 4 + j;
+            aLoc[j * col + i + 1].X = aLoc[i + 1].X;
+            aLoc[j * col + i + 1].Y = rcPop.Top + 4 + j;
         }
     }
-    aLoc[n-1].X = (pos.X - strlen(pString[n-1])) / 2 + rcPop.Left;
-    aLoc[n-1].Y = rcPop.Bottom - 1;
+    aLoc[n - 1].X = (pos.X - strlen(pString[n - 1])) / 2 + rcPop.Left;
+    aLoc[n - 1].Y = rcPop.Bottom - 1;
 
     labels.pLoc = aLoc;
 
@@ -1793,20 +1615,19 @@ int ShowSearchResult(char **pString, int n,int col )
     char aSort[row];
     char aTag[row];
     i = 3;
-    for (j=0; j<row-1; j++)
-    {
+    for (j = 0; j < row - 1; j++) {
         aArea[j].Left = aLoc[i].X;
-        aArea[j].Top = aLoc[i].Y ;
-        aArea[j].Right = aLoc[i+1].X + strlen(pString[i+1]);
+        aArea[j].Top = aLoc[i].Y;
+        aArea[j].Right = aLoc[i + 1].X + strlen(pString[i + 1]);
         aArea[j].Bottom = aLoc[i].Y;
         aSort[j] = 0;
         aTag[j] = j + 1;
-        i = i+col;
+        i = i + col;
     }
-    aArea[j].Left = aLoc[n-1].X;
-    aArea[j].Top = aLoc[n-1].Y ;
-    aArea[j].Right = aLoc[n-1].X + 3;
-    aArea[j].Bottom = aLoc[n-1].Y;
+    aArea[j].Left = aLoc[n - 1].X;
+    aArea[j].Top = aLoc[n - 1].Y;
+    aArea[j].Right = aLoc[n - 1].X + 3;
+    aArea[j].Bottom = aLoc[n - 1].Y;
     aSort[j] = 0;
     aTag[j] = j + 1;
 
@@ -1817,10 +1638,10 @@ int ShowSearchResult(char **pString, int n,int col )
     DrawBox(&rcPop);
     pos.X = rcPop.Left + 1;
     pos.Y = rcPop.Bottom - 2;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
     pos.X = rcPop.Left + 1;
     pos.Y = rcPop.Top + 2;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
 
     DealInput2(&areas, &iHot, NULL);
     PopOff();
@@ -1828,47 +1649,39 @@ int ShowSearchResult(char **pString, int n,int col )
     return iHot;
 }
 
-void SetHotPoint(HOT_AREA *pHotArea, int iHot)
-{
+void SetHotPoint(HOT_AREA *pHotArea, int iHot) {
     CONSOLE_CURSOR_INFO lpCur;
     COORD pos = {0, 0};
     WORD att1, att2, att3;
     int i, width;
 
     att1 = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;  /*被选中热区的文本属性黑底白字*/
-    att2 = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*青底黑字*/
-    att3 = BACKGROUND_BLUE | BACKGROUND_GREEN |BACKGROUND_RED ;  /*白底黑字*/
-    for (i=0; i<pHotArea->num; i++)
-    {
+    att2 = BACKGROUND_BLUE | BACKGROUND_GREEN;  /*青底黑字*/
+    att3 = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;  /*白底黑字*/
+    for (i = 0; i < pHotArea->num; i++) {
         /*将按钮类热区置为白底黑字*/
         pos.X = pHotArea->pArea[i].Left;
         pos.Y = pHotArea->pArea[i].Top;
         width = pHotArea->pArea[i].Right - pHotArea->pArea[i].Left + 1;
-        if (pHotArea->pSort[i] == 0)
-        {
+        if (pHotArea->pSort[i] == 0) {
             /*热区是按钮类*/
             FillConsoleOutputAttribute(gh_std_out, att2, width, pos, &ul);
-        }
-        else
-        {
+        } else {
             /*热区是文本类*/
             FillConsoleOutputAttribute(gh_std_out, att3, width, pos, &ul);
         }
     }
 
-    pos.X = pHotArea->pArea[iHot-1].Left;
-    pos.Y = pHotArea->pArea[iHot-1].Top;
-    width = pHotArea->pArea[iHot-1].Right - pHotArea->pArea[iHot-1].Left + 1;
-    if (pHotArea->pSort[iHot-1] == 0)
-    {
+    pos.X = pHotArea->pArea[iHot - 1].Left;
+    pos.Y = pHotArea->pArea[iHot - 1].Top;
+    width = pHotArea->pArea[iHot - 1].Right - pHotArea->pArea[iHot - 1].Left + 1;
+    if (pHotArea->pSort[iHot - 1] == 0) {
         /*被激活热区是按钮类*/
         FillConsoleOutputAttribute(gh_std_out, att1, width, pos, &ul);
         GetConsoleCursorInfo(gh_std_out, &lpCur);
         lpCur.bVisible = FALSE;
         SetConsoleCursorInfo(gh_std_out, &lpCur);
-    }
-    else if (pHotArea->pSort[iHot-1] == 1)
-    {
+    } else if (pHotArea->pSort[iHot - 1] == 1) {
         /*被激活热区是文本框类*/
         SetConsoleCursorPosition(gh_std_out, pos);
         GetConsoleCursorInfo(gh_std_out, &lpCur);
@@ -1887,11 +1700,12 @@ void SetHotPoint(HOT_AREA *pHotArea, int iHot)
  *
  * 调用说明: 仅在执行函数ExitSys时, 才可能返回FALSE, 其他情况下总是返回TRUE
  */
-BOOL ExeFunction(int m, int s)
-{
+BOOL ExeFunction(int m, int s) {
     BOOL bRet = TRUE;
     /*函数指针数组，用来存放所有功能函数的入口地址*/
-    BOOL (*pFunction[ga_sub_menu_count[0]+ga_sub_menu_count[1]+ga_sub_menu_count[2]+ga_sub_menu_count[3]+ga_sub_menu_count[4]])(void);
+    BOOL(*pFunction[ga_sub_menu_count[0] + ga_sub_menu_count[1] + ga_sub_menu_count[2] + ga_sub_menu_count[3] +
+                    ga_sub_menu_count[4]])(
+    void);
     int i, loc;
 
     /*将功能函数入口地址存入与功能函数所在主菜单号和子菜单号对应下标的数组元素*/
@@ -1912,27 +1726,24 @@ BOOL ExeFunction(int m, int s)
     pFunction[13] = NULL;
     pFunction[14] = AboutDorm;
 
-    for (i=1,loc=0; i<m; i++)  /*根据主菜单号和子菜单号计算对应下标*/
+    for (i = 1, loc = 0; i < m; i++)  /*根据主菜单号和子菜单号计算对应下标*/
     {
-        loc += ga_sub_menu_count[i-1];
+        loc += ga_sub_menu_count[i - 1];
     }
     loc += s - 1;
 
-    if (pFunction[loc] != NULL)
-    {
+    if (pFunction[loc] != NULL) {
         bRet = (*pFunction[loc])();  /*用函数指针调用所指向的功能函数*/
     }
 
     return bRet;
 }
 
-BOOL SaveData(void)
-{
+BOOL SaveData(void) {
     BOOL bRet;
 
     bRet = SaveSysData2(gp_head2);
-    if(bRet)
-    {
+    if (bRet) {
         char *plabel_name[] = {"数据保存成功",
                                "确定"
         };
@@ -1941,15 +1752,14 @@ BOOL SaveData(void)
     return bRet;
 }
 
-BOOL BackupData(void)
-{
+BOOL BackupData(void) {
     BOOL bRet;
     time_t current_time;
     struct tm *current_tm;
     char backupfile[30] = "Backup ";
     time(&current_time);                         /*取出系统当前时间*/
     current_tm = localtime(&current_time);       /*取出年月日*/
-    strncat(backupfile,asctime(current_tm), 10);
+    strncat(backupfile, asctime(current_tm), 10);
     bRet = BackupSysData(gp_head2, backupfile);
     char *plabel_name[] =
             {
@@ -1962,8 +1772,7 @@ BOOL BackupData(void)
     return bRet;
 }
 
-BOOL RestoreData(void)
-{
+BOOL RestoreData(void) {
     BOOL bRet = TRUE;
     LABEL_BUNDLE labels;
     HOT_AREA areas;
@@ -1982,16 +1791,16 @@ BOOL RestoreData(void)
     rcPop.Top = (SCR_ROW - pos.Y) / 2;
     rcPop.Bottom = rcPop.Top + pos.Y - 1;
 
-    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN;  /*弹出窗口区域青底黑字*/
     labels.num = 2;
     labels.ppLabel = plabel_name;
     COORD aLoc[2];
 
     /******设置标签束的输出位置*****/
 
-    aLoc[0].X = rcPop.Left + (pos.X-strlen(plabel_name[0]))/2;
+    aLoc[0].X = rcPop.Left + (pos.X - strlen(plabel_name[0])) / 2;
     aLoc[0].Y = rcPop.Top + 2;
-    aLoc[1].X = rcPop.Left + (pos.X-strlen(plabel_name[1]))/2;
+    aLoc[1].X = rcPop.Left + (pos.X - strlen(plabel_name[1])) / 2;
     aLoc[1].Y = rcPop.Top + 6;
 
     labels.pLoc = aLoc;
@@ -2002,15 +1811,15 @@ BOOL RestoreData(void)
     char aSort[3] = {1, 0, 0};
     char aTag[3] = {1, 2, 3};
     aArea[0].Left = aLoc[0].X;
-    aArea[0].Top = aLoc[0].Y + 2 ;
+    aArea[0].Top = aLoc[0].Y + 2;
     aArea[0].Right = aLoc[0].X + strlen(plabel_name[0]) - 1;
     aArea[0].Bottom = aLoc[0].Y + 2;
     aArea[1].Left = aLoc[1].X;
-    aArea[1].Top = aLoc[1].Y ;
+    aArea[1].Top = aLoc[1].Y;
     aArea[1].Right = aLoc[1].X + 3;
     aArea[1].Bottom = aLoc[1].Y;
     aArea[2].Left = aLoc[1].X + 8;
-    aArea[2].Top = aLoc[1].Y ;
+    aArea[2].Top = aLoc[1].Y;
     aArea[2].Right = aLoc[1].X + 11;
     aArea[2].Bottom = aLoc[1].Y;
 
@@ -2021,36 +1830,29 @@ BOOL RestoreData(void)
     DrawBox(&rcPop);
 
     char *ppcondition[1];
-    if (DealInput2(&areas, &iHot, ppcondition) == 13)
-    {
+    if (DealInput2(&areas, &iHot, ppcondition) == 13) {
         PopOff();
         if (iHot == 2) /*调用备份函数*/
         {
-            if (*ppcondition[0] == '\0')
-            {
+            if (*ppcondition[0] == '\0') {
                 char *plabel_name[] = {"你输入的信息为空",
                                        "确认"
                 };
                 ShowModule(plabel_name, 2);
-            }
-            else if (RestoreSysData(&gp_head2, ppcondition[0]))
-            {
+            } else if (RestoreSysData(&gp_head2, ppcondition[0])) {
                 char *plabel_name[] = {"信息导入成功！",
                                        "确认"
                 };
                 ShowModule(plabel_name, 2);
             }
         }
-    }
-    else
-    {
+    } else {
         PopOff();
     }
     return bRet;
 }
 
-BOOL ExitSys(void)
-{
+BOOL ExitSys(void) {
     LABEL_BUNDLE labels;
     HOT_AREA areas;
     BOOL bRet = TRUE;
@@ -2070,13 +1872,13 @@ BOOL ExitSys(void)
     att = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;  /*白底黑字*/
     labels.num = 2;
     labels.ppLabel = pCh;
-    COORD aLoc[] = {{rcPop.Left+3, rcPop.Top+2},
-                    {rcPop.Left+5, rcPop.Top+5}};
+    COORD aLoc[] = {{rcPop.Left + 3, rcPop.Top + 2},
+                    {rcPop.Left + 5, rcPop.Top + 5}};
     labels.pLoc = aLoc;
 
     areas.num = 2;
-    SMALL_RECT aArea[] = {{rcPop.Left + 5, rcPop.Top + 5,
-                                  rcPop.Left + 8, rcPop.Top + 5},
+    SMALL_RECT aArea[] = {{rcPop.Left + 5,  rcPop.Top + 5,
+                                  rcPop.Left + 8,  rcPop.Top + 5},
                           {rcPop.Left + 13, rcPop.Top + 5,
                                   rcPop.Left + 16, rcPop.Top + 5}};
     char aSort[] = {0, 0};
@@ -2088,20 +1890,18 @@ BOOL ExitSys(void)
 
     pos.X = rcPop.Left + 1;
     pos.Y = rcPop.Top + 4;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
 
-    if (DealInput(&areas, &iHot) == 13 && iHot == 1)
-    {
+    if (DealInput(&areas, &iHot) == 13 && iHot == 1) {
         bRet = FALSE;
-    }
-    else
-    {
+    } else {
         bRet = TRUE;
     }
     PopOff();
 
     return bRet;
 }
+
 BOOL MaintainCityInfo(void) {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"录入城市信息",
@@ -2114,21 +1914,17 @@ BOOL MaintainCityInfo(void) {
 
     if (iHot == -1) {
         PopOff();
-    }
-    else {
-        if (iHot == 1){
+    } else {
+        if (iHot == 1) {
             PopOff();
             InsertCityNodeSubMenu();
-        }
-        else if (iHot == 2) {
+        } else if (iHot == 2) {
             PopOff();
             ModifyCityNodeSubMenu();
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
             DeleteCityNodeSubMenu();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2147,31 +1943,28 @@ BOOL InsertCityNodeSubMenu(void) {
     int n = 6;
     int inputNum = 4;
     char *ppcondition[inputNum];
-    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum+2);
+    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum + 2);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 5) {
             PopOff();
-            if((strlen(ppcondition[0])==0) || (strlen(ppcondition[1])==0)) {
+            if ((strlen(ppcondition[0]) == 0) || (strlen(ppcondition[1]) == 0)) {
                 char *error_plabel_name[] = {"必须填写合法的城市ID和城市名！",
                                              "确认"
                 };
                 ShowModule(error_plabel_name, 2);
                 return FALSE;
-            }
-            else {
+            } else {
                 CITY_NODE *cityFound = SeekCityNodeByID(gp_head2, ppcondition[0]);
-                if(cityFound!=NULL) {
+                if (cityFound != NULL) {
                     char *error_plabel_name[] = {"您将要插入的城市信息已存在！请先删除或先修改！",
                                                  "确认"
                     };
                     ShowModule(error_plabel_name, 2);
                     return FALSE;
-                }
-                else{
-                    CITY_NODE *pCityNode = (CITY_NODE *)malloc(sizeof(CITY_NODE));
+                } else {
+                    CITY_NODE *pCityNode = (CITY_NODE *) malloc(sizeof(CITY_NODE));
                     pCityNode->rnext = NULL;
                     pCityNode->next = NULL;
                     strcpy(pCityNode->city_id, ppcondition[0]);
@@ -2187,8 +1980,7 @@ BOOL InsertCityNodeSubMenu(void) {
                 }
 
             }
-        }
-        else if (iHot == 6){
+        } else if (iHot == 6) {
             PopOff();
         }
     }
@@ -2205,18 +1997,168 @@ BOOL ModifyCityNodeSubMenu(void) {
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待修改的城市名称信息",
+                              "城市名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                CITY_NODE *pCityNode = SeekCityNodeByName(gp_head2, ppcondition[0]);
+                if (pCityNode == NULL) {
+                    char *plabel_name[] = {"你想要修改的城市不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    CITY_NODE *tmp = pCityNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char *plabel_ret[2 * num + 4];
+                    tmp = pCityNode;
+                    int i = 0;
+                    plabel_ret[i++] = "名称包含以下城市：";
+                    plabel_ret[i++] = "城  市ID";
+                    plabel_ret[i++] = "城市名称";
+                    while (tmp != NULL) {
+                        plabel_ret[i++] = tmp->city_id;
+                        plabel_ret[i++] = tmp->name;
+                        tmp = tmp->next;
+                    }
+                    plabel_ret[i] = "确定";
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
+                        pCityNode = pCityNode->next;
+                    }
+                    char table[100];
+                    strcat(table, "正在修改名称为");
+                    strcat(table, pCityNode->name);
+                    strcat(table, "的城市信息：");
+                    char *plabel_name[] = {"",
+                                           "城  市ID",
+                                           "城市名称",
+                                           "监督电话",
+                                           "咨询电话",
+                                           "确定    取消"
+                    };
+                    plabel_name[0] = table;
+                    int n = 6;
+                    int inputNum = 4;
+                    char *ppcondition[inputNum];
+                    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum + 2);
+                    if (iHot == 5) {
+                        if (strcmp(pCityNode->city_id, ppcondition[0]) != 0 &&
+                            SeekCityNodeByID(gp_head2, ppcondition[0]) != NULL) {
+                            PopOff();
+                            char *error_plabel_name[] = {"修改失败，该ID的城市已存在！",
+                                                         "确认"
+                            };
+                            ShowModule(error_plabel_name, 2);
+                            return bRet;
+                        }
+                        strcpy(pCityNode->city_id, ppcondition[0]);
+                        strcpy(pCityNode->name, ppcondition[1]);
+                        strcpy(pCityNode->jiandu_num, ppcondition[2]);
+                        strcpy(pCityNode->zixun_num, ppcondition[3]);
+                        REGION_NODE *pRegionNode = pCityNode->rnext;
+                        for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
+                            strcpy(pRegionNode->city_id, ppcondition[0]);
+                        }
+                        PopOff();
+                        char *error_plabel_name[] = {"修改成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        PopOff();
+                    }
+                }
+
+            } else {
+                PopOff();
+            }
+        } else if (iHot == 2) {
             PopOff();
-        }
-        else if (iHot == 3) {
+            char *plabel[] = {"请输入待修改的城市ID信息",
+                              "城  市ID",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                CITY_NODE *pCityNode = SeekCityNodeByID(gp_head2, ppcondition[0]);
+                if (pCityNode == NULL) {
+                    char *plabel_name[] = {"待修改的城市不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    char table[100];
+                    strcat(table, "正在修改ID为");
+                    strcat(table, pCityNode->city_id);
+                    strcat(table, "的城市信息：");
+                    char *plabel_name[] = {"",
+                                           "城  市ID",
+                                           "城市名称",
+                                           "监督电话",
+                                           "咨询电话",
+                                           "确定    取消"
+                    };
+                    plabel_name[0] = table;
+                    int n = 6;
+                    int inputNum = 4;
+                    char *ppcondition[inputNum];
+                    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum + 2);
+                    if (iHot == 5) {
+                        if (strcmp(pCityNode->city_id, ppcondition[0]) != 0 &&
+                            SeekCityNodeByID(gp_head2, ppcondition[0]) != NULL) {
+                            PopOff();
+                            char *error_plabel_name[] = {"修改失败，该ID的城市已存在！",
+                                                         "确认"
+                            };
+                            ShowModule(error_plabel_name, 2);
+                            return bRet;
+                        }
+                        strcpy(pCityNode->city_id, ppcondition[0]);
+                        strcpy(pCityNode->name, ppcondition[1]);
+                        strcpy(pCityNode->jiandu_num, ppcondition[2]);
+                        strcpy(pCityNode->zixun_num, ppcondition[3]);
+                        REGION_NODE *pRegionNode = pCityNode->rnext;
+                        for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
+                            strcpy(pRegionNode->city_id, ppcondition[0]);
+                        }
+                        PopOff();
+                        char *error_plabel_name[] = {"修改成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        PopOff();
+                    }
+                }
+            } else {
+                PopOff();
+            }
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2233,12 +2175,71 @@ BOOL DeleteCityNodeSubMenu(void) {
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待查询的城市名称信息",
+                              "城市名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                CITY_NODE *pCityNode = SeekCityNodeByName(gp_head2, ppcondition[0]);
+                if (pCityNode == NULL) {
+                    char *plabel_name[] = {"你查询的城市不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    CITY_NODE *tmp = pCityNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char *plabel_ret[2 * num + 4];
+                    tmp = pCityNode;
+                    int i = 0;
+                    plabel_ret[i++] = "名称包含以下城市：";
+                    plabel_ret[i++] = "城  市ID";
+                    plabel_ret[i++] = "城市名称";
+                    while (tmp != NULL) {
+                        plabel_ret[i++] = tmp->city_id;
+                        plabel_ret[i++] = tmp->name;
+                        tmp = tmp->next;
+                    }
+                    plabel_ret[i] = "确定";
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
+                        pCityNode = pCityNode->next;
+                    }
+                    BOOL del = delete_city(&gp_head2, pCityNode->city_id);
+                    if (del) {
+                        char *error_plabel_name[] = {"删除成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        char *error_plabel_name[] = {"删除失败！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    }
+                }
+
+            } else {
+                PopOff();
+            }
+        } else if (iHot == 2) {
             PopOff();
             char *plabel[] = {"请输入待删除的城市ID信息",
                               "城  市ID",
@@ -2248,25 +2249,23 @@ BOOL DeleteCityNodeSubMenu(void) {
             int inputNum = 3;
             char *ppcondition[inputNum];
             int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
-            if(aHot==2) {
+            if (aHot == 2) {
                 PopOff();
                 CITY_NODE *pCityNode = SeekCityNodeByID(gp_head2, ppcondition[0]);
-                if(pCityNode==NULL) {
+                if (pCityNode == NULL) {
                     char *plabel_name[] = {"待删除的城市不存在！",
                                            "确定"
                     };
                     ShowModule(plabel_name, 2);
-                }
-                else {
-                    BOOL del = delete_city(&gp_head2,ppcondition[0]);
-                    if(del){
+                } else {
+                    BOOL del = delete_city(&gp_head2, ppcondition[0]);
+                    if (del) {
                         char *error_plabel_name[] = {"删除成功！",
                                                      "确认"
                         };
                         ShowModule(error_plabel_name, 2);
                         return bRet;
-                    }
-                    else {
+                    } else {
                         char *error_plabel_name[] = {"删除失败！",
                                                      "确认"
                         };
@@ -2274,15 +2273,12 @@ BOOL DeleteCityNodeSubMenu(void) {
                         return bRet;
                     }
                 }
-            }
-            else{
+            } else {
                 PopOff();
             }
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2301,22 +2297,18 @@ BOOL MaintainScenicAreaInfo(void) {
 
     if (iHot == -1) {
         PopOff();
-    }
-    else {
-        if (iHot == 1){
+    } else {
+        if (iHot == 1) {
             PopOff();
             InsertScenicAreaNodeSubMenu();
 
-        }
-        else if (iHot == 2) {
+        } else if (iHot == 2) {
             PopOff();
             ModifyScenicAreaNodeSubMenu();
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
             DeleteScenicAreaNodeSubMenu();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2339,32 +2331,29 @@ BOOL InsertScenicAreaNodeSubMenu(void) {
     int n = 9;
     int inputNum = 9;
     char *ppcondition[inputNum];
-    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
+    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 8) {
             PopOff();
-            if((strlen(ppcondition[0])==0) || (strlen(ppcondition[1])==0)) {
+            if ((strlen(ppcondition[0]) == 0) || (strlen(ppcondition[1]) == 0)) {
                 char *error_plabel_name[] = {"必须填写合法的景区ID和景区名！",
                                              "确认"
                 };
                 ShowModule(error_plabel_name, 2);
                 return FALSE;
-            }
-            else {
+            } else {
                 REGION_NODE *cityFound = SeekRegionNodeByID(gp_head2, ppcondition[1]);
 
-                if(cityFound!=NULL) {
+                if (cityFound != NULL) {
                     char *error_plabel_name[] = {"您将要插入的景区信息已存在！请先删除或先修改！",
                                                  "确认"
                     };
                     ShowModule(error_plabel_name, 2);
                     return FALSE;
-                }
-                else{
-                    REGION_NODE *pRegionNode = (REGION_NODE *)malloc(sizeof(REGION_NODE));
+                } else {
+                    REGION_NODE *pRegionNode = (REGION_NODE *) malloc(sizeof(REGION_NODE));
                     pRegionNode->snext = NULL;
                     pRegionNode->next = NULL;
                     strcpy(pRegionNode->name, ppcondition[0]);
@@ -2383,8 +2372,7 @@ BOOL InsertScenicAreaNodeSubMenu(void) {
                 }
 
             }
-        }
-        else if (iHot == 9){
+        } else if (iHot == 9) {
             PopOff();
         }
     }
@@ -2401,18 +2389,161 @@ BOOL ModifyScenicAreaNodeSubMenu(void) {
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待修改的景区名称信息",
+                              "景区名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                REGION_NODE *pRegionNode = SeekRegionNodeByName(gp_head2, ppcondition[0]);
+                if (pRegionNode == NULL) {
+                    char *plabel_name[] = {"你想要修改的景区不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    REGION_NODE *tmp = pRegionNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char table[100];
+                    strcat(table, "正在修改名称为");
+                    strcat(table, pRegionNode->name);
+                    strcat(table, "的景区信息：");
+                    char *plabel_name[] = {"",
+                                           "景区名称",
+                                           "景  区ID",
+                                           "景区级别",
+                                           "景区地址",
+                                           "门票价格",
+                                           "开放时间",
+                                           "确定    取消"
+                    };
+                    plabel_name[0] = table;
+                    int n = 8;
+                    int inputNum = 8;
+                    char *ppcondition[inputNum];
+                    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum);
+                    if (iHot == 7) {
+                        if (strcmp(pRegionNode->region_id, ppcondition[1]) != 0 &&
+                            SeekRegionNodeByID(gp_head2, ppcondition[1]) != NULL) {
+                            PopOff();
+                            char *error_plabel_name[] = {"修改失败，该ID的景区已存在！",
+                                                         "确认"
+                            };
+                            ShowModule(error_plabel_name, 2);
+                            return bRet;
+                        }
+                        strcpy(pRegionNode->name, ppcondition[0]);
+                        strcpy(pRegionNode->region_id, ppcondition[1]);
+                        strcpy(pRegionNode->level, ppcondition[2]);
+                        strcpy(pRegionNode->address, ppcondition[3]);
+                        strcpy(pRegionNode->price, ppcondition[4]);
+                        strcpy(pRegionNode->opentime, ppcondition[5]);
+                        SPOT_NODE *pSpotNode = pRegionNode->snext;
+                        for (pSpotNode = pRegionNode->snext; pSpotNode != NULL; pSpotNode = pSpotNode->next) {
+                            strcpy(pSpotNode->region_id, ppcondition[1]);
+                        }
+                        PopOff();
+                        char *error_plabel_name[] = {"修改成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        PopOff();
+                    }
+                }
+
+            } else {
+                PopOff();
+            }
+        } else if (iHot == 2) {
             PopOff();
-        }
-        else if (iHot == 3) {
+            char *plabel[] = {"请输入待修改的景区ID信息",
+                              "景  区ID",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                REGION_NODE *pRegionNode = SeekRegionNodeByID(gp_head2, ppcondition[0]);
+                if (pRegionNode == NULL) {
+                    char *plabel_name[] = {"待修改的景区不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    char table[100];
+                    strcat(table, "正在修改ID为");
+                    strcat(table, pRegionNode->city_id);
+                    strcat(table, "的景区信息：");
+                    char *plabel_name[] = {"",
+                                           "景区名称",
+                                           "景  区ID",
+                                           "景区级别",
+                                           "景区地址",
+                                           "门票价格",
+                                           "开放时间",
+                                           "确定    取消"
+                    };
+                    plabel_name[0] = table;
+                    int n = 8;
+                    int inputNum = 8;
+                    char *ppcondition[inputNum];
+                    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum);
+                    if (iHot == 7) {
+                        if (strcmp(pRegionNode->region_id, ppcondition[1]) != 0 &&
+                            SeekRegionNodeByID(gp_head2, ppcondition[1]) != NULL) {
+                            PopOff();
+                            char *error_plabel_name[] = {"修改失败，该ID的景区已存在！",
+                                                         "确认"
+                            };
+                            ShowModule(error_plabel_name, 2);
+                            return bRet;
+                        }
+                        strcpy(pRegionNode->name, ppcondition[0]);
+                        strcpy(pRegionNode->region_id, ppcondition[1]);
+                        strcpy(pRegionNode->level, ppcondition[2]);
+                        strcpy(pRegionNode->address, ppcondition[3]);
+                        strcpy(pRegionNode->price, ppcondition[4]);
+                        strcpy(pRegionNode->opentime, ppcondition[5]);
+                        SPOT_NODE *pSpotNode = pRegionNode->snext;
+                        for (pSpotNode = pRegionNode->snext; pSpotNode != NULL; pSpotNode = pSpotNode->next) {
+                            strcpy(pSpotNode->region_id, ppcondition[1]);
+                        }
+                        PopOff();
+                        char *error_plabel_name[] = {"修改成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        PopOff();
+                    }
+
+                }
+
+            } else {
+                PopOff();
+            }
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2429,12 +2560,71 @@ BOOL DeleteScenicAreaNodeSubMenu(void) {
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待查询的景区名称信息",
+                              "景区名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                REGION_NODE *pRegionNode = SeekRegionNodeByName(gp_head2, ppcondition[0]);
+                if (pRegionNode == NULL) {
+                    char *plabel_name[] = {"你查询的景区不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    REGION_NODE *tmp = pRegionNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char *plabel_ret[2 * num + 4];
+                    tmp = pRegionNode;
+                    int i = 0;
+                    plabel_ret[i++] = "名称包含以下景区：";
+                    plabel_ret[i++] = "景  区ID";
+                    plabel_ret[i++] = "景区名称";
+                    while (tmp != NULL) {
+                        plabel_ret[i++] = tmp->region_id;
+                        plabel_ret[i++] = tmp->name;
+                        tmp = tmp->next;
+                    }
+                    plabel_ret[i] = "确定";
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
+                        pRegionNode = pRegionNode->next;
+                    }
+                    BOOL del = delete_region(gp_head2, pRegionNode->region_id);
+                    if (del) {
+                        char *error_plabel_name[] = {"删除成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        char *error_plabel_name[] = {"删除失败！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    }
+                }
+
+            } else {
+                PopOff();
+            }
+        } else if (iHot == 2) {
             PopOff();
             char *plabel[] = {"请输入待删除的景区ID信息",
                               "景  区ID",
@@ -2444,25 +2634,23 @@ BOOL DeleteScenicAreaNodeSubMenu(void) {
             int inputNum = 3;
             char *ppcondition[inputNum];
             int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
-            if(aHot==2) {
+            if (aHot == 2) {
                 PopOff();
                 REGION_NODE *pRegionNode = SeekRegionNodeByID(gp_head2, ppcondition[0]);
-                if(pRegionNode==NULL) {
+                if (pRegionNode == NULL) {
                     char *plabel_name[] = {"待删除的景区不存在！",
                                            "确定"
                     };
                     ShowModule(plabel_name, 2);
-                }
-                else {
-                    BOOL del = delete_region(gp_head2,ppcondition[0]);
-                    if(del){
+                } else {
+                    BOOL del = delete_region(gp_head2, ppcondition[0]);
+                    if (del) {
                         char *error_plabel_name[] = {"删除成功！",
                                                      "确认"
                         };
                         ShowModule(error_plabel_name, 2);
                         return bRet;
-                    }
-                    else {
+                    } else {
                         char *error_plabel_name[] = {"删除失败！",
                                                      "确认"
                         };
@@ -2470,15 +2658,12 @@ BOOL DeleteScenicAreaNodeSubMenu(void) {
                         return bRet;
                     }
                 }
-            }
-            else{
+            } else {
                 PopOff();
             }
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2497,22 +2682,18 @@ BOOL MaintainAttractionInfo(void) {
 
     if (iHot == -1) {
         PopOff();
-    }
-    else {
-        if (iHot == 1){
+    } else {
+        if (iHot == 1) {
             PopOff();
             InsertAttractionNodeSubMenu();
 
-        }
-        else if (iHot == 2) {
+        } else if (iHot == 2) {
             PopOff();
             ModifyAttractionNodeSubMenu();
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
             DeleteAttractionNodeSubMenu();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2533,23 +2714,21 @@ BOOL InsertAttractionNodeSubMenu(void) {
     int n = 8;
     int inputNum = 8;
     char *ppcondition[inputNum];
-    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum );
+    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 7) {
             PopOff();
-            if((strlen(ppcondition[0])==0) || (strlen(ppcondition[1])==0)) {
+            if ((strlen(ppcondition[0]) == 0) || (strlen(ppcondition[1]) == 0)) {
                 char *error_plabel_name[] = {"必须填写合法的景点ID和景点名！",
                                              "确认"
                 };
                 ShowModule(error_plabel_name, 2);
                 return FALSE;
-            }
-            else {
+            } else {
                 REGION_NODE *cityFound = SeekRegionNodeByID(gp_head2, ppcondition[2]);
-                if(cityFound==NULL) {
+                if (cityFound == NULL) {
                     char *error_plabel_name[] = {"您将要插入的景点的归属景区不存在！",
                                                  "确认"
                     };
@@ -2558,15 +2737,14 @@ BOOL InsertAttractionNodeSubMenu(void) {
                 }
                 SPOT_NODE *spotFound = SeekSpotNodeByID(gp_head2, ppcondition[1]);
 
-                if(spotFound!=NULL) {
+                if (spotFound != NULL) {
                     char *error_plabel_name[] = {"您将要插入的景点信息已存在！请先删除或先修改！",
                                                  "确认"
                     };
                     ShowModule(error_plabel_name, 2);
                     return FALSE;
-                }
-                else{
-                    SPOT_NODE *pSpotNode = (SPOT_NODE *)malloc(sizeof(SPOT_NODE));
+                } else {
+                    SPOT_NODE *pSpotNode = (SPOT_NODE *) malloc(sizeof(SPOT_NODE));
                     pSpotNode->next = NULL;
                     strcpy(pSpotNode->name, ppcondition[0]);
                     strcpy(pSpotNode->spot_id, ppcondition[1]);
@@ -2583,8 +2761,7 @@ BOOL InsertAttractionNodeSubMenu(void) {
                 }
 
             }
-        }
-        else if (iHot == 8){
+        } else if (iHot == 8) {
             PopOff();
         }
     }
@@ -2601,18 +2778,168 @@ BOOL ModifyAttractionNodeSubMenu(void) {
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待查询的景点名称信息",
+                              "景点名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                SPOT_NODE *pSpotNode = SeekSpotNodeByName(gp_head2, ppcondition[0]);
+                if (pSpotNode == NULL) {
+                    char *plabel_name[] = {"你查询的景点不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    SPOT_NODE *tmp = pSpotNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char *plabel_ret[2 * num + 4];
+                    tmp = pSpotNode;
+                    int i = 0;
+                    plabel_ret[i++] = "名称包含以下景点：";
+                    plabel_ret[i++] = "景  点ID";
+                    plabel_ret[i++] = "景点名称";
+                    while (tmp != NULL) {
+                        plabel_ret[i++] = tmp->spot_id;
+                        plabel_ret[i++] = tmp->name;
+                        tmp = tmp->next;
+                    }
+                    plabel_ret[i] = "确定";
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
+                        pSpotNode = pSpotNode->next;
+                    }
+                    char table[100];
+                    strcat(table, "正在修改ID为");
+                    strcat(table, pSpotNode->name);
+                    strcat(table, "的景点信息：");
+                    char *plabel_name[] = {"请输入待修改的景点信息",
+                                           "景点名称",
+                                           "景  点ID",
+                                           "景点位置",
+                                           "浏览时间",
+                                           "景点特点",
+                                           "确定    取消"
+                    };
+                    int n = 7;
+                    int inputNum = 7;
+                    char *ppcondition[inputNum];
+                    plabel_name[0] = table;
+                    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum);
+                    if (iHot == 6) {
+                        if (strcmp(pSpotNode->spot_id, ppcondition[1]) != 0 &&
+                            SeekSpotNodeByID(gp_head2, ppcondition[1]) != NULL) {
+                            PopOff();
+                            char *error_plabel_name[] = {"修改失败，该ID的景点已存在！",
+                                                         "确认"
+                            };
+                            ShowModule(error_plabel_name, 2);
+                            return bRet;
+                        }
+                        strcpy(pSpotNode->name, ppcondition[0]);
+                        strcpy(pSpotNode->spot_id, ppcondition[1]);
+                        strcpy(pSpotNode->address, ppcondition[2]);
+                        strcpy(pSpotNode->opentime, ppcondition[3]);
+                        strcpy(pSpotNode->feature, ppcondition[4]);
+                        PopOff();
+                        char *error_plabel_name[] = {"修改成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        PopOff();
+                    }
+                }
+
+            }
+            else{
+                PopOff();
+            }
+        } else if (iHot == 2) {
             PopOff();
-        }
-        else if (iHot == 3) {
+            char *plabel[] = {"请输入待修改的景点ID信息",
+                              "景  点ID",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                SPOT_NODE *pSpotNode = SeekSpotNodeByID(gp_head2, ppcondition[0]);
+                if (pSpotNode == NULL) {
+                    char *plabel_name[] = {"待修改的景点不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    char table[100];
+                    strcat(table, "正在修改ID为");
+                    strcat(table, pSpotNode->spot_id);
+                    strcat(table, "的景点信息：");
+                    char *plabel_name[] = {"请输入待录入的景点信息",
+                                           "景点名称",
+                                           "景  点ID",
+                                           "景点位置",
+                                           "浏览时间",
+                                           "景点特点",
+                                           "确定    取消"
+                    };
+                    int n = 7;
+                    int inputNum = 7;
+                    char *ppcondition[inputNum];
+                    plabel_name[0] = table;
+                    int iHot = PopInputMenu(plabel_name, n, ppcondition, inputNum);
+                    if (iHot == 6) {
+                        if (strcmp(pSpotNode->spot_id, ppcondition[1]) != 0 &&
+                            SeekSpotNodeByID(gp_head2, ppcondition[1]) != NULL) {
+                            PopOff();
+                            char *error_plabel_name[] = {"修改失败，该ID的景点已存在！",
+                                                         "确认"
+                            };
+                            ShowModule(error_plabel_name, 2);
+                            return bRet;
+                        }
+                        strcpy(pSpotNode->name, ppcondition[0]);
+                        strcpy(pSpotNode->spot_id, ppcondition[1]);
+                        strcpy(pSpotNode->address, ppcondition[2]);
+                        strcpy(pSpotNode->opentime, ppcondition[3]);
+                        strcpy(pSpotNode->feature, ppcondition[4]);
+                        PopOff();
+                        char *error_plabel_name[] = {"修改成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        PopOff();
+                    }
+
+                }
+
+            } else {
+                PopOff();
+            }
+
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
@@ -2629,12 +2956,69 @@ BOOL DeleteAttractionNodeSubMenu(void) {
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待查询的景点名称信息",
+                              "景点名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                SPOT_NODE *pSpotNode = SeekSpotNodeByName(gp_head2, ppcondition[0]);
+                if (pSpotNode == NULL) {
+                    char *plabel_name[] = {"你查询的景点不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    SPOT_NODE *tmp = pSpotNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char *plabel_ret[2 * num + 4];
+                    tmp = pSpotNode;
+                    int i = 0;
+                    plabel_ret[i++] = "名称包含以下景点：";
+                    plabel_ret[i++] = "景  点ID";
+                    plabel_ret[i++] = "景点名称";
+                    while (tmp != NULL) {
+                        plabel_ret[i++] = tmp->spot_id;
+                        plabel_ret[i++] = tmp->name;
+                        tmp = tmp->next;
+                    }
+                    plabel_ret[i] = "确定";
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
+                        pSpotNode = pSpotNode->next;
+                    }
+                    BOOL del = delete_spot(&gp_head2, pSpotNode->spot_id);
+                    if (del) {
+                        char *error_plabel_name[] = {"删除成功！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    } else {
+                        char *error_plabel_name[] = {"删除失败！",
+                                                     "确认"
+                        };
+                        ShowModule(error_plabel_name, 2);
+                        return bRet;
+                    }
+                }
+
+            }
+        } else if (iHot == 2) {
             PopOff();
             char *plabel[] = {"请输入待删除的景点ID信息",
                               "景  点ID",
@@ -2644,25 +3028,23 @@ BOOL DeleteAttractionNodeSubMenu(void) {
             int inputNum = 3;
             char *ppcondition[inputNum];
             int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
-            if(aHot==2) {
+            if (aHot == 2) {
                 PopOff();
                 SPOT_NODE *pSpotNode = SeekSpotNodeByID(gp_head2, ppcondition[0]);
-                if(pSpotNode==NULL) {
+                if (pSpotNode == NULL) {
                     char *plabel_name[] = {"待删除的景点不存在！",
                                            "确定"
                     };
                     ShowModule(plabel_name, 2);
-                }
-                else {
-                    BOOL del = delete_spot(&gp_head2,ppcondition[0]);
-                    if(del){
+                } else {
+                    BOOL del = delete_spot(&gp_head2, ppcondition[0]);
+                    if (del) {
                         char *error_plabel_name[] = {"删除成功！",
                                                      "确认"
                         };
                         ShowModule(error_plabel_name, 2);
                         return bRet;
-                    }
-                    else {
+                    } else {
                         char *error_plabel_name[] = {"删除失败！",
                                                      "确认"
                         };
@@ -2670,23 +3052,19 @@ BOOL DeleteAttractionNodeSubMenu(void) {
                         return bRet;
                     }
                 }
-            }
-            else{
+            } else {
                 PopOff();
             }
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
     return bRet;
 }
 
-BOOL QueryCityInfo(void)
-{
+BOOL QueryCityInfo(void) {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"根据城市名称查询",
                            "根据城  市ID查询",
@@ -2696,8 +3074,7 @@ BOOL QueryCityInfo(void)
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
             char *plabel[] = {"请输入待查询的城市名称信息",
@@ -2708,42 +3085,41 @@ BOOL QueryCityInfo(void)
             int inputNum = 3;
             char *ppcondition[inputNum];
             int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
-            if(aHot==2) {
+            if (aHot == 2) {
                 PopOff();
                 CITY_NODE *pCityNode = SeekCityNodeByName(gp_head2, ppcondition[0]);
-                if(pCityNode==NULL) {
+                if (pCityNode == NULL) {
                     char *plabel_name[] = {"你查询的城市不存在！",
                                            "确定"
                     };
                     ShowModule(plabel_name, 2);
-                }
-                else {
+                } else {
                     //计算查询的结果的数目
                     CITY_NODE *tmp = pCityNode;
                     int num = 0;
-                    while(tmp!=NULL){
+                    while (tmp != NULL) {
                         num++;
                         tmp = tmp->next;
                     }
 
-                    char *plabel_ret[2*num+4];
+                    char *plabel_ret[2 * num + 4];
                     tmp = pCityNode;
                     int i = 0;
                     plabel_ret[i++] = "名称包含以下城市：";
                     plabel_ret[i++] = "城  市ID";
                     plabel_ret[i++] = "城市名称";
-                    while(tmp!=NULL){
+                    while (tmp != NULL) {
                         plabel_ret[i++] = tmp->city_id;
                         plabel_ret[i++] = tmp->name;
                         tmp = tmp->next;
                     }
                     plabel_ret[i] = "确定";
-                    int bHot = ShowSearchResult(plabel_ret, 2*num+4, 2);
-                    int k =0;
-                    for(k=0;k<bHot-1;k++){
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
                         pCityNode = pCityNode->next;
                     }
-                    char *plabel_ret2[2*4+2];
+                    char *plabel_ret2[2 * 4 + 2];
                     plabel_ret2[0] = "你查询的城市信息";
                     plabel_ret2[1] = "城市名称:";
                     plabel_ret2[2] = pCityNode->name;
@@ -2757,12 +3133,10 @@ BOOL QueryCityInfo(void)
                     ShowResult(plabel_ret2, 10, 2);
                 }
 
-            }
-            else{
+            } else {
                 PopOff();
             }
-        }
-        else if (iHot == 2){
+        } else if (iHot == 2) {
             PopOff();
             char *plabel[] = {"请输入待查询的城市ID信息",
                               "城  市ID",
@@ -2772,17 +3146,16 @@ BOOL QueryCityInfo(void)
             int inputNum = 3;
             char *ppcondition[inputNum];
             int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
-            if(aHot==2) {
+            if (aHot == 2) {
                 PopOff();
                 CITY_NODE *pCityNode = SeekCityNodeByID(gp_head2, ppcondition[0]);
-                if(pCityNode==NULL) {
+                if (pCityNode == NULL) {
                     char *plabel_name[] = {"你查询的城市不存在！",
                                            "确定"
                     };
                     ShowModule(plabel_name, 2);
-                }
-                else {
-                    char *plabel_ret[2*4+2];
+                } else {
+                    char *plabel_ret[2 * 4 + 2];
                     plabel_ret[0] = "你查询的城市信息";
                     plabel_ret[1] = "城市名称:";
                     plabel_ret[2] = pCityNode->name;
@@ -2796,25 +3169,21 @@ BOOL QueryCityInfo(void)
                     ShowResult(plabel_ret, 10, 2);
                 }
 
-            }
-            else{
+            } else {
                 PopOff();
             }
 
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
 
-        }
-        else {
+        } else {
             PopOff();
         }
     }
     return bRet;
 }
 
-BOOL QueryScenicAreaInfo(void)
-{
+BOOL QueryScenicAreaInfo(void) {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"根据景区名称查询",
                            "根据景  区ID查询",
@@ -2824,12 +3193,76 @@ BOOL QueryScenicAreaInfo(void)
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待查询的景区名称信息",
+                              "景区名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                REGION_NODE *pRegionNode = SeekRegionNodeByName(gp_head2, ppcondition[0]);
+                if (pRegionNode == NULL) {
+                    char *plabel_name[] = {"你查询的景区不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    REGION_NODE *tmp = pRegionNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char *plabel_ret[2 * num + 4];
+                    tmp = pRegionNode;
+                    int i = 0;
+                    plabel_ret[i++] = "名称包含以下景区：";
+                    plabel_ret[i++] = "景  区ID";
+                    plabel_ret[i++] = "景区名称";
+                    while (tmp != NULL) {
+                        plabel_ret[i++] = tmp->region_id;
+                        plabel_ret[i++] = tmp->name;
+                        tmp = tmp->next;
+                    }
+                    plabel_ret[i] = "确定";
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
+                        pRegionNode = pRegionNode->next;
+                    }
+                    char *plabel_ret2[2 * 7 + 2];
+                    plabel_ret2[0] = "你查询的景区信息";
+                    plabel_ret2[1] = "景区名称:";
+                    plabel_ret2[2] = pRegionNode->name;
+                    plabel_ret2[3] = "景  区ID";
+                    plabel_ret2[4] = pRegionNode->region_id;
+                    plabel_ret2[5] = "城  市ID";
+                    plabel_ret2[6] = pRegionNode->city_id;
+                    plabel_ret2[7] = "景区级别";
+                    plabel_ret2[8] = pRegionNode->level;
+                    plabel_ret2[9] = "景区地址";
+                    plabel_ret2[10] = pRegionNode->address;
+                    plabel_ret2[11] = "门票价格";
+                    plabel_ret2[12] = pRegionNode->price;
+                    plabel_ret2[13] = "开放时间";
+                    plabel_ret2[14] = pRegionNode->opentime;
+                    plabel_ret2[15] = "确定";
+                    ShowResult(plabel_ret2, 16, 2);
+                }
+
+            } else {
+                PopOff();
+            }
+        } else if (iHot == 2) {
             PopOff();
             char *plabel[] = {"请输入待查询的景区ID信息",
                               "景  区ID",
@@ -2839,17 +3272,16 @@ BOOL QueryScenicAreaInfo(void)
             int inputNum = 3;
             char *ppcondition[inputNum];
             int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
-            if(aHot==2) {
+            if (aHot == 2) {
                 PopOff();
                 REGION_NODE *pRegionNode = SeekRegionNodeByID(gp_head2, ppcondition[0]);
-                if(pRegionNode==NULL) {
+                if (pRegionNode == NULL) {
                     char *plabel_name[] = {"你查询的景区不存在！",
                                            "确定"
                     };
                     ShowModule(plabel_name, 2);
-                }
-                else {
-                    char *plabel_ret[7*2+2];
+                } else {
+                    char *plabel_ret[7 * 2 + 2];
                     plabel_ret[0] = "你查询的景区信息";
                     plabel_ret[1] = "景区名称";
                     plabel_ret[2] = pRegionNode->name;
@@ -2866,26 +3298,22 @@ BOOL QueryScenicAreaInfo(void)
                     plabel_ret[13] = "开放时间";
                     plabel_ret[14] = pRegionNode->opentime;
                     plabel_ret[15] = "确定";
-                    ShowResult(plabel_ret, 7*2+2, 2);
+                    ShowResult(plabel_ret, 7 * 2 + 2, 2);
                 }
 
-            }
-            else{
+            } else {
                 PopOff();
             }
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
     return bRet;
 }
 
-BOOL RandomView(void)
-{
+BOOL RandomView(void) {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"随便看看城市",
                            "随便看看景区",
@@ -2896,56 +3324,133 @@ BOOL RandomView(void)
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            CITY_NODE *pCityNode = RandomCity(gp_head2);
+            if(pCityNode==NULL){
+                char *plabel_name[] = {"没有任何城市信息！",
+                                       "确定"
+                };
+                ShowModule(plabel_name, 2);
+            }
+            else{
+                char *plabel_ret[2 * 4 + 2];
+                plabel_ret[0] = "你查询的城市信息";
+                plabel_ret[1] = "城市名称:";
+                plabel_ret[2] = pCityNode->name;
+                plabel_ret[3] = "城  市ID";
+                plabel_ret[4] = pCityNode->city_id;
+                plabel_ret[5] = "监督电话";
+                plabel_ret[6] = pCityNode->jiandu_num;
+                plabel_ret[7] = "咨询电话";
+                plabel_ret[8] = pCityNode->zixun_num;
+                plabel_ret[9] = "确定";
+                ShowResult(plabel_ret, 10, 2);
+            }
+        } else if (iHot == 2) {
             PopOff();
-        }
-        else if (iHot == 3) {
+            REGION_NODE *pRegionNode = RandomRegion(gp_head2);
+            if(pRegionNode==NULL){
+                char *plabel_name[] = {"没有任何景区信息！",
+                                       "确定"
+                };
+                ShowModule(plabel_name, 2);
+            }
+            else{
+                char *plabel_ret2[2 * 7 + 2];
+                plabel_ret2[0] = "你查询的景区信息";
+                plabel_ret2[1] = "景区名称:";
+                plabel_ret2[2] = pRegionNode->name;
+                plabel_ret2[3] = "景  区ID";
+                plabel_ret2[4] = pRegionNode->region_id;
+                plabel_ret2[5] = "城  市ID";
+                plabel_ret2[6] = pRegionNode->city_id;
+                plabel_ret2[7] = "景区级别";
+                plabel_ret2[8] = pRegionNode->level;
+                plabel_ret2[9] = "景区地址";
+                plabel_ret2[10] = pRegionNode->address;
+                plabel_ret2[11] = "门票价格";
+                plabel_ret2[12] = pRegionNode->price;
+                plabel_ret2[13] = "开放时间";
+                plabel_ret2[14] = pRegionNode->opentime;
+                plabel_ret2[15] = "确定";
+                ShowResult(plabel_ret2, 16, 2);
+            }
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+            SPOT_NODE *pSpotNode = RandomSpot(gp_head2);
+            if(pSpotNode==NULL){
+                char *plabel_name[] = {"没有任何景点信息！",
+                                       "确定"
+                };
+                ShowModule(plabel_name, 2);
+            }
+            else{
+                char *plabel_ret2[2 * 6 + 2];
+                plabel_ret2[0] = "你查询的景点信息";
+                plabel_ret2[1] = "景点名称:";
+                plabel_ret2[2] = pSpotNode->name;
+                plabel_ret2[3] = "景  点ID";
+                plabel_ret2[4] = pSpotNode->spot_id;
+                plabel_ret2[5] = "景  区ID";
+                plabel_ret2[6] = pSpotNode->region_id;
+                plabel_ret2[7] = "景点位置";
+                plabel_ret2[8] = pSpotNode->address;
+                plabel_ret2[9] = "浏览时间";
+                plabel_ret2[10] = pSpotNode->opentime;
+                plabel_ret2[11] = "景点特色";
+                plabel_ret2[12] = pSpotNode->feature;
+                plabel_ret2[13] = "确定";
+                ShowResult(plabel_ret2, 14, 2);
+            }
+        } else {
             PopOff();
         }
     }
     return bRet;
 }
 
-BOOL StatusCityInfo(void)
-{
+BOOL StatusCityInfo() {
     BOOL bRet = TRUE;
-    char *plabel_name[] = {"随便看看城市",
-                           "随便看看景区",
-                           "随便看看景点",
-                           "取消"
-    };
-    int n = 4;
-    int iHot = PopChoiceMenu(plabel_name, n);
-    if (iHot == -1) {
-        PopOff();
+    CITY_NODE *pCityNode = gp_head2;
+    REGION_NODE *pRegionNode = NULL;
+    SPOT_NODE *pSpotNode = NULL;
+    int cityNum = 0, regionNum=0, spotNum=0;
+    while(pCityNode!=NULL){
+        cityNum++;
+        pRegionNode = pCityNode->rnext;
+        while(pRegionNode!=NULL){
+            regionNum++;
+            pSpotNode = pRegionNode->snext;
+            while(pSpotNode!=NULL){
+                spotNum++;
+                pSpotNode = pSpotNode->next;
+            }
+            pRegionNode = pRegionNode->next;
+        }
+        pCityNode = pCityNode->next;
     }
-    else {
-        if (iHot == 1) {
-            PopOff();
-        }
-        else if (iHot == 2){
-            PopOff();
-        }
-        else if (iHot == 3) {
-            PopOff();
-        }
-        else {
-            PopOff();
-        }
-    }
+    char *plabel_ret2[8];
+    plabel_ret2[0] = "信息统计结果";
+    plabel_ret2[1] = "城市数目:";
+    char cityNumStr[100];
+    itoa(cityNum,cityNumStr,10);
+    plabel_ret2[2] = cityNumStr;
+    plabel_ret2[3] = "景区数目";
+    char regionNumStr[100];
+    itoa(regionNum,regionNumStr,10);
+    plabel_ret2[4] = regionNumStr;
+    plabel_ret2[5] = "景点数目";
+    char spotNumStr[100];
+    itoa(spotNum,spotNumStr,10);
+    plabel_ret2[6] = spotNumStr;
+    plabel_ret2[7] = "确定";
+    ShowResult(plabel_ret2, 8, 2);
     return bRet;
 }
 
-BOOL QueryAttractionInfo(void)
-{
+BOOL QueryAttractionInfo(void) {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"根据景点名称查找",
                            "根据景  点ID查找",
@@ -2955,12 +3460,71 @@ BOOL QueryAttractionInfo(void)
     int iHot = PopChoiceMenu(plabel_name, n);
     if (iHot == -1) {
         PopOff();
-    }
-    else {
+    } else {
         if (iHot == 1) {
             PopOff();
-        }
-        else if (iHot == 2){
+            char *plabel[] = {"请输入待查询的景点名称信息",
+                              "景点名称",
+                              "确定    取消"
+            };
+            int n = 3;
+            int inputNum = 3;
+            char *ppcondition[inputNum];
+            int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
+            if (aHot == 2) {
+                PopOff();
+                SPOT_NODE *pSpotNode = SeekSpotNodeByName(gp_head2, ppcondition[0]);
+                if (pSpotNode == NULL) {
+                    char *plabel_name[] = {"你查询的景点不存在！",
+                                           "确定"
+                    };
+                    ShowModule(plabel_name, 2);
+                } else {
+                    //计算查询的结果的数目
+                    SPOT_NODE *tmp = pSpotNode;
+                    int num = 0;
+                    while (tmp != NULL) {
+                        num++;
+                        tmp = tmp->next;
+                    }
+
+                    char *plabel_ret[2 * num + 4];
+                    tmp = pSpotNode;
+                    int i = 0;
+                    plabel_ret[i++] = "名称包含以下景点：";
+                    plabel_ret[i++] = "景  点ID";
+                    plabel_ret[i++] = "景点名称";
+                    while (tmp != NULL) {
+                        plabel_ret[i++] = tmp->spot_id;
+                        plabel_ret[i++] = tmp->name;
+                        tmp = tmp->next;
+                    }
+                    plabel_ret[i] = "确定";
+                    int bHot = ShowSearchResult(plabel_ret, 2 * num + 4, 2);
+                    int k = 0;
+                    for (k = 0; k < bHot - 1; k++) {
+                        pSpotNode = pSpotNode->next;
+                    }
+                    char *plabel_ret2[2 * 6 + 2];
+                    plabel_ret2[0] = "你查询的景点信息";
+                    plabel_ret2[1] = "景点名称:";
+                    plabel_ret2[2] = pSpotNode->name;
+                    plabel_ret2[3] = "景  点ID";
+                    plabel_ret2[4] = pSpotNode->spot_id;
+                    plabel_ret2[5] = "景  区ID";
+                    plabel_ret2[6] = pSpotNode->region_id;
+                    plabel_ret2[7] = "景点位置";
+                    plabel_ret2[8] = pSpotNode->address;
+                    plabel_ret2[9] = "浏览时间";
+                    plabel_ret2[10] = pSpotNode->opentime;
+                    plabel_ret2[11] = "景点特色";
+                    plabel_ret2[12] = pSpotNode->feature;
+                    plabel_ret2[13] = "确定";
+                    ShowResult(plabel_ret2, 14, 2);
+                }
+
+            }
+        } else if (iHot == 2) {
             PopOff();
             char *plabel[] = {"请输入待查询的景区ID信息",
                               "景  区ID",
@@ -2970,17 +3534,16 @@ BOOL QueryAttractionInfo(void)
             int inputNum = 3;
             char *ppcondition[inputNum];
             int aHot = PopInputMenu(plabel, n, ppcondition, inputNum);
-            if(aHot==2) {
+            if (aHot == 2) {
                 PopOff();
                 SPOT_NODE *pSpotNode = SeekSpotNodeByID(gp_head2, ppcondition[0]);
-                if(pSpotNode==NULL) {
+                if (pSpotNode == NULL) {
                     char *plabel_name[] = {"你查询的景点不存在！",
                                            "确定"
                     };
                     ShowModule(plabel_name, 2);
-                }
-                else {
-                    char *plabel_ret[6*2+2];
+                } else {
+                    char *plabel_ret[6 * 2 + 2];
                     plabel_ret[0] = "你查询的景点信息";
                     plabel_ret[1] = "景点名称";
                     plabel_ret[2] = pSpotNode->name;
@@ -2995,26 +3558,22 @@ BOOL QueryAttractionInfo(void)
                     plabel_ret[11] = "景点特点";
                     plabel_ret[12] = pSpotNode->feature;
                     plabel_ret[13] = "确定";
-                    ShowResult(plabel_ret, 6*2+2, 2);
+                    ShowResult(plabel_ret, 6 * 2 + 2, 2);
                 }
 
-            }
-            else{
+            } else {
                 PopOff();
             }
-        }
-        else if (iHot == 3) {
+        } else if (iHot == 3) {
             PopOff();
-        }
-        else {
+        } else {
             PopOff();
         }
     }
     return bRet;
 }
 
-BOOL HelpTopic(void)
-{
+BOOL HelpTopic(void) {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：帮助",
                            "子菜单项：帮助主题",
@@ -3026,8 +3585,7 @@ BOOL HelpTopic(void)
     return bRet;
 }
 
-BOOL AboutDorm(void)
-{
+BOOL AboutDorm(void) {
     BOOL bRet = TRUE;
     char *plabel_name[] = {"主菜单项：帮助",
                            "子菜单项：关于...",
@@ -3040,23 +3598,22 @@ BOOL AboutDorm(void)
 }
 
 
-BOOL SaveSysData2(CITY_NODE *hd)
-{
+BOOL SaveSysData2(CITY_NODE *hd) {
     CITY_NODE *pCityNode = NULL;
     REGION_NODE *pRegionNode = NULL;
     SPOT_NODE *pSpotNode = NULL;
     FILE *pFile;
 
     pFile = fopen(gp_city_info_filename, "wb");
-    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-        fwrite(pCityNode, sizeof(CITY_NODE),1, pFile);
+    for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+        fwrite(pCityNode, sizeof(CITY_NODE), 1, pFile);
     }
     fclose(pFile);
 
     pFile = fopen(gp_region_info_filename, "wb");
-    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
+    for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
         pRegionNode = pCityNode->rnext;
-        while(pRegionNode!=NULL) {
+        while (pRegionNode != NULL) {
             fwrite(pRegionNode, sizeof(REGION_NODE), 1, pFile);
             pRegionNode = pRegionNode->next;
         }
@@ -3064,10 +3621,10 @@ BOOL SaveSysData2(CITY_NODE *hd)
     fclose(pFile);
 
     pFile = fopen(gp_spot_info_filename, "wb");
-    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
+    for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+        for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
             pSpotNode = pRegionNode->snext;
-            while(pSpotNode!=NULL){
+            while (pSpotNode != NULL) {
                 fwrite(pSpotNode, sizeof(SPOT_NODE), 1, pFile);
                 pSpotNode = pSpotNode->next;
             }
@@ -3088,8 +3645,7 @@ BOOL SaveSysData2(CITY_NODE *hd)
  *
  * 调用说明:
  */
-BOOL BackupSysData(CITY_NODE *hd, char *filename)
-{
+BOOL BackupSysData(CITY_NODE *hd, char *filename) {
 
     CITY_NODE *pcity_node;
     REGION_NODE *pregion_node;
@@ -3099,55 +3655,45 @@ BOOL BackupSysData(CITY_NODE *hd, char *filename)
     unsigned long pspot_node_num = 0;
     int handle;
     /*遍历十字链，分别统计三种基础数据信息的记录总数*/
-    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
-    {
+    for (pcity_node = hd; pcity_node != NULL; pcity_node = pcity_node->next) {
         type_city_num++;
-        for (pregion_node = pcity_node->rnext; pregion_node!=NULL; pregion_node=pregion_node->next)
-        {
+        for (pregion_node = pcity_node->rnext; pregion_node != NULL; pregion_node = pregion_node->next) {
             region_node_num++;
-            for (pspot_node = pregion_node->snext; pspot_node!=NULL; pspot_node=pspot_node->next)
-            {
+            for (pspot_node = pregion_node->snext; pspot_node != NULL; pspot_node = pspot_node->next) {
                 pspot_node_num++;
             }
         }
     }
 
-    if((handle=open(filename, O_WRONLY|O_BINARY))==-1)
-    {
-        handle=open(filename, O_CREAT|O_BINARY|O_WRONLY, S_IWRITE);
+    if ((handle = open(filename, O_WRONLY | O_BINARY)) == -1) {
+        handle = open(filename, O_CREAT | O_BINARY | O_WRONLY, S_IWRITE);
     }
 
     /*保存三类基础数据的记录总数*/
-    write(handle, (char*)&type_city_num, sizeof(type_city_num));
-    write(handle, (char*)&region_node_num, sizeof(region_node_num));
-    write(handle, (char*)&pspot_node_num, sizeof(pspot_node_num));
+    write(handle, (char *) &type_city_num, sizeof(type_city_num));
+    write(handle, (char *) &region_node_num, sizeof(region_node_num));
+    write(handle, (char *) &pspot_node_num, sizeof(pspot_node_num));
 
     /*保存服装分类信息*/
-    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
-    {
-        write(handle, (char*)pcity_node, sizeof(CITY_NODE));
+    for (pcity_node = hd; pcity_node != NULL; pcity_node = pcity_node->next) {
+        write(handle, (char *) pcity_node, sizeof(CITY_NODE));
     }
 
-    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
-    {
+    for (pcity_node = hd; pcity_node != NULL; pcity_node = pcity_node->next) {
         /*保存服装基本信息*/
         pregion_node = pcity_node->rnext;
-        while (pregion_node != NULL)
-        {
-            write(handle, (char*)pregion_node, sizeof(REGION_NODE));
+        while (pregion_node != NULL) {
+            write(handle, (char *) pregion_node, sizeof(REGION_NODE));
             pregion_node = pregion_node->next;
         }
     }
 
     /*保存服装销售信息*/
-    for (pcity_node=hd; pcity_node!=NULL; pcity_node=pcity_node->next)
-    {
-        for(pregion_node=pcity_node->rnext; pregion_node!=NULL; pregion_node=pregion_node->next)
-        {
+    for (pcity_node = hd; pcity_node != NULL; pcity_node = pcity_node->next) {
+        for (pregion_node = pcity_node->rnext; pregion_node != NULL; pregion_node = pregion_node->next) {
             pspot_node = pregion_node->snext;
-            while (pspot_node != NULL)
-            {
-                write(handle, (char*)pspot_node, sizeof(SPOT_NODE));
+            while (pspot_node != NULL) {
+                write(handle, (char *) pspot_node, sizeof(SPOT_NODE));
                 pspot_node = pspot_node->next;
             }
         }
@@ -3166,8 +3712,7 @@ BOOL BackupSysData(CITY_NODE *hd, char *filename)
  *
  * 调用说明:
  */
-BOOL RestoreSysData(CITY_NODE **phead, char *filename)
-{
+BOOL RestoreSysData(CITY_NODE **phead, char *filename) {
     CITY_NODE *hd = NULL;
     CITY_NODE *pcity_node;
     REGION_NODE *pregion_node;
@@ -3179,69 +3724,56 @@ BOOL RestoreSysData(CITY_NODE **phead, char *filename)
     int handle;
     int find;
 
-    if ((handle=open(filename, O_RDONLY|O_BINARY))==-1)
-    {
+    if ((handle = open(filename, O_RDONLY | O_BINARY)) == -1) {
         /*如果此文件不存在，则弹出提示窗口并返回FALSE*/
-        char *plabel_name[] = {"你输入的文件不存在！","确定"};
+        char *plabel_name[] = {"你输入的文件不存在！", "确定"};
         ShowModule(plabel_name, 2);
         return FALSE;
-    }
-    else
-    {
+    } else {
         /*读取三种基础数据信息的记录数*/
-        read(handle, (char*)&city_node_num, sizeof(city_node_num));
-        read(handle, (char*)&region_node_num, sizeof(region_node_num));
-        read(handle, (char*)&spot_node_num, sizeof(spot_node_num));
+        read(handle, (char *) &city_node_num, sizeof(city_node_num));
+        read(handle, (char *) &region_node_num, sizeof(region_node_num));
+        read(handle, (char *) &spot_node_num, sizeof(spot_node_num));
 
         /*读取城市信息，建立十字链主链*/
-        for (ulloop=1; ulloop<=city_node_num; ulloop++)
-        {
-            pcity_node = (CITY_NODE*)malloc(sizeof(CITY_NODE));
-            read(handle, (char*)pcity_node, sizeof(CITY_NODE));
+        for (ulloop = 1; ulloop <= city_node_num; ulloop++) {
+            pcity_node = (CITY_NODE *) malloc(sizeof(CITY_NODE));
+            read(handle, (char *) pcity_node, sizeof(CITY_NODE));
             pcity_node->rnext = NULL;
             pcity_node->next = hd;
             hd = pcity_node;
         }
         *phead = hd;
 
-        for (ulloop=1; ulloop<=region_node_num; ulloop++)
-        {
-            pregion_node = (REGION_NODE*)malloc(sizeof(REGION_NODE));
-            read(handle, (char*)pregion_node, sizeof(REGION_NODE));
+        for (ulloop = 1; ulloop <= region_node_num; ulloop++) {
+            pregion_node = (REGION_NODE *) malloc(sizeof(REGION_NODE));
+            read(handle, (char *) pregion_node, sizeof(REGION_NODE));
             pregion_node->snext = NULL;
             pcity_node = hd;
             while (pcity_node != NULL
-                   && pcity_node->city_id != pregion_node->city_id)
-            {
+                   && pcity_node->city_id != pregion_node->city_id) {
                 pcity_node = pcity_node->next;
             }
 
-            if (pcity_node != NULL)
-            {
+            if (pcity_node != NULL) {
                 pregion_node->next = pcity_node->rnext;
                 pcity_node->rnext = pregion_node;
-            }
-            else
-            {
+            } else {
                 free(pregion_node);
             }
         }
 
         /*读取景区信息，建立景区信息支链*/
-        for (ulloop=1; ulloop<=spot_node_num; ulloop++)
-        {
-            pspot_node = (SPOT_NODE*)malloc(sizeof(SPOT_NODE));
-            read(handle, (char*)pspot_node, sizeof(SPOT_NODE));
+        for (ulloop = 1; ulloop <= spot_node_num; ulloop++) {
+            pspot_node = (SPOT_NODE *) malloc(sizeof(SPOT_NODE));
+            read(handle, (char *) pspot_node, sizeof(SPOT_NODE));
             pcity_node = hd;
             find = 0;
 
-            while (pcity_node!=NULL && find==0)
-            {
+            while (pcity_node != NULL && find == 0) {
                 pregion_node = pcity_node->rnext;
-                while(pregion_node!=NULL && find==0)
-                {
-                    if(strcmp(pregion_node->region_id, pspot_node->region_id) == 0)
-                    {
+                while (pregion_node != NULL && find == 0) {
+                    if (strcmp(pregion_node->region_id, pspot_node->region_id) == 0) {
                         find = 1;
                         break;
                     }
@@ -3250,13 +3782,10 @@ BOOL RestoreSysData(CITY_NODE **phead, char *filename)
                 pcity_node = pcity_node->next;
             }
 
-            if (find)
-            {
+            if (find) {
                 pspot_node->next = pregion_node->snext;
                 pregion_node->snext = pspot_node;
-            }
-            else
-            {
+            } else {
                 free(pspot_node);
             }
         }
@@ -3266,8 +3795,7 @@ BOOL RestoreSysData(CITY_NODE **phead, char *filename)
     }
 }
 
-BOOL ShowModule(char **pString, int n)
-{
+BOOL ShowModule(char **pString, int n) {
     LABEL_BUNDLE labels;
     HOT_AREA areas;
     BOOL bRet = TRUE;
@@ -3277,11 +3805,9 @@ BOOL ShowModule(char **pString, int n)
     int iHot = 1;
     int i, maxlen, str_len;
 
-    for (i=0,maxlen=0; i<n; i++)
-    {
+    for (i = 0, maxlen = 0; i < n; i++) {
         str_len = strlen(pString[i]);
-        if (maxlen < str_len)
-        {
+        if (maxlen < str_len) {
             maxlen = str_len;
         }
     }
@@ -3293,27 +3819,26 @@ BOOL ShowModule(char **pString, int n)
     rcPop.Top = (SCR_ROW - pos.Y) / 2;
     rcPop.Bottom = rcPop.Top + pos.Y - 1;
 
-    att = BACKGROUND_BLUE | BACKGROUND_GREEN ;  /*弹出窗口区域青底黑字*/
+    att = BACKGROUND_BLUE | BACKGROUND_GREEN;  /*弹出窗口区域青底黑字*/
     labels.num = n;
     labels.ppLabel = pString;
     COORD aLoc[n];
 
-    for (i=0; i<n; i++)
-    {
+    for (i = 0; i < n; i++) {
         aLoc[i].X = rcPop.Left + 3;
         aLoc[i].Y = rcPop.Top + 2 + i;
 
     }
-    str_len = strlen(pString[n-1]);
-    aLoc[n-1].X = rcPop.Left + 3 + (maxlen-str_len)/2;
-    aLoc[n-1].Y = aLoc[n-1].Y + 2;
+    str_len = strlen(pString[n - 1]);
+    aLoc[n - 1].X = rcPop.Left + 3 + (maxlen - str_len) / 2;
+    aLoc[n - 1].Y = aLoc[n - 1].Y + 2;
 
     labels.pLoc = aLoc;
 
     areas.num = 1;
     SMALL_RECT aArea[] = {{
-                                  aLoc[n-1].X, aLoc[n-1].Y,
-                                  aLoc[n-1].X + 3, aLoc[n-1].Y
+                                  aLoc[n - 1].X, aLoc[n - 1].Y,
+                                  aLoc[n - 1].X + 3, aLoc[n - 1].Y
                           }
     };
 
@@ -3327,7 +3852,7 @@ BOOL ShowModule(char **pString, int n)
     DrawBox(&rcPop);
     pos.X = rcPop.Left + 1;
     pos.Y = rcPop.Top + 2 + n;
-    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right-rcPop.Left-1, pos, &ul);
+    FillConsoleOutputCharacter(gh_std_out, '-', rcPop.Right - rcPop.Left - 1, pos, &ul);
 
     DealInput2(&areas, &iHot, NULL);
 
@@ -3342,19 +3867,18 @@ BOOL ShowModule(char **pString, int n)
 
 BOOL add_city(CITY_NODE **head, CITY_NODE *pcity_node) {
     CITY_NODE *city = *head;
-    if(city == NULL) {
+    if (city == NULL) {
         (*head) = pcity_node;
         return TRUE;;
     }
     CITY_NODE *rCity = SeekCityNodeByID(city, pcity_node->city_id);
     if (rCity != NULL) {
         return FALSE;
-    }
-    else {
-        while (city->next != NULL){
+    } else {
+        while (city->next != NULL) {
             city = city->next;
         }
-        if(city->next == NULL) {
+        if (city->next == NULL) {
             city->next = pcity_node;
             return TRUE;
         }
@@ -3362,16 +3886,13 @@ BOOL add_city(CITY_NODE **head, CITY_NODE *pcity_node) {
 
 }
 
-CITY_NODE *SeekCityNodeByID(CITY_NODE *hd, char *id)
-{
+CITY_NODE *SeekCityNodeByID(CITY_NODE *hd, char *id) {
     CITY_NODE *pcity_node;
     int find = 0;
 
     pcity_node = hd;
-    while(pcity_node != NULL)
-    {
-        if (strcmp(pcity_node->city_id, id) == 0)
-        {
+    while (pcity_node != NULL) {
+        if (strcmp(pcity_node->city_id, id) == 0) {
             find = 1;
             break;
         }
@@ -3384,17 +3905,14 @@ CITY_NODE *SeekCityNodeByID(CITY_NODE *hd, char *id)
 }
 
 // 返回查询结果的链表
-CITY_NODE *SeekCityNodeByName(CITY_NODE *hd, char *name)
-{
+CITY_NODE *SeekCityNodeByName(CITY_NODE *hd, char *name) {
     CITY_NODE *pcity_node;
-    CITY_NODE *city_find=NULL;
+    CITY_NODE *city_find = NULL;
 
     pcity_node = hd;
-    while(pcity_node != NULL)
-    {
-        if (strcmp(pcity_node->name, name) == 0)
-        {
-            CITY_NODE *tmp = (CITY_NODE *)malloc(sizeof(CITY_NODE));
+    while (pcity_node != NULL) {
+        if (strcmp(pcity_node->name, name) == 0) {
+            CITY_NODE *tmp = (CITY_NODE *) malloc(sizeof(CITY_NODE));
             strcpy(tmp->city_id, pcity_node->city_id);
             strcpy(tmp->name, pcity_node->name);
             strcpy(tmp->jiandu_num, pcity_node->jiandu_num);
@@ -3408,49 +3926,41 @@ CITY_NODE *SeekCityNodeByName(CITY_NODE *hd, char *name)
     return city_find;
 }
 
-BOOL ConfirmCityInsertion(CITY_NODE **head, CITY_NODE *pcity_node)
-{
+BOOL ConfirmCityInsertion(CITY_NODE **head, CITY_NODE *pcity_node) {
     CITY_NODE *city = *head;
-    if(city == NULL) {
+    if (city == NULL) {
         (*head) = pcity_node;
         return TRUE;;
     }
     CITY_NODE *rCity = SeekCityNodeByID(city, pcity_node->city_id);
     if (rCity != NULL) {
         return FALSE;
-    }
-    else {
-        while (city->next != NULL){
+    } else {
+        while (city->next != NULL) {
             city = city->next;
         }
-        if(city->next == NULL) {
+        if (city->next == NULL) {
             city->next = pcity_node;
             return TRUE;
         }
     }
 }
 
-BOOL add_region(CITY_NODE *head, REGION_NODE *pregion_node)
-{
+BOOL add_region(CITY_NODE *head, REGION_NODE *pregion_node) {
     CITY_NODE *pcity_node = head;
     REGION_NODE *region_node = NULL;
 
-    if (pcity_node -> rnext == NULL)
-    {
-        pcity_node -> rnext = pregion_node;
+    if (pcity_node->rnext == NULL) {
+        pcity_node->rnext = pregion_node;
         return TRUE;
-    }
-    else
-    {
-        region_node = pcity_node -> rnext;
-        while (region_node -> next != NULL)
-        {
-            region_node = region_node -> next;
+    } else {
+        region_node = pcity_node->rnext;
+        while (region_node->next != NULL) {
+            region_node = region_node->next;
         }
-        if (region_node -> next == NULL)
-        {
-            region_node -> next = pregion_node;
-            pregion_node -> snext = NULL;
+        if (region_node->next == NULL) {
+            region_node->next = pregion_node;
+            pregion_node->snext = NULL;
             return TRUE;
         }
     }
@@ -3458,15 +3968,14 @@ BOOL add_region(CITY_NODE *head, REGION_NODE *pregion_node)
     return FALSE;
 }
 
-REGION_NODE *SeekRegionNodeByName(CITY_NODE *hd, char *name)
-{
+REGION_NODE *SeekRegionNodeByName(CITY_NODE *hd, char *name) {
     CITY_NODE *pCityNode = NULL;
     REGION_NODE *pRegionNode = NULL;
     REGION_NODE *regionFind = NULL;
-    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
-            if(strcmp(pRegionNode->name, name)==0){
-                REGION_NODE *tmp = (REGION_NODE*)malloc(sizeof(REGION_NODE));
+    for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+        for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
+            if (strcmp(pRegionNode->name, name) == 0) {
+                REGION_NODE *tmp = (REGION_NODE *) malloc(sizeof(REGION_NODE));
                 strcpy(tmp->city_id, pRegionNode->city_id);
                 strcpy(tmp->name, pRegionNode->name);
                 strcpy(tmp->region_id, pRegionNode->region_id);
@@ -3483,21 +3992,20 @@ REGION_NODE *SeekRegionNodeByName(CITY_NODE *hd, char *name)
     return regionFind;
 }
 
-REGION_NODE *SeekRegionNodeByID(CITY_NODE *hd, char *id)
-{
+REGION_NODE *SeekRegionNodeByID(CITY_NODE *hd, char *id) {
     CITY_NODE *pCityNode = NULL;
     REGION_NODE *pRegionNode = NULL, *tmp = NULL;
     SPOT_NODE *pSpotNode = NULL;
     int find = 0;
-    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
-            if(strcmp(pRegionNode->region_id, id)==0){
+    for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+        for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
+            if (strcmp(pRegionNode->region_id, id) == 0) {
                 tmp = pRegionNode;
                 find = 1;
                 break;
             }
         }
-        if(find==1){
+        if (find == 1) {
             break;
         }
     }
@@ -3505,31 +4013,24 @@ REGION_NODE *SeekRegionNodeByID(CITY_NODE *hd, char *id)
 
 }
 
-BOOL ConfirmRegionInsertion(CITY_NODE *pcity_node, REGION_NODE *pregion_node)
-{
+BOOL ConfirmRegionInsertion(CITY_NODE *pcity_node, REGION_NODE *pregion_node) {
     CITY_NODE *city = SeekCityNodeByID(pcity_node, pregion_node->city_id);
     BOOL flag = add_region(city, pregion_node);
     return flag;
 }
 
-BOOL add_spot(REGION_NODE *pregion_node, SPOT_NODE *pspot_node)
-{
+BOOL add_spot(REGION_NODE *pregion_node, SPOT_NODE *pspot_node) {
     REGION_NODE *region_node = pregion_node;
     SPOT_NODE *spot_node = NULL;
-    if (region_node->snext == NULL)
-    {
+    if (region_node->snext == NULL) {
         region_node->snext = pspot_node;
         return TRUE;
-    }
-    else
-    {
+    } else {
         spot_node = region_node->snext;
-        while (spot_node->next != NULL)
-        {
+        while (spot_node->next != NULL) {
             spot_node = spot_node->next;
         }
-        if (spot_node->next == NULL)
-        {
+        if (spot_node->next == NULL) {
             spot_node->next = pspot_node;
             return TRUE;
         }
@@ -3537,44 +4038,44 @@ BOOL add_spot(REGION_NODE *pregion_node, SPOT_NODE *pspot_node)
     return FALSE;
 }
 
-SPOT_NODE * SeekSpotNodeByID(CITY_NODE *hd, char *id){
+SPOT_NODE *SeekSpotNodeByID(CITY_NODE *hd, char *id) {
     CITY_NODE *pCityNode = NULL;
     REGION_NODE *pRegionNode = NULL;
-    SPOT_NODE *pSpotNode = NULL, *tmp=NULL;
+    SPOT_NODE *pSpotNode = NULL, *tmp = NULL;
     int find = 0;
-    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
+    for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+        for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
             pSpotNode = pRegionNode->snext;
-            while(pSpotNode!=NULL){
-                if(strcmp(pSpotNode->spot_id, id)==0) {
+            while (pSpotNode != NULL) {
+                if (strcmp(pSpotNode->spot_id, id) == 0) {
                     tmp = pSpotNode;
                     find = 1;
                     break;
                 }
                 pSpotNode = pSpotNode->next;
             }
-            if(find==1){
+            if (find == 1) {
                 break;
             }
         }
-        if(find==1){
+        if (find == 1) {
             break;
         }
     }
     return tmp;
 }
 
-SPOT_NODE * SeekSpotNodeByName(CITY_NODE *hd, char *name){
+SPOT_NODE *SeekSpotNodeByName(CITY_NODE *hd, char *name) {
     CITY_NODE *pCityNode = NULL;
     REGION_NODE *pRegionNode = NULL;
     SPOT_NODE *pSpotNode = NULL;
     SPOT_NODE *pSpotFound = NULL;
-    for(pCityNode=hd;pCityNode!=NULL;pCityNode=pCityNode->next) {
-        for(pRegionNode = pCityNode->rnext;pRegionNode!=NULL;pRegionNode=pRegionNode->next) {
+    for (pCityNode = hd; pCityNode != NULL; pCityNode = pCityNode->next) {
+        for (pRegionNode = pCityNode->rnext; pRegionNode != NULL; pRegionNode = pRegionNode->next) {
             pSpotNode = pRegionNode->snext;
-            while(pSpotNode!=NULL){
-                if(strcmp(pSpotNode->name, name)==0) {
-                    SPOT_NODE *tmp = (SPOT_NODE*)malloc(sizeof(SPOT_NODE));
+            while (pSpotNode != NULL) {
+                if (strcmp(pSpotNode->name, name) == 0) {
+                    SPOT_NODE *tmp = (SPOT_NODE *) malloc(sizeof(SPOT_NODE));
                     strcpy(tmp->region_id, pSpotNode->region_id);
                     strcpy(tmp->name, pSpotNode->name);
                     strcpy(tmp->spot_id, pSpotNode->spot_id);
@@ -3592,50 +4093,45 @@ SPOT_NODE * SeekSpotNodeByName(CITY_NODE *hd, char *name){
     return pSpotFound;
 }
 
-BOOL ConfirmSpotInsertion(CITY_NODE *pcity_node, SPOT_NODE *pspot_node)
-{
+BOOL ConfirmSpotInsertion(CITY_NODE *pcity_node, SPOT_NODE *pspot_node) {
     REGION_NODE *pregion_node = SeekRegionNodeByID(pcity_node, pspot_node->region_id);
     BOOL flag = add_spot(pregion_node, pspot_node);
     return flag;
 }
 
 /*删除城市信息*/
-BOOL delete_city(CITY_NODE **head, char *id)
-{
-    CITY_NODE *pCityNodeprior=NULL,*pCityNodeCur=NULL;
+BOOL delete_city(CITY_NODE **head, char *id) {
+    CITY_NODE *pCityNodeprior = NULL, *pCityNodeCur = NULL;
     pCityNodeprior = NULL;
     pCityNodeCur = *head;
-    while(pCityNodeCur!=NULL){
-        if(strcmp(pCityNodeCur->city_id, id)!=0){
+    while (pCityNodeCur != NULL) {
+        if (strcmp(pCityNodeCur->city_id, id) != 0) {
             pCityNodeprior = pCityNodeCur;
             pCityNodeCur = pCityNodeCur->next;
-        }
-        else {
+        } else {
             break;
         }
     }
 
-    if(pCityNodeCur==NULL){
+    if (pCityNodeCur == NULL) {
         return FALSE;
-    }
-    else {
-        if(pCityNodeprior==NULL){
+    } else {
+        if (pCityNodeprior == NULL) {
             *head = pCityNodeCur->next;
-        }
-        else {
+        } else {
             pCityNodeprior->next = pCityNodeCur->next;
         }
 
         // 释放后续景区节点
         REGION_NODE *pRegionNode = pCityNodeCur->rnext;
         REGION_NODE *pRegionNodeCur = NULL;
-        while(pRegionNode!=NULL){
+        while (pRegionNode != NULL) {
             pRegionNodeCur = pRegionNode;
             pRegionNode = pRegionNode->next;
 
             SPOT_NODE *pSpotNode = pRegionNodeCur->snext;
             SPOT_NODE *pSpotNodeCur = NULL;
-            while(pSpotNode!=NULL){
+            while (pSpotNode != NULL) {
                 pSpotNodeCur = pSpotNode;
                 pSpotNode = pSpotNode->next;
                 free(pSpotNodeCur);
@@ -3645,41 +4141,38 @@ BOOL delete_city(CITY_NODE **head, char *id)
         free(pCityNodeCur);
         return TRUE;
     }
-    return  FALSE;
+    return FALSE;
 }
 
-BOOL delete_region(CITY_NODE *head, char *id)
-{
+BOOL delete_region(CITY_NODE *head, char *id) {
     CITY_NODE *pCityNode = NULL;
     REGION_NODE *pRegionNodePrior = NULL;
     REGION_NODE *pRegionNodeCur = NULL;
     int find = 0;
-    for(pCityNode=head;pCityNode!=NULL;pCityNode=pCityNode->next){
+    for (pCityNode = head; pCityNode != NULL; pCityNode = pCityNode->next) {
         pRegionNodeCur = pCityNode->rnext;
         pRegionNodePrior = NULL;
-        while(pRegionNodeCur!=NULL){
-            if(strcmp(pRegionNodeCur->region_id, id)!=0){
+        while (pRegionNodeCur != NULL) {
+            if (strcmp(pRegionNodeCur->region_id, id) != 0) {
                 pRegionNodePrior = pRegionNodeCur;
                 pRegionNodeCur = pRegionNodeCur->next;
-            }
-            else {
+            } else {
                 find = 1;
                 break;
             }
         }
-        if(find==1){
+        if (find == 1) {
             break;
         }
     }
-    if(find==1){
-        if(pRegionNodePrior==NULL){
+    if (find == 1) {
+        if (pRegionNodePrior == NULL) {
             pCityNode->rnext = pRegionNodeCur->next;
-        }
-        else{
+        } else {
             pRegionNodePrior->next = pRegionNodeCur->next;
             SPOT_NODE *pSpotNode = pRegionNodeCur->snext;
             SPOT_NODE *pSpotNodeCur = NULL;
-            while(pSpotNode!=NULL){
+            while (pSpotNode != NULL) {
                 pSpotNodeCur = pSpotNode;
                 pSpotNode = pSpotNode->next;
                 free(pSpotNodeCur);
@@ -3691,21 +4184,17 @@ BOOL delete_region(CITY_NODE *head, char *id)
     return FALSE;
 }
 
-BOOL delete_spot(CITY_NODE **head, char *id)
-{
+BOOL delete_spot(CITY_NODE **head, char *id) {
     CITY_NODE *cp = *head;
     REGION_NODE *qp;
     SPOT_NODE *dp, *prior;
     while (cp != NULL)                       /*查找要删除的景点节点*/
     {
         qp = cp->rnext;
-        while (qp != NULL)
-        {
+        while (qp != NULL) {
             dp = qp->snext;
-            while (dp != NULL)
-            {
-                if (!strcmp(dp->spot_id, id))
-                {
+            while (dp != NULL) {
+                if (!strcmp(dp->spot_id, id)) {
                     if (dp == qp->snext)
                         qp->snext = dp->next;
                     else
@@ -3723,6 +4212,100 @@ BOOL delete_spot(CITY_NODE **head, char *id)
     return FALSE;
 }
 
+CITY_NODE *RandomCity(CITY_NODE *hd){
+    // city计数
+    CITY_NODE *pCityNode = hd;
+    int num = 0;
+    while(pCityNode!=NULL){
+        num++;
+        pCityNode = pCityNode->next;
+    }
+    srand((int)time(0));
+    int sec = (int)(rand()%num)+1;
+    pCityNode = hd;
+    int i=0;
+    for(i=0;i<sec;i++){
+        pCityNode = pCityNode->next;
+    }
+    return pCityNode;
+}
+REGION_NODE *RandomRegion(CITY_NODE *hd){
+    CITY_NODE *pCityNode = hd;
+    REGION_NODE *pRegionNode = NULL;
+    int num = 0;
+    while(pCityNode!=NULL){
+        pRegionNode = pCityNode->rnext;
+        while(pRegionNode!=NULL){
+            num++;
+            pRegionNode = pRegionNode->next;
+        }
+        pCityNode = pCityNode->next;
+    }
+    srand((int)time(0));
+    int sec = (int)(rand()%num)+1;
+    pCityNode = hd;
+    pRegionNode = NULL;
+    num = 0;
+    while(pCityNode!=NULL){
+        pRegionNode = pCityNode->rnext;
+        while(pRegionNode!=NULL){
+            num++;
+            if(num==sec){
+                break;
+            }
+            pRegionNode = pRegionNode->next;
+        }
+        if(num==sec){
+            break;
+        }
+        pCityNode = pCityNode->next;
+    }
+    return pRegionNode;
+}
 
-
-
+SPOT_NODE *RandomSpot(CITY_NODE *hd){
+    CITY_NODE *pCityNode = hd;
+    REGION_NODE *pRegionNode = NULL;
+    SPOT_NODE *pSpotNode = NULL;
+    int num = 0;
+    while(pCityNode!=NULL){
+        pRegionNode = pCityNode->rnext;
+        while(pRegionNode!=NULL){
+            pSpotNode = pRegionNode->snext;
+            while(pSpotNode!=NULL){
+                num++;
+                pSpotNode = pSpotNode->next;
+            }
+            pRegionNode = pRegionNode->next;
+        }
+        pCityNode = pCityNode->next;
+    }
+    srand((int)time(0));
+    int sec = (int)(rand()%num)+1;
+    pCityNode = hd;
+    pRegionNode = NULL;
+    pSpotNode = NULL;
+    num = 0;
+    while(pCityNode!=NULL){
+        pRegionNode = pCityNode->rnext;
+        while(pRegionNode!=NULL){
+            pSpotNode = pRegionNode->snext;
+            while(pSpotNode!=NULL){
+                num++;
+                if(num==sec){
+                    break;
+                }
+                pSpotNode = pSpotNode->next;
+            }
+            if(num==sec){
+                break;
+            }
+            pRegionNode = pRegionNode->next;
+        }
+        if(num==sec){
+            break;
+        }
+        pCityNode = pCityNode->next;
+    }
+    return pSpotNode;
+}

@@ -277,7 +277,7 @@ BOOL QueryScenicAreaInfo(void);    /*查询景区基本信息*/
 BOOL QueryAttractionInfo(void);   /*查询景点基本信息*/
 
 BOOL RandomView(void);    /*查询景区基本信息*/
-BOOL StatusCityInfo(void);   /*查询景点基本信息*/
+BOOL StatusCityInfo();   /*查询景点基本信息*/
 
 BOOL SaveSysData2(CITY_NODE *phd);                       /*保存系统数据*/
 BOOL BackupSysData(CITY_NODE *hd, char *filename);     /*备份系统数据*/
@@ -303,4 +303,7 @@ BOOL delete_city(CITY_NODE **head, char *id);
 CITY_NODE *SeekCityNodeByName(CITY_NODE *hd, char *name);
 REGION_NODE *SeekRegionNodeByName(CITY_NODE *hd, char *name);
 SPOT_NODE * SeekSpotNodeByName(CITY_NODE *hd, char *name);
+CITY_NODE *RandomCity(CITY_NODE *hd);
+REGION_NODE *RandomRegion(CITY_NODE *hd);
+SPOT_NODE *RandomSpot(CITY_NODE *hd);
 #endif /**< TYPE_H_INCLUDED*/
